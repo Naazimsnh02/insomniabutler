@@ -3,6 +3,7 @@ import '../../core/theme.dart';
 import 'onboarding_content_screens.dart';
 import 'onboarding_interactive_screens.dart';
 import 'setup_screen.dart';
+import 'auth_screen.dart';
 
 /// Main Onboarding Flow Controller
 class OnboardingScreen extends StatefulWidget {
@@ -17,7 +18,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  final int _totalPages = 6;
+  final int _totalPages = 7;
 
   @override
   void dispose() {
@@ -145,7 +146,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       onNext: _nextPage,
                       onSkip: _nextPage,
                     ),
-                    SetupScreen(onComplete: widget.onComplete),
+                    SetupScreen(onComplete: _nextPage),
+                    AuthScreen(onComplete: widget.onComplete),
                   ],
                 ),
               ),
