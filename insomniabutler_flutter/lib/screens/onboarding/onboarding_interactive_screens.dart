@@ -15,6 +15,7 @@ class DemoScreen extends StatefulWidget {
 
 class _DemoScreenState extends State<DemoScreen> {
   final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   bool _showResponse = false;
   bool _showButtons = false;
   bool _showClosure = false;
@@ -23,19 +24,35 @@ class _DemoScreenState extends State<DemoScreen> {
   @override
   void dispose() {
     _controller.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   void _onSubmit() {
     if (_controller.text.trim().isNotEmpty) {
+      FocusScope.of(context).unfocus();
       setState(() {
         _showResponse = true;
       });
+      _scrollToBottom();
       Future.delayed(const Duration(milliseconds: 800), () {
         if (mounted) {
           setState(() {
             _showButtons = true;
           });
+          _scrollToBottom();
         }
       });
     }
@@ -46,11 +63,13 @@ class _DemoScreenState extends State<DemoScreen> {
       _showClosure = true;
       _sleepReadiness = 75;
     });
+    _scrollToBottom();
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () => FocusScope.of(context).unfocus(),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.containerPadding),
@@ -65,6 +84,7 @@ class _DemoScreenState extends State<DemoScreen> {
             const SizedBox(height: AppSpacing.lg),
             Expanded(
               child: SingleChildScrollView(
+                controller: _scrollController,
                 child: Column(
                   children: [
                     // User Input

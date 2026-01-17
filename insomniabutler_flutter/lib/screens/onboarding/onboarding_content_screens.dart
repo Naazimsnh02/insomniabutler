@@ -24,8 +24,15 @@ class WelcomeScreen extends StatelessWidget {
                   children: [
                     const Spacer(),
                     // Illustration
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
+                      ),
+                      foregroundDecoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
+                        border: Border.all(color: AppColors.glassBorder, width: 1),
+                      ),
+                      clipBehavior: Clip.antiAlias,
                       child: Image.asset(
                         'assets/onboarding_welcome.png',
                         height: 300,
@@ -33,7 +40,7 @@ class WelcomeScreen extends StatelessWidget {
                         fit: BoxFit.cover,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xxl),
+                    const SizedBox(height: AppSpacing.lg),
                     // Content Card
                     SizedBox(
                       width: double.infinity,
@@ -101,8 +108,15 @@ class ProblemScreen extends StatelessWidget {
                   children: [
                     const Spacer(),
                     // Illustration
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
+                      ),
+                      foregroundDecoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
+                        border: Border.all(color: AppColors.glassBorder, width: 1),
+                      ),
+                      clipBehavior: Clip.antiAlias,
                       child: Image.asset(
                         'assets/onboarding_problem.png',
                         height: 300,
@@ -110,7 +124,7 @@ class ProblemScreen extends StatelessWidget {
                         fit: BoxFit.cover,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xxl),
+                    const SizedBox(height: AppSpacing.lg),
                     // Content Card
                     SizedBox(
                       width: double.infinity,
@@ -202,8 +216,15 @@ class SolutionScreen extends StatelessWidget {
                   children: [
                     const Spacer(),
                     // Illustration
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
+                      ),
+                      foregroundDecoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
+                        border: Border.all(color: AppColors.glassBorder, width: 1),
+                      ),
+                      clipBehavior: Clip.antiAlias,
                       child: Image.asset(
                         'assets/onboarding_solution.png',
                         height: 300,
@@ -211,7 +232,7 @@ class SolutionScreen extends StatelessWidget {
                         fit: BoxFit.cover,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xxl),
+                    const SizedBox(height: AppSpacing.lg),
                     // Content Card
                     SizedBox(
                       width: double.infinity,

@@ -53,45 +53,51 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               // Header with Skip Button
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Logo/Title
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(AppSpacing.sm),
-                          decoration: BoxDecoration(
-                            gradient: AppColors.gradientPrimary,
-                            borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                          ),
-                          child: const Icon(
-                            Icons.bedtime,
-                            color: Colors.white,
-                            size: 20,
+                child: SizedBox(
+                  height: 48,
+                  child: Stack(
+                    children: [
+                      // Logo on Left
+                      Positioned(
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            height: 32,
                           ),
                         ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Text(
+                      ),
+                      // Centered Title
+                      Center(
+                        child: Text(
                           'Insomnia Butler',
                           style: AppTextStyles.labelLg.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ],
-                    ),
-                    // Skip Button
-                    if (_currentPage < _totalPages - 1)
-                      TextButton(
-                        onPressed: _skipToEnd,
-                        child: Text(
-                          'Skip',
-                          style: AppTextStyles.labelLg.copyWith(
-                            color: AppColors.textSecondary,
+                      ),
+                      // Positioned Skip Button on Right
+                      if (_currentPage < _totalPages - 1)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          bottom: 0,
+                          child: Center(
+                            child: TextButton(
+                              onPressed: _skipToEnd,
+                              child: Text(
+                                'Skip',
+                                style: AppTextStyles.labelLg.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               // Page Indicator
