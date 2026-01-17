@@ -21,7 +21,7 @@ Phase 5: Polish & Demo Prep (Day 3-4)
 # PHASE 1: FOUNDATION & SETUP
 
 ## Task 1.1: Project Initialization
-**Priority:** CRITICAL | **Time:** 30 min | **AI Difficulty:** Easy
+**Priority:** CRITICAL
 
 ### Objectives:
 - Initialize Serverpod 3 project structure
@@ -44,7 +44,7 @@ Phase 5: Polish & Demo Prep (Day 3-4)
 ---
 
 ## Task 1.2: Database Schema Design
-**Priority:** CRITICAL | **Time:** 45 min | **AI Difficulty:** Medium
+**Priority:** CRITICAL
 
 ### Objectives:
 - Create Serverpod protocol models
@@ -134,7 +134,7 @@ fields:
 ---
 
 ## Task 1.3: Gemini API Integration Setup
-**Priority:** CRITICAL | **Time:** 30 min | **AI Difficulty:** Easy
+**Priority:** CRITICAL
 
 ### Objectives:
 - Add Google Generative AI package
@@ -145,7 +145,7 @@ fields:
 1. Add to `pubspec.yaml`:
 ```yaml
 dependencies:
-  google_generative_ai: ^0.2.0
+  google_generative_ai: ^0.4.7
 ```
 
 2. Create `lib/src/services/gemini_service.dart`:
@@ -154,7 +154,7 @@ class GeminiService {
   final GenerativeModel model;
   
   GeminiService(String apiKey) : model = GenerativeModel(
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash',
     apiKey: apiKey,
   );
   
@@ -182,7 +182,7 @@ class GeminiService {
 # PHASE 2: BACKEND CORE
 
 ## Task 2.1: Authentication Endpoint
-**Priority:** HIGH | **Time:** 45 min | **AI Difficulty:** Medium
+**Priority:** HIGH
 
 ### Objectives:
 - Implement user registration
@@ -229,7 +229,7 @@ class AuthEndpoint extends Endpoint {
 ---
 
 ## Task 2.2: Thought Clearing Endpoint (CORE FEATURE)
-**Priority:** CRITICAL | **Time:** 2 hours | **AI Difficulty:** Hard
+**Priority:** CRITICAL
 
 ### Objectives:
 - Process user thoughts through Gemini
@@ -352,7 +352,7 @@ Respond in a caring, conversational tone. Keep responses under 100 words.
 ---
 
 ## Task 2.3: Sleep Session Endpoint
-**Priority:** HIGH | **Time:** 1 hour | **AI Difficulty:** Medium
+**Priority:** HIGH
 
 ### Objectives:
 - Start sleep session
@@ -432,7 +432,7 @@ class SleepSessionEndpoint extends Endpoint {
 ---
 
 ## Task 2.4: Analytics & Insights Endpoint
-**Priority:** MEDIUM | **Time:** 1.5 hours | **AI Difficulty:** Medium
+**Priority:** MEDIUM
 
 ### Objectives:
 - Calculate sleep latency improvements
@@ -515,7 +515,7 @@ class InsightsEndpoint extends Endpoint {
 # PHASE 3: FRONTEND CORE
 
 ## Task 3.1: Design System Setup
-**Priority:** HIGH | **Time:** 1 hour | **AI Difficulty:** Easy
+**Priority:** HIGH
 
 ### Objectives:
 - Create color constants
@@ -634,7 +634,7 @@ class GlassCard extends StatelessWidget {
 ---
 
 ## Task 3.2: Onboarding Flow
-**Priority:** MEDIUM | **Time:** 2 hours | **AI Difficulty:** Medium
+**Priority:** MEDIUM
 
 ### Objectives:
 - Create 6 onboarding screens
@@ -692,7 +692,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 ---
 
 ## Task 3.3: Thought Clearing Chat UI (CORE FEATURE)
-**Priority:** CRITICAL | **Time:** 3 hours | **AI Difficulty:** Hard
+**Priority:** CRITICAL
 
 ### Objectives:
 - Build chat interface
@@ -963,7 +963,7 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> {
 ---
 
 ## Task 3.4: Home Dashboard
-**Priority:** HIGH | **Time:** 2 hours | **AI Difficulty:** Medium
+**Priority:** HIGH
 
 ### Objectives:
 - Display sleep window
@@ -1184,7 +1184,7 @@ class HomeScreen extends StatelessWidget {
 ---
 
 ## Task 3.5: Insights Dashboard
-**Priority:** MEDIUM | **Time:** 2 hours | **AI Difficulty:** Medium
+**Priority:** MEDIUM
 
 ### Objectives:
 - Display improvement stats
@@ -1417,7 +1417,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
 # PHASE 4: POLISH & DEMO PREP
 
 ## Task 4.1: Demo Data Seeding
-**Priority:** HIGH | **Time:** 1 hour | **AI Difficulty:** Easy
+**Priority:** HIGH
 
 ### Objectives:
 - Create realistic demo data
@@ -1471,7 +1471,7 @@ Future<void> seedDemoData(Session session, int userId) async {
 ---
 
 ## Task 4.2: Error Handling & Offline Mode
-**Priority:** MEDIUM | **Time:** 1 hour | **AI Difficulty:** Medium
+**Priority:** MEDIUM
 
 ### Objectives:
 - Handle API failures gracefully
@@ -1492,7 +1492,7 @@ Future<void> seedDemoData(Session session, int userId) async {
 ---
 
 ## Task 4.3: Animations & Micro-interactions
-**Priority:** LOW | **Time:** 1.5 hours | **AI Difficulty:** Medium
+**Priority:** LOW
 
 ### Objectives:
 - Add button press animations
@@ -1515,7 +1515,7 @@ Future<void> seedDemoData(Session session, int userId) async {
 ---
 
 ## Task 4.4: Demo Video Recording
-**Priority:** CRITICAL | **Time:** 1 hour | **AI Difficulty:** Easy
+**Priority:** CRITICAL
 
 ### Objectives:
 - Record 2-minute demo video

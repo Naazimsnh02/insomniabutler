@@ -27,12 +27,16 @@ dependencies:
   cupertino_icons: ^1.0.5
   flutter:
     sdk: flutter
+  flutter_animate: ^4.5.2
+  flutter_native_splash: ^2.4.7
+  google_fonts: ^7.0.2
   insomniabutler_client:
     path: ../insomniabutler_client
   serverpod_auth_idp_flutter: 3.2.2
   serverpod_flutter: 3.2.2
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.14.4
   flutter_lints: '>=3.0.0 <7.0.0'
   flutter_test:
     sdk: flutter
@@ -60,6 +64,7 @@ flutter:
   # https://flutter.dev/assets-and-images/#from-packages
   assets:
     - assets/config.json
+    - assets/images/
 dependency_overrides:
   flutter_secure_storage: ^10.0.0
 
@@ -82,3 +87,18 @@ dependency_overrides:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true
+
+flutter_native_splash:
+  color: "#0A0E27"
+  image: "assets/images/logo.png"
+  android_12:
+    image: "assets/images/logo.png"
+    color: "#0A0E27"
+  fullscreen: true
