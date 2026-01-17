@@ -78,7 +78,7 @@ Optional feature to nudge you away from doom-scrolling and toward sleep readines
 | :--- | :--- |
 | **Mobile App** | Flutter (Dart) |
 | **Backend** | Serverpod 3.0 (Dart) |
-| **AI Engine** | Google Gemini 1.5 Pro |
+| **AI Engine** | Google Gemini 2.5 Flash |
 | **Database** | PostgreSQL |
 | **Infrastructure** | Docker / Serverpod Cloud |
 

@@ -1,0 +1,12 @@
+class: SleepSession
+table: sleep_sessions
+fields:
+  userId: int
+  bedTime: DateTime
+  wakeTime: DateTime?
+  sleepLatencyMinutes: int?
+  usedButler: bool
+  thoughtsProcessed: int
+  sleepQuality: int?
+  morningMood: String?
+  sessionDate: DateTime

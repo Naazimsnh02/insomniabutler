@@ -1,0 +1,8 @@
+class: ChatMessage
+table: chat_messages
+fields:
+  sessionId: String
+  userId: int
+  role: String
+  content: String
+  timestamp: DateTime

@@ -1,0 +1,8 @@
+class: User
+table: users
+fields:
+  email: String
+  name: String
+  sleepGoal: String?
+  bedtimePreference: DateTime?
+  createdAt: DateTime

@@ -1,0 +1,10 @@
+class: ThoughtLog
+table: thought_logs
+fields:
+  userId: int
+  sessionId: int?
+  category: String
+  content: String
+  timestamp: DateTime
+  resolved: bool
+  readinessIncrease: int

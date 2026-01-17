@@ -1,0 +1,9 @@
+class: SleepInsight
+table: sleep_insights
+fields:
+  userId: int
+  insightType: String
+  metric: String
+  value: double
+  description: String
+  generatedAt: DateTime

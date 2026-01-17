@@ -57,3 +57,6 @@ sessionLogs:
 #futureCall:
 #  concurrencyLimit: 1 # Defaults to 1, a negative or null value removes the limit
 #  scanInterval: 5000 # Unit in milliseconds, defaults to 5000
+# Gemini AI Configuration
+gemini:
+  apiKey: 'REPLACE_WITH_YOUR_API_KEY'
