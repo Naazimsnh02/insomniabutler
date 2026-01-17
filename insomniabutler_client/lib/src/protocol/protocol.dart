@@ -16,17 +16,23 @@ import 'greetings/greeting.dart' as _i3;
 import 'sleep_insight.dart' as _i4;
 import 'sleep_session.dart' as _i5;
 import 'thought_log.dart' as _i6;
-import 'user.dart' as _i7;
+import 'thought_response.dart' as _i7;
+import 'user.dart' as _i8;
+import 'user_insights.dart' as _i9;
+import 'package:insomniabutler_client/src/protocol/sleep_session.dart' as _i10;
+import 'package:insomniabutler_client/src/protocol/chat_message.dart' as _i11;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    as _i8;
+    as _i12;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
-    as _i9;
+    as _i13;
 export 'chat_message.dart';
 export 'greetings/greeting.dart';
 export 'sleep_insight.dart';
 export 'sleep_session.dart';
 export 'thought_log.dart';
+export 'thought_response.dart';
 export 'user.dart';
+export 'user_insights.dart';
 export 'client.dart';
 
 class Protocol extends _i1.SerializationManager {
@@ -78,8 +84,14 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i6.ThoughtLog) {
       return _i6.ThoughtLog.fromJson(data) as T;
     }
-    if (t == _i7.User) {
-      return _i7.User.fromJson(data) as T;
+    if (t == _i7.ThoughtResponse) {
+      return _i7.ThoughtResponse.fromJson(data) as T;
+    }
+    if (t == _i8.User) {
+      return _i8.User.fromJson(data) as T;
+    }
+    if (t == _i9.UserInsights) {
+      return _i9.UserInsights.fromJson(data) as T;
     }
     if (t == _i1.getType<_i2.ChatMessage?>()) {
       return (data != null ? _i2.ChatMessage.fromJson(data) : null) as T;
@@ -96,14 +108,41 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i1.getType<_i6.ThoughtLog?>()) {
       return (data != null ? _i6.ThoughtLog.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i7.User?>()) {
-      return (data != null ? _i7.User.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i7.ThoughtResponse?>()) {
+      return (data != null ? _i7.ThoughtResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i8.User?>()) {
+      return (data != null ? _i8.User.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i9.UserInsights?>()) {
+      return (data != null ? _i9.UserInsights.fromJson(data) : null) as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == Map<String, int>) {
+      return (data as Map).map(
+            (k, v) => MapEntry(deserialize<String>(k), deserialize<int>(v)),
+          )
+          as T;
+    }
+    if (t == List<_i10.SleepSession>) {
+      return (data as List)
+              .map((e) => deserialize<_i10.SleepSession>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i11.ChatMessage>) {
+      return (data as List)
+              .map((e) => deserialize<_i11.ChatMessage>(e))
+              .toList()
+          as T;
     }
     try {
-      return _i8.Protocol().deserialize<T>(data, t);
+      return _i12.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
-      return _i9.Protocol().deserialize<T>(data, t);
+      return _i13.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -115,7 +154,9 @@ class Protocol extends _i1.SerializationManager {
       _i4.SleepInsight => 'SleepInsight',
       _i5.SleepSession => 'SleepSession',
       _i6.ThoughtLog => 'ThoughtLog',
-      _i7.User => 'User',
+      _i7.ThoughtResponse => 'ThoughtResponse',
+      _i8.User => 'User',
+      _i9.UserInsights => 'UserInsights',
       _ => null,
     };
   }
@@ -143,14 +184,18 @@ class Protocol extends _i1.SerializationManager {
         return 'SleepSession';
       case _i6.ThoughtLog():
         return 'ThoughtLog';
-      case _i7.User():
+      case _i7.ThoughtResponse():
+        return 'ThoughtResponse';
+      case _i8.User():
         return 'User';
+      case _i9.UserInsights():
+        return 'UserInsights';
     }
-    className = _i8.Protocol().getClassNameForObject(data);
+    className = _i12.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_idp.$className';
     }
-    className = _i9.Protocol().getClassNameForObject(data);
+    className = _i13.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_core.$className';
     }
@@ -178,16 +223,22 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName == 'ThoughtLog') {
       return deserialize<_i6.ThoughtLog>(data['data']);
     }
+    if (dataClassName == 'ThoughtResponse') {
+      return deserialize<_i7.ThoughtResponse>(data['data']);
+    }
     if (dataClassName == 'User') {
-      return deserialize<_i7.User>(data['data']);
+      return deserialize<_i8.User>(data['data']);
+    }
+    if (dataClassName == 'UserInsights') {
+      return deserialize<_i9.UserInsights>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
-      return _i8.Protocol().deserializeByClassName(data);
+      return _i12.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_core.')) {
       data['className'] = dataClassName.substring(20);
-      return _i9.Protocol().deserializeByClassName(data);
+      return _i13.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -202,10 +253,10 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i8.Protocol().mapRecordToJson(record);
+      return _i12.Protocol().mapRecordToJson(record);
     } catch (_) {}
     try {
-      return _i9.Protocol().mapRecordToJson(record);
+      return _i13.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }

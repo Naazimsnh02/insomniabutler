@@ -13,11 +13,15 @@
 import 'package:serverpod/serverpod.dart' as _i1;
 import '../auth/email_idp_endpoint.dart' as _i2;
 import '../auth/jwt_refresh_endpoint.dart' as _i3;
-import '../greetings/greeting_endpoint.dart' as _i4;
+import '../endpoints/auth_endpoint.dart' as _i4;
+import '../endpoints/insights_endpoint.dart' as _i5;
+import '../endpoints/sleep_session_endpoint.dart' as _i6;
+import '../endpoints/thought_clearing_endpoint.dart' as _i7;
+import '../greetings/greeting_endpoint.dart' as _i8;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i5;
+    as _i9;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
-    as _i6;
+    as _i10;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -35,7 +39,31 @@ class Endpoints extends _i1.EndpointDispatch {
           'jwtRefresh',
           null,
         ),
-      'greeting': _i4.GreetingEndpoint()
+      'auth': _i4.AuthEndpoint()
+        ..initialize(
+          server,
+          'auth',
+          null,
+        ),
+      'insights': _i5.InsightsEndpoint()
+        ..initialize(
+          server,
+          'insights',
+          null,
+        ),
+      'sleepSession': _i6.SleepSessionEndpoint()
+        ..initialize(
+          server,
+          'sleepSession',
+          null,
+        ),
+      'thoughtClearing': _i7.ThoughtClearingEndpoint()
+        ..initialize(
+          server,
+          'thoughtClearing',
+          null,
+        ),
+      'greeting': _i8.GreetingEndpoint()
         ..initialize(
           server,
           'greeting',
@@ -236,6 +264,455 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
+    connectors['auth'] = _i1.EndpointConnector(
+      name: 'auth',
+      endpoint: endpoints['auth']!,
+      methodConnectors: {
+        'register': _i1.MethodConnector(
+          name: 'register',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'name': _i1.ParameterDescription(
+              name: 'name',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['auth'] as _i4.AuthEndpoint).register(
+                session,
+                params['email'],
+                params['name'],
+              ),
+        ),
+        'login': _i1.MethodConnector(
+          name: 'login',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['auth'] as _i4.AuthEndpoint).login(
+                session,
+                params['email'],
+              ),
+        ),
+        'getUserById': _i1.MethodConnector(
+          name: 'getUserById',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['auth'] as _i4.AuthEndpoint).getUserById(
+                session,
+                params['userId'],
+              ),
+        ),
+        'updatePreferences': _i1.MethodConnector(
+          name: 'updatePreferences',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'sleepGoal': _i1.ParameterDescription(
+              name: 'sleepGoal',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'bedtimePreference': _i1.ParameterDescription(
+              name: 'bedtimePreference',
+              type: _i1.getType<DateTime?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['auth'] as _i4.AuthEndpoint).updatePreferences(
+                    session,
+                    params['userId'],
+                    params['sleepGoal'],
+                    params['bedtimePreference'],
+                  ),
+        ),
+      },
+    );
+    connectors['insights'] = _i1.EndpointConnector(
+      name: 'insights',
+      endpoint: endpoints['insights']!,
+      methodConnectors: {
+        'getUserInsights': _i1.MethodConnector(
+          name: 'getUserInsights',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['insights'] as _i5.InsightsEndpoint)
+                  .getUserInsights(
+                    session,
+                    params['userId'],
+                  ),
+        ),
+        'getWeeklyInsights': _i1.MethodConnector(
+          name: 'getWeeklyInsights',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'weekStart': _i1.ParameterDescription(
+              name: 'weekStart',
+              type: _i1.getType<DateTime>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['insights'] as _i5.InsightsEndpoint)
+                  .getWeeklyInsights(
+                    session,
+                    params['userId'],
+                    params['weekStart'],
+                  ),
+        ),
+        'getThoughtCategoryBreakdown': _i1.MethodConnector(
+          name: 'getThoughtCategoryBreakdown',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['insights'] as _i5.InsightsEndpoint)
+                  .getThoughtCategoryBreakdown(
+                    session,
+                    params['userId'],
+                  ),
+        ),
+        'getSleepTrend': _i1.MethodConnector(
+          name: 'getSleepTrend',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'days': _i1.ParameterDescription(
+              name: 'days',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['insights'] as _i5.InsightsEndpoint).getSleepTrend(
+                    session,
+                    params['userId'],
+                    params['days'],
+                  ),
+        ),
+        'getButlerEffectivenessScore': _i1.MethodConnector(
+          name: 'getButlerEffectivenessScore',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['insights'] as _i5.InsightsEndpoint)
+                  .getButlerEffectivenessScore(
+                    session,
+                    params['userId'],
+                  ),
+        ),
+      },
+    );
+    connectors['sleepSession'] = _i1.EndpointConnector(
+      name: 'sleepSession',
+      endpoint: endpoints['sleepSession']!,
+      methodConnectors: {
+        'startSession': _i1.MethodConnector(
+          name: 'startSession',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+                  .startSession(
+                    session,
+                    params['userId'],
+                  ),
+        ),
+        'endSession': _i1.MethodConnector(
+          name: 'endSession',
+          params: {
+            'sessionId': _i1.ParameterDescription(
+              name: 'sessionId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'sleepQuality': _i1.ParameterDescription(
+              name: 'sleepQuality',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'morningMood': _i1.ParameterDescription(
+              name: 'morningMood',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'sleepLatencyMinutes': _i1.ParameterDescription(
+              name: 'sleepLatencyMinutes',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+                  .endSession(
+                    session,
+                    params['sessionId'],
+                    params['sleepQuality'],
+                    params['morningMood'],
+                    params['sleepLatencyMinutes'],
+                  ),
+        ),
+        'markButlerUsed': _i1.MethodConnector(
+          name: 'markButlerUsed',
+          params: {
+            'sessionId': _i1.ParameterDescription(
+              name: 'sessionId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'thoughtCount': _i1.ParameterDescription(
+              name: 'thoughtCount',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+                  .markButlerUsed(
+                    session,
+                    params['sessionId'],
+                    params['thoughtCount'],
+                  ),
+        ),
+        'getUserSessions': _i1.MethodConnector(
+          name: 'getUserSessions',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'limit': _i1.ParameterDescription(
+              name: 'limit',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+                  .getUserSessions(
+                    session,
+                    params['userId'],
+                    params['limit'],
+                  ),
+        ),
+        'getActiveSession': _i1.MethodConnector(
+          name: 'getActiveSession',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+                  .getActiveSession(
+                    session,
+                    params['userId'],
+                  ),
+        ),
+        'getLastNightSession': _i1.MethodConnector(
+          name: 'getLastNightSession',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+                  .getLastNightSession(
+                    session,
+                    params['userId'],
+                  ),
+        ),
+        'updateSleepLatency': _i1.MethodConnector(
+          name: 'updateSleepLatency',
+          params: {
+            'sessionId': _i1.ParameterDescription(
+              name: 'sessionId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'latencyMinutes': _i1.ParameterDescription(
+              name: 'latencyMinutes',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+                  .updateSleepLatency(
+                    session,
+                    params['sessionId'],
+                    params['latencyMinutes'],
+                  ),
+        ),
+      },
+    );
+    connectors['thoughtClearing'] = _i1.EndpointConnector(
+      name: 'thoughtClearing',
+      endpoint: endpoints['thoughtClearing']!,
+      methodConnectors: {
+        'processThought': _i1.MethodConnector(
+          name: 'processThought',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'userMessage': _i1.ParameterDescription(
+              name: 'userMessage',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'sessionId': _i1.ParameterDescription(
+              name: 'sessionId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'currentReadiness': _i1.ParameterDescription(
+              name: 'currentReadiness',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['thoughtClearing'] as _i7.ThoughtClearingEndpoint)
+                      .processThought(
+                        session,
+                        params['userId'],
+                        params['userMessage'],
+                        params['sessionId'],
+                        params['currentReadiness'],
+                      ),
+        ),
+        'getSessionHistory': _i1.MethodConnector(
+          name: 'getSessionHistory',
+          params: {
+            'sessionId': _i1.ParameterDescription(
+              name: 'sessionId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['thoughtClearing'] as _i7.ThoughtClearingEndpoint)
+                      .getSessionHistory(
+                        session,
+                        params['sessionId'],
+                      ),
+        ),
+      },
+    );
     connectors['greeting'] = _i1.EndpointConnector(
       name: 'greeting',
       endpoint: endpoints['greeting']!,
@@ -253,16 +730,16 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['greeting'] as _i4.GreetingEndpoint).hello(
+              ) async => (endpoints['greeting'] as _i8.GreetingEndpoint).hello(
                 session,
                 params['name'],
               ),
         ),
       },
     );
-    modules['serverpod_auth_idp'] = _i5.Endpoints()
+    modules['serverpod_auth_idp'] = _i9.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i6.Endpoints()
+    modules['serverpod_auth_core'] = _i10.Endpoints()
       ..initializeEndpoints(server);
   }
 }

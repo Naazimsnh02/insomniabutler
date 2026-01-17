@@ -16,9 +16,15 @@ import 'package:serverpod_client/serverpod_client.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
+import 'package:insomniabutler_client/src/protocol/user.dart' as _i5;
+import 'package:insomniabutler_client/src/protocol/user_insights.dart' as _i6;
+import 'package:insomniabutler_client/src/protocol/sleep_session.dart' as _i7;
+import 'package:insomniabutler_client/src/protocol/thought_response.dart'
+    as _i8;
+import 'package:insomniabutler_client/src/protocol/chat_message.dart' as _i9;
 import 'package:insomniabutler_client/src/protocol/greetings/greeting.dart'
-    as _i5;
-import 'protocol.dart' as _i6;
+    as _i10;
+import 'protocol.dart' as _i11;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -234,6 +240,243 @@ class EndpointJwtRefresh extends _i4.EndpointRefreshJwtTokens {
   );
 }
 
+/// Authentication endpoint for user registration and login
+/// {@category Endpoint}
+class EndpointAuth extends _i2.EndpointRef {
+  EndpointAuth(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'auth';
+
+  /// Register a new user
+  /// Returns the created user or null if email already exists
+  _i3.Future<_i5.User?> register(
+    String email,
+    String name,
+  ) => caller.callServerEndpoint<_i5.User?>(
+    'auth',
+    'register',
+    {
+      'email': email,
+      'name': name,
+    },
+  );
+
+  /// Login user by email
+  /// Returns the user if found, null otherwise
+  _i3.Future<_i5.User?> login(String email) =>
+      caller.callServerEndpoint<_i5.User?>(
+        'auth',
+        'login',
+        {'email': email},
+      );
+
+  /// Get user by ID
+  _i3.Future<_i5.User?> getUserById(int userId) =>
+      caller.callServerEndpoint<_i5.User?>(
+        'auth',
+        'getUserById',
+        {'userId': userId},
+      );
+
+  /// Update user preferences
+  _i3.Future<_i5.User?> updatePreferences(
+    int userId,
+    String? sleepGoal,
+    DateTime? bedtimePreference,
+  ) => caller.callServerEndpoint<_i5.User?>(
+    'auth',
+    'updatePreferences',
+    {
+      'userId': userId,
+      'sleepGoal': sleepGoal,
+      'bedtimePreference': bedtimePreference,
+    },
+  );
+}
+
+/// Analytics and insights endpoint for sleep intelligence
+/// {@category Endpoint}
+class EndpointInsights extends _i2.EndpointRef {
+  EndpointInsights(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'insights';
+
+  /// Get comprehensive user insights
+  _i3.Future<_i6.UserInsights> getUserInsights(int userId) =>
+      caller.callServerEndpoint<_i6.UserInsights>(
+        'insights',
+        'getUserInsights',
+        {'userId': userId},
+      );
+
+  /// Get weekly insights for a specific week
+  _i3.Future<_i6.UserInsights> getWeeklyInsights(
+    int userId,
+    DateTime weekStart,
+  ) => caller.callServerEndpoint<_i6.UserInsights>(
+    'insights',
+    'getWeeklyInsights',
+    {
+      'userId': userId,
+      'weekStart': weekStart,
+    },
+  );
+
+  /// Get thought category breakdown
+  _i3.Future<Map<String, int>> getThoughtCategoryBreakdown(int userId) =>
+      caller.callServerEndpoint<Map<String, int>>(
+        'insights',
+        'getThoughtCategoryBreakdown',
+        {'userId': userId},
+      );
+
+  /// Get sleep quality trend (last N days)
+  _i3.Future<List<_i7.SleepSession>> getSleepTrend(
+    int userId,
+    int days,
+  ) => caller.callServerEndpoint<List<_i7.SleepSession>>(
+    'insights',
+    'getSleepTrend',
+    {
+      'userId': userId,
+      'days': days,
+    },
+  );
+
+  /// Get Butler effectiveness score (0-100)
+  _i3.Future<int> getButlerEffectivenessScore(int userId) =>
+      caller.callServerEndpoint<int>(
+        'insights',
+        'getButlerEffectivenessScore',
+        {'userId': userId},
+      );
+}
+
+/// Sleep session management endpoint
+/// {@category Endpoint}
+class EndpointSleepSession extends _i2.EndpointRef {
+  EndpointSleepSession(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'sleepSession';
+
+  /// Start a new sleep session
+  _i3.Future<_i7.SleepSession> startSession(int userId) =>
+      caller.callServerEndpoint<_i7.SleepSession>(
+        'sleepSession',
+        'startSession',
+        {'userId': userId},
+      );
+
+  /// End a sleep session with quality feedback
+  _i3.Future<_i7.SleepSession?> endSession(
+    int sessionId,
+    int sleepQuality,
+    String morningMood,
+    int? sleepLatencyMinutes,
+  ) => caller.callServerEndpoint<_i7.SleepSession?>(
+    'sleepSession',
+    'endSession',
+    {
+      'sessionId': sessionId,
+      'sleepQuality': sleepQuality,
+      'morningMood': morningMood,
+      'sleepLatencyMinutes': sleepLatencyMinutes,
+    },
+  );
+
+  /// Mark that Butler was used during this session
+  _i3.Future<void> markButlerUsed(
+    int sessionId,
+    int thoughtCount,
+  ) => caller.callServerEndpoint<void>(
+    'sleepSession',
+    'markButlerUsed',
+    {
+      'sessionId': sessionId,
+      'thoughtCount': thoughtCount,
+    },
+  );
+
+  /// Get user's sleep sessions with optional limit
+  _i3.Future<List<_i7.SleepSession>> getUserSessions(
+    int userId,
+    int limit,
+  ) => caller.callServerEndpoint<List<_i7.SleepSession>>(
+    'sleepSession',
+    'getUserSessions',
+    {
+      'userId': userId,
+      'limit': limit,
+    },
+  );
+
+  /// Get the most recent active session for a user
+  _i3.Future<_i7.SleepSession?> getActiveSession(int userId) =>
+      caller.callServerEndpoint<_i7.SleepSession?>(
+        'sleepSession',
+        'getActiveSession',
+        {'userId': userId},
+      );
+
+  /// Get last night's session
+  _i3.Future<_i7.SleepSession?> getLastNightSession(int userId) =>
+      caller.callServerEndpoint<_i7.SleepSession?>(
+        'sleepSession',
+        'getLastNightSession',
+        {'userId': userId},
+      );
+
+  /// Update sleep latency for a session
+  _i3.Future<_i7.SleepSession?> updateSleepLatency(
+    int sessionId,
+    int latencyMinutes,
+  ) => caller.callServerEndpoint<_i7.SleepSession?>(
+    'sleepSession',
+    'updateSleepLatency',
+    {
+      'sessionId': sessionId,
+      'latencyMinutes': latencyMinutes,
+    },
+  );
+}
+
+/// Core thought clearing endpoint - processes user thoughts through AI
+/// {@category Endpoint}
+class EndpointThoughtClearing extends _i2.EndpointRef {
+  EndpointThoughtClearing(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'thoughtClearing';
+
+  /// Process a user's thought through AI and return categorized response
+  _i3.Future<_i8.ThoughtResponse> processThought(
+    int userId,
+    String userMessage,
+    String sessionId,
+    int currentReadiness,
+  ) => caller.callServerEndpoint<_i8.ThoughtResponse>(
+    'thoughtClearing',
+    'processThought',
+    {
+      'userId': userId,
+      'userMessage': userMessage,
+      'sessionId': sessionId,
+      'currentReadiness': currentReadiness,
+    },
+  );
+
+  /// Get conversation history for a session
+  _i3.Future<List<_i9.ChatMessage>> getSessionHistory(String sessionId) =>
+      caller.callServerEndpoint<List<_i9.ChatMessage>>(
+        'thoughtClearing',
+        'getSessionHistory',
+        {'sessionId': sessionId},
+      );
+}
+
 /// This is an example endpoint that returns a greeting message through
 /// its [hello] method.
 /// {@category Endpoint}
@@ -244,8 +487,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i5.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i5.Greeting>(
+  _i3.Future<_i10.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i10.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -283,7 +526,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i6.Protocol(),
+         _i11.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -294,6 +537,10 @@ class Client extends _i2.ServerpodClientShared {
        ) {
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    auth = EndpointAuth(this);
+    insights = EndpointInsights(this);
+    sleepSession = EndpointSleepSession(this);
+    thoughtClearing = EndpointThoughtClearing(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
   }
@@ -301,6 +548,14 @@ class Client extends _i2.ServerpodClientShared {
   late final EndpointEmailIdp emailIdp;
 
   late final EndpointJwtRefresh jwtRefresh;
+
+  late final EndpointAuth auth;
+
+  late final EndpointInsights insights;
+
+  late final EndpointSleepSession sleepSession;
+
+  late final EndpointThoughtClearing thoughtClearing;
 
   late final EndpointGreeting greeting;
 
@@ -310,6 +565,10 @@ class Client extends _i2.ServerpodClientShared {
   Map<String, _i2.EndpointRef> get endpointRefLookup => {
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
+    'auth': auth,
+    'insights': insights,
+    'sleepSession': sleepSession,
+    'thoughtClearing': thoughtClearing,
     'greeting': greeting,
   };
 

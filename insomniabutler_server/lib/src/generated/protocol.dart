@@ -21,13 +21,19 @@ import 'greetings/greeting.dart' as _i6;
 import 'sleep_insight.dart' as _i7;
 import 'sleep_session.dart' as _i8;
 import 'thought_log.dart' as _i9;
-import 'user.dart' as _i10;
+import 'thought_response.dart' as _i10;
+import 'user.dart' as _i11;
+import 'user_insights.dart' as _i12;
+import 'package:insomniabutler_server/src/generated/sleep_session.dart' as _i13;
+import 'package:insomniabutler_server/src/generated/chat_message.dart' as _i14;
 export 'chat_message.dart';
 export 'greetings/greeting.dart';
 export 'sleep_insight.dart';
 export 'sleep_session.dart';
 export 'thought_log.dart';
+export 'thought_response.dart';
 export 'user.dart';
+export 'user_insights.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
   Protocol._();
@@ -436,8 +442,14 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i9.ThoughtLog) {
       return _i9.ThoughtLog.fromJson(data) as T;
     }
-    if (t == _i10.User) {
-      return _i10.User.fromJson(data) as T;
+    if (t == _i10.ThoughtResponse) {
+      return _i10.ThoughtResponse.fromJson(data) as T;
+    }
+    if (t == _i11.User) {
+      return _i11.User.fromJson(data) as T;
+    }
+    if (t == _i12.UserInsights) {
+      return _i12.UserInsights.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.ChatMessage?>()) {
       return (data != null ? _i5.ChatMessage.fromJson(data) : null) as T;
@@ -454,8 +466,35 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i9.ThoughtLog?>()) {
       return (data != null ? _i9.ThoughtLog.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i10.User?>()) {
-      return (data != null ? _i10.User.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i10.ThoughtResponse?>()) {
+      return (data != null ? _i10.ThoughtResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i11.User?>()) {
+      return (data != null ? _i11.User.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i12.UserInsights?>()) {
+      return (data != null ? _i12.UserInsights.fromJson(data) : null) as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == Map<String, int>) {
+      return (data as Map).map(
+            (k, v) => MapEntry(deserialize<String>(k), deserialize<int>(v)),
+          )
+          as T;
+    }
+    if (t == List<_i13.SleepSession>) {
+      return (data as List)
+              .map((e) => deserialize<_i13.SleepSession>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i14.ChatMessage>) {
+      return (data as List)
+              .map((e) => deserialize<_i14.ChatMessage>(e))
+              .toList()
+          as T;
     }
     try {
       return _i3.Protocol().deserialize<T>(data, t);
@@ -476,7 +515,9 @@ class Protocol extends _i1.SerializationManagerServer {
       _i7.SleepInsight => 'SleepInsight',
       _i8.SleepSession => 'SleepSession',
       _i9.ThoughtLog => 'ThoughtLog',
-      _i10.User => 'User',
+      _i10.ThoughtResponse => 'ThoughtResponse',
+      _i11.User => 'User',
+      _i12.UserInsights => 'UserInsights',
       _ => null,
     };
   }
@@ -504,8 +545,12 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'SleepSession';
       case _i9.ThoughtLog():
         return 'ThoughtLog';
-      case _i10.User():
+      case _i10.ThoughtResponse():
+        return 'ThoughtResponse';
+      case _i11.User():
         return 'User';
+      case _i12.UserInsights():
+        return 'UserInsights';
     }
     className = _i2.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -543,8 +588,14 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'ThoughtLog') {
       return deserialize<_i9.ThoughtLog>(data['data']);
     }
+    if (dataClassName == 'ThoughtResponse') {
+      return deserialize<_i10.ThoughtResponse>(data['data']);
+    }
     if (dataClassName == 'User') {
-      return deserialize<_i10.User>(data['data']);
+      return deserialize<_i11.User>(data['data']);
+    }
+    if (dataClassName == 'UserInsights') {
+      return deserialize<_i12.UserInsights>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -590,8 +641,8 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i8.SleepSession.t;
       case _i9.ThoughtLog:
         return _i9.ThoughtLog.t;
-      case _i10.User:
-        return _i10.User.t;
+      case _i11.User:
+        return _i11.User.t;
     }
     return null;
   }

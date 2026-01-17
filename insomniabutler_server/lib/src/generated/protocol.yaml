@@ -8,5 +8,27 @@ emailIdp:
   - finishPasswordReset:
 jwtRefresh:
   - refreshAccessToken:
+auth:
+  - register:
+  - login:
+  - getUserById:
+  - updatePreferences:
+insights:
+  - getUserInsights:
+  - getWeeklyInsights:
+  - getThoughtCategoryBreakdown:
+  - getSleepTrend:
+  - getButlerEffectivenessScore:
+sleepSession:
+  - startSession:
+  - endSession:
+  - markButlerUsed:
+  - getUserSessions:
+  - getActiveSession:
+  - getLastNightSession:
+  - updateSleepLatency:
+thoughtClearing:
+  - processThought:
+  - getSessionHistory:
 greeting:
   - hello:

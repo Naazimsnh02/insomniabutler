@@ -1,0 +1,5 @@
+class: ThoughtResponse
+fields:
+  message: String
+  category: String
+  newReadiness: int

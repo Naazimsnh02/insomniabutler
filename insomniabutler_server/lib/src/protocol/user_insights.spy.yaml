@@ -1,0 +1,8 @@
+class: UserInsights
+fields:
+  latencyImprovement: int
+  avgLatencyWithButler: double
+  avgLatencyWithoutButler: double
+  topThoughtCategories: List<String>
+  totalThoughtsProcessed: int
+  totalSessions: int
