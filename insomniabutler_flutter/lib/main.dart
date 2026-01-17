@@ -4,7 +4,7 @@ import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
-import 'screens/splash_screen.dart';
+import 'screens/home_screen.dart';
 import 'core/theme.dart';
 
 /// Sets up a global client object that can be used to talk to the server from
@@ -39,6 +39,10 @@ void main() async {
 
   client.auth.initialize();
 
+  // Show splash for at least 2 seconds for branding, then remove
+  await Future.delayed(const Duration(seconds: 2));
+  FlutterNativeSplash.remove();
+
   runApp(const MyApp());
 }
 
@@ -55,7 +59,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: AppColors.background,
         primaryColor: AppColors.accentPurple,
       ),
-      home: const SplashScreen(),
+      home: const HomeScreen(title: 'Insomnia Butler'),
     );
   }
 }

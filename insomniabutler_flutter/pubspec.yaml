@@ -91,14 +91,16 @@ dependency_overrides:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/logo.png"
+  image_path: "assets/logo_new.png"
   min_sdk_android: 21
   remove_alpha_ios: true
 
 flutter_native_splash:
-  color: "#0A0E27"
-  image: "assets/images/logo.png"
+  color: "#080D20"
+  image: "assets/images/splash_branding.png"
   android_12:
-    image: "assets/images/logo.png"
-    color: "#0A0E27"
+    image: "assets/images/splash_branding.png"
+    color: "#080D20"
   fullscreen: true
+  android_gravity: center
+  ios_content_mode: center
