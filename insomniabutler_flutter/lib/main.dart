@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'screens/home_screen.dart';
+import 'screens/onboarding/onboarding_screen.dart';
 import 'core/theme.dart';
 
 /// Sets up a global client object that can be used to talk to the server from
@@ -37,8 +39,6 @@ void main() async {
     ..connectivityMonitor = FlutterConnectivityMonitor()
     ..authSessionManager = FlutterAuthSessionManager();
 
-  client.auth.initialize();
-
   // Show splash for at least 2 seconds for branding, then remove
   await Future.delayed(const Duration(seconds: 2));
   FlutterNativeSplash.remove();
@@ -56,11 +56,75 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: AppColors.background,
-        primaryColor: AppColors.accentPurple,
+        scaffoldBackgroundColor: const Color(0xFF0A0E27),
+        primaryColor: AppColors.accentPrimary,
+        fontFamily: 'Manrope',
       ),
-      home: const HomeScreen(title: 'Insomnia Butler'),
+      home: const AppInitializer(),
     );
   }
 }
+
+/// Determines whether to show onboarding or home screen
+class AppInitializer extends StatefulWidget {
+  const AppInitializer({Key? key}) : super(key: key);
+
+  @override
+  State<AppInitializer> createState() => _AppInitializerState();
+}
+
+class _AppInitializerState extends State<AppInitializer> {
+  bool _isLoading = true;
+  bool _showOnboarding = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFirstLaunch();
+  }
+
+  Future<void> _checkFirstLaunch() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasCompletedOnboarding = prefs.getBool('onboarding_completed') ?? false;
+    
+    setState(() {
+      _showOnboarding = !hasCompletedOnboarding;
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _completeOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', true);
+    
+    setState(() {
+      _showOnboarding = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.bgPrimary,
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.accentPrimary),
+          ),
+        ),
+      );
+    }
+
+    if (_showOnboarding) {
+      return OnboardingScreen(
+        onComplete: _completeOnboarding,
+      );
+    }
+
+    return const HomeScreen(title: 'Insomnia Butler');
+  }
+}
+
 
