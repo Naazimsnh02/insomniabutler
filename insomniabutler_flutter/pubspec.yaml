@@ -32,6 +32,7 @@ dependencies:
   google_fonts: ^7.0.2
   insomniabutler_client:
     path: ../insomniabutler_client
+  intl: ^0.20.2
   serverpod_auth_idp_flutter: 3.2.2
   serverpod_flutter: 3.2.2
   shared_preferences: ^2.3.4

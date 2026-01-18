@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:ui';
+import 'package:intl/intl.dart';
 import '../core/theme.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/primary_button.dart';
@@ -10,7 +11,7 @@ import '../services/user_service.dart';
 import '../utils/haptic_helper.dart';
 
 /// Home Dashboard - Main app screen
-/// Premium glassmorphic dashboard with sleep stats and quick actions
+/// Redesigned with premium high-fidelity UI inspired by modern sleep trackers
 class NewHomeScreen extends StatefulWidget {
   const NewHomeScreen({Key? key}) : super(key: key);
 
@@ -20,7 +21,8 @@ class NewHomeScreen extends StatefulWidget {
 
 class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProviderStateMixin {
   int _selectedNavIndex = 0;
-  late AnimationController _pulseController;
+  DateTime _selectedDate = DateTime.now();
+  String? _selectedMood;
   
   // User data
   String _userName = 'User';
@@ -32,14 +34,17 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
   int _streakDays = 0;
   bool _isLoadingInsights = true;
 
+  final List<Map<String, String>> _moods = [
+    {'emoji': '😠', 'label': 'Angry'},
+    {'emoji': '😔', 'label': 'Sad'},
+    {'emoji': '😑', 'label': 'Blah'},
+    {'emoji': '😊', 'label': 'Happy'},
+    {'emoji': '➕', 'label': 'Add'},
+  ];
+
   @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    )..repeat(reverse: true);
-    
     _loadUserData();
     _loadInsights();
   }
@@ -54,7 +59,7 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
         _userName = userName;
       });
     } catch (e) {
-      print('Error loading user data: $e');
+      debugPrint('Error loading user data: $e');
     }
   }
   
@@ -68,7 +73,7 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
       
       final insights = await client.insights.getUserInsights(userId);
       
-      // Calculate streak (simplified - could be enhanced)
+      // Calculate streak (simplified)
       final sessions = await client.insights.getSleepTrend(userId, 30);
       int streak = 0;
       DateTime? lastDate;
@@ -87,684 +92,619 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
       
       setState(() {
         _latencyImprovement = insights.latencyImprovement;
-        _avgSleep = (insights.avgLatencyWithButler / 60).clamp(0, 12); // Convert to hours
+        _avgSleep = (insights.avgLatencyWithButler / 60).clamp(0, 12);
         _streakDays = streak;
         _isLoadingInsights = false;
       });
     } catch (e) {
-      print('Error loading insights: $e');
+      debugPrint('Error loading insights: $e');
       setState(() => _isLoadingInsights = false);
     }
   }
 
   @override
   void dispose() {
-    _pulseController.dispose();
     super.dispose();
-  }
-
-  String _getGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    if (hour < 21) return 'Good Evening';
-    return 'Good Night';
-  }
-
-  String _getTimeUntilBed() {
-    final now = DateTime.now();
-    final bedtime = DateTime(now.year, now.month, now.day, 23, 0);
-    
-    if (now.isAfter(bedtime)) {
-      return 'Past bedtime';
-    }
-    
-    final difference = bedtime.difference(now);
-    final hours = difference.inHours;
-    final minutes = difference.inMinutes % 60;
-    
-    if (hours == 0) {
-      return '$minutes min';
-    }
-    return '${hours}h ${minutes}m';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.bgPrimary,
-        ),
-        child: SafeArea(
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              _buildHeader(),
-              SliverPadding(
-                padding: const EdgeInsets.all(AppSpacing.containerPadding),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _buildTonightCard(),
-                    const SizedBox(height: AppSpacing.lg),
-                    _buildQuickActions(),
-                    const SizedBox(height: AppSpacing.lg),
-                    _buildImpactCard(),
-                    const SizedBox(height: AppSpacing.lg),
-                    _buildStreakCard(),
-                    const SizedBox(height: 100), // Space for bottom nav
-                  ]),
-                ),
+      backgroundColor: AppColors.backgroundDeep,
+      body: Stack(
+        children: [
+          // Background Gradient
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: AppColors.bgPrimary,
               ),
-            ],
+            ),
           ),
-        ),
+
+          // Main Content
+          SafeArea(
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                _buildTopBar(),
+                _buildCalendarStrip(),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildDailyAffirmation(),
+                      const SizedBox(height: AppSpacing.xl),
+                      _buildSleepGauge(),
+                      const SizedBox(height: AppSpacing.xl),
+                      _buildControlPanel(),
+                      const SizedBox(height: AppSpacing.xl),
+                      _buildMoodTracker(),
+                      const SizedBox(height: AppSpacing.xl),
+                      _buildImpactSection(),
+                      const SizedBox(height: 140), // Space for fab & nav
+                    ]),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Bottom UI Components
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _buildBottomNavArea(),
+          ),
+        ],
       ),
-      bottomNavigationBar: _buildBottomNav(),
-      floatingActionButton: _buildFloatingButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildTopBar() {
     return SliverToBoxAdapter(
-      child: Container(
+      child: Padding(
         padding: const EdgeInsets.all(AppSpacing.containerPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _getGreeting(),
-                      style: AppTextStyles.body.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ).animate().fadeIn(duration: 300.ms),
-                    const SizedBox(height: 4),
-                    Text(
-                      _userName,
-                      style: AppTextStyles.h1.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ).animate().fadeIn(delay: 100.ms, duration: 300.ms).slideX(begin: -0.2, end: 0),
-                  ],
-                ),
-                // Profile avatar with glass effect
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    gradient: AppColors.gradientPrimary,
-                    shape: BoxShape.circle,
-                    boxShadow: AppShadows.buttonShadow,
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'A',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ).animate().fadeIn(delay: 200.ms).scale(delay: 200.ms),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.glassBg,
-                borderRadius: BorderRadius.circular(AppBorderRadius.full),
-                border: Border.all(color: AppColors.glassBorder),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.bedtime,
-                    size: 16,
-                    color: AppColors.accentPrimary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Ready for bed in ${_getTimeUntilBed()}',
-                    style: AppTextStyles.bodySm.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ).animate().fadeIn(delay: 300.ms).slideX(begin: -0.3, end: 0),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTonightCard() {
-    return GlassCard(
-      elevated: true,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  gradient: AppColors.gradientCalm,
-                  borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                ),
-                child: const Icon(
-                  Icons.nightlight_round,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Tonight\'s Sleep Window',
-                      style: AppTextStyles.h4.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Optimized for your rhythm',
-                      style: AppTextStyles.bodySm.copyWith(
-                        color: AppColors.textTertiary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            decoration: BoxDecoration(
-              gradient: AppColors.gradientPrimary,
-              borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-              boxShadow: AppShadows.buttonShadow,
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildTimeDisplay('🛏️', '11:00 PM', 'Bedtime'),
-                    Container(
-                      width: 40,
-                      height: 2,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.white.withOpacity(0.3),
-                            Colors.white.withOpacity(0.8),
-                            Colors.white.withOpacity(0.3),
-                          ],
-                        ),
-                      ),
-                    ).animate(onPlay: (controller) => controller.repeat())
-                      .shimmer(duration: 2000.ms),
-                    _buildTimeDisplay('⏰', '7:00 AM', 'Wake up'),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  '8 hours of quality sleep',
-                  style: AppTextStyles.bodySm.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () async {
-                await HapticHelper.mediumImpact();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const ThoughtClearingScreen(),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accentPrimary,
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-                ),
-                elevation: 0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.self_improvement, color: Colors.white),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    'Start Wind-Down',
-                    style: AppTextStyles.bodyLg.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    ).animate().fadeIn(delay: 400.ms, duration: 400.ms).slideY(begin: 0.2, end: 0);
-  }
-
-  Widget _buildTimeDisplay(String emoji, String time, String label) {
-    return Column(
-      children: [
-        Text(emoji, style: const TextStyle(fontSize: 28)),
-        const SizedBox(height: 8),
-        Text(
-          time,
-          style: AppTextStyles.h3.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: AppTextStyles.bodySm.copyWith(
-            color: Colors.white.withOpacity(0.8),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuickActions() {
-    return GlassCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.flash_on,
-                color: AppColors.accentWarning,
-                size: 20,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                'Quick Actions',
-                style: AppTextStyles.h4.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _buildActionButton(
-            icon: Icons.psychology,
-            label: '🧘 Clear Thoughts',
-            subtitle: 'Process anxious thoughts',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const ThoughtClearingScreen(),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _buildActionButton(
-            icon: Icons.nightlight,
-            label: '📊 Last Night',
-            subtitle: 'View sleep summary',
-            onTap: () {
-              // TODO: Navigate to sleep log
-            },
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _buildActionButton(
-            icon: Icons.insights,
-            label: '📈 Weekly Insights',
-            subtitle: 'See your progress',
-            onTap: () {
-              // TODO: Navigate to insights
-            },
-          ),
-        ],
-      ),
-    ).animate().fadeIn(delay: 500.ms, duration: 400.ms).slideY(begin: 0.2, end: 0);
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: () async {
-        await HapticHelper.lightImpact();
-        onTap();
-      },
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.glassBg,
-          borderRadius: BorderRadius.circular(AppBorderRadius.md),
-          border: Border.all(color: AppColors.glassBorder),
-        ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                gradient: AppColors.gradientPrimary,
-                borderRadius: BorderRadius.circular(AppBorderRadius.sm),
-              ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: AppTextStyles.bodyLg.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: AppTextStyles.bodySm.copyWith(
-                      color: AppColors.textTertiary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              color: AppColors.textSecondary,
-              size: 16,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildImpactCard() {
-    return GlassCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.trending_up,
-                color: AppColors.accentSuccess,
-                size: 20,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                'Your Impact',
-                style: AppTextStyles.h4.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard(
-                  icon: '⚡',
-                  value: _isLoadingInsights ? '--' : '$_latencyImprovement%',
-                  label: 'Faster Sleep',
-                  color: AppColors.accentSuccess,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _buildStatCard(
-                  icon: '💤',
-                  value: _isLoadingInsights ? '--' : '${_avgSleep.toStringAsFixed(1)}h',
-                  label: 'Avg Sleep',
-                  color: AppColors.accentTertiary,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ).animate().fadeIn(delay: 600.ms, duration: 400.ms).slideY(begin: 0.2, end: 0);
-  }
-
-  Widget _buildStatCard({
-    required String icon,
-    required String value,
-    required String label,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            color.withOpacity(0.2),
-            color.withOpacity(0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppBorderRadius.md),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 32)),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            value,
-            style: AppTextStyles.h2.copyWith(
-              color: color,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: AppTextStyles.bodySm.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStreakCard() {
-    return GlassCard(
-      gradient: AppColors.gradientHero,
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(AppBorderRadius.md),
-            ),
-            child: const Text(
-              '🔥',
-              style: TextStyle(fontSize: 32),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _isLoadingInsights ? 'Loading...' : '$_streakDays Day Streak',
-                  style: AppTextStyles.h3.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  'Daily',
+                  style: AppTextStyles.h1.copyWith(fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 4),
                 Text(
-                  'Keep it going! You\'re building a healthy sleep habit',
-                  style: AppTextStyles.bodySm.copyWith(
-                    color: Colors.white.withOpacity(0.9),
+                  'Journal',
+                  style: AppTextStyles.h2.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
             ),
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.calendar_today_rounded, color: Colors.white),
+              style: IconButton.styleFrom(
+                backgroundColor: AppColors.glassBgElevated,
+                padding: const EdgeInsets.all(12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCalendarStrip() {
+    final now = DateTime.now();
+    final days = List.generate(7, (index) => now.subtract(Duration(days: 3 - index)));
+
+    return SliverToBoxAdapter(
+      child: SizedBox(
+        height: 80,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          itemCount: days.length,
+          itemBuilder: (context, index) {
+            final date = days[index];
+            final isSelected = date.day == _selectedDate.day && date.month == _selectedDate.month;
+            final isToday = date.day == now.day && date.month == now.month;
+
+            return GestureDetector(
+              onTap: () {
+                HapticHelper.lightImpact();
+                setState(() => _selectedDate = date);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: 50,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppColors.accentPrimary.withOpacity(0.2) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(AppBorderRadius.full),
+                  border: isSelected ? Border.all(color: AppColors.accentPrimary.withOpacity(0.5)) : null,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      DateFormat('E').format(date).toUpperCase()[0],
+                      style: AppTextStyles.label.copyWith(
+                        color: isSelected ? AppColors.accentPrimary : AppColors.textTertiary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: isSelected ? AppColors.gradientPrimary : null,
+                        border: isToday && !isSelected 
+                            ? Border.all(color: AppColors.accentPrimary, width: 1.5) 
+                            : null,
+                      ),
+                      child: Center(
+                        child: Text(
+                          date.day.toString(),
+                          style: AppTextStyles.bodySm.copyWith(
+                            color: isSelected ? Colors.white : AppColors.textPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ).animate().fadeIn(delay: 200.ms),
+    );
+  }
+
+  Widget _buildDailyAffirmation() {
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Daily Affirmation',
+                style: AppTextStyles.labelLg.copyWith(
+                  color: AppColors.accentAmber,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Icon(Icons.auto_awesome_rounded, size: 16, color: AppColors.accentAmber),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            '"Everything meant for you is on the good way"',
+            style: AppTextStyles.bodyLg.copyWith(
+              fontStyle: FontStyle.italic,
+              height: 1.4,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.favorite_rounded, size: 14, color: Colors.white.withOpacity(0.5)),
+              const SizedBox(width: 12),
+              Icon(Icons.share_rounded, size: 14, color: Colors.white.withOpacity(0.5)),
+            ],
           ),
         ],
       ),
-    ).animate().fadeIn(delay: 700.ms, duration: 400.ms).slideY(begin: 0.2, end: 0);
+    ).animate().fadeIn(delay: 300.ms).slideX(begin: 0.1, end: 0);
   }
 
-  Widget _buildFloatingButton() {
-    return AnimatedBuilder(
-      animation: _pulseController,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: 1.0 + (_pulseController.value * 0.05),
-          child: Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              gradient: AppColors.gradientPrimary,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.accentPrimary.withOpacity(0.5),
-                  blurRadius: 20,
-                  spreadRadius: 2,
+  Widget _buildSleepGauge() {
+    final dateStr = DateFormat('EEE, dd MMMM').format(_selectedDate);
+    
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(dateStr, style: AppTextStyles.h4),
+            const Icon(Icons.ios_share_rounded, color: AppColors.textSecondary, size: 20),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        SizedBox(
+          height: 240,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Outer Glow
+              Container(
+                width: 220,
+                height: 220,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accentPrimary.withOpacity(0.1),
+                      blurRadius: 50,
+                      spreadRadius: 10,
+                    ),
+                  ],
                 ),
+              ),
+              // Gauge Arc Placeholder (Using a decorated container for now)
+              Container(
+                width: 200,
+                height: 200,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white10, width: 2),
+                ),
+                child: CustomPaint(
+                  painter: _GaugePainter(),
+                ),
+              ),
+              // Inner Content
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '80%',
+                    style: AppTextStyles.displayMd.copyWith(
+                      color: AppColors.accentPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Sleep Score',
+                    style: AppTextStyles.label.copyWith(color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '8h 0m',
+                    style: AppTextStyles.h2.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    'Sleep duration',
+                    style: AppTextStyles.label.copyWith(color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+              // Time Labels on Circle
+              ...List.generate(4, (i) {
+                final angle = (i * 90 - 90) * (3.14159 / 180);
+                final time = ['12', '3', '6', '9'][i];
+                return Positioned(
+                  left: 100 + 85 * (1.0 * (angle == 0 ? 1 : angle == 3.14159 ? -1 : 0)) - 10,
+                  top: 100 + 85 * (1.0 * (angle == 1.5707 ? 1 : angle == -1.5707 ? -1 : 0)) - 10,
+                  child: Center(
+                    child: Text(
+                      time,
+                      style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Column(
+              children: [
+                Text('Time in bed', style: AppTextStyles.caption),
+                Text('00:00 - 08:00', style: AppTextStyles.bodySm.copyWith(fontWeight: FontWeight.bold)),
               ],
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () async {
-                  await HapticHelper.mediumImpact();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ThoughtClearingScreen(),
-                    ),
-                  );
-                },
-                customBorder: const CircleBorder(),
-                child: const Center(
-                  child: Icon(
-                    Icons.chat_bubble,
-                    color: Colors.white,
-                    size: 28,
+            const SizedBox(width: 40),
+            Column(
+              children: [
+                Text('Sleep Quality', style: AppTextStyles.caption),
+                Text('Very good!', style: AppTextStyles.bodySm.copyWith(
+                  color: AppColors.accentSuccess,
+                  fontWeight: FontWeight.bold,
+                )),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ).animate().fadeIn(delay: 400.ms).scale(begin: const Offset(0.9, 0.9));
+  }
+
+  Widget _buildControlPanel() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildTimeCard('Bedtime', '00:00', Icons.bedtime_rounded),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: _buildTimeCard('Alarm', '08:00', Icons.alarm_rounded),
+        ),
+      ],
+    ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1, end: 0);
+  }
+
+  Widget _buildTimeCard(String title, String time, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.glassBgElevated,
+        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        border: Border.all(color: AppColors.glassBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, size: 14, color: AppColors.accentPrimary),
+                  const SizedBox(width: 4),
+                  Text(title, style: AppTextStyles.caption),
+                ],
+              ),
+              const Icon(Icons.edit_outlined, size: 14, color: AppColors.textTertiary),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            time,
+            style: AppTextStyles.h2.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMoodTracker() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('How do you feel now?', style: AppTextStyles.labelLg),
+        const SizedBox(height: AppSpacing.md),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: _moods.map((mood) {
+            final isSelected = _selectedMood == mood['label'];
+            return GestureDetector(
+              onTap: () {
+                HapticHelper.lightImpact();
+                setState(() => _selectedMood = mood['label']);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppColors.accentPrimary : AppColors.glassBgElevated,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected ? AppColors.accentPrimary : AppColors.glassBorder,
+                  ),
+                ),
+                child: Text(
+                  mood['emoji']!,
+                  style: const TextStyle(fontSize: 24),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    ).animate().fadeIn(delay: 600.ms);
+  }
+
+  Widget _buildImpactSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Sleep Insights', style: AppTextStyles.labelLg),
+        const SizedBox(height: AppSpacing.md),
+        GlassCard(
+          child: Row(
+            children: [
+              _buildSimpleStat('⚡', '${_latencyImprovement}%', 'Faster Sleep'),
+              const VerticalDivider(color: AppColors.glassBorder, width: 40),
+              _buildSimpleStat('🔥', '${_streakDays}d', 'Sleep Streak'),
+              const VerticalDivider(color: AppColors.glassBorder, width: 40),
+              _buildSimpleStat('💤', '${_avgSleep.toStringAsFixed(1)}h', 'Avg. Rest'),
+            ],
+          ),
+        ),
+      ],
+    ).animate().fadeIn(delay: 700.ms);
+  }
+
+  Widget _buildSimpleStat(String emoji, String value, String label) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 20)),
+          const SizedBox(height: 4),
+          Text(value, style: AppTextStyles.bodyLg.copyWith(fontWeight: FontWeight.bold)),
+          Text(label, style: AppTextStyles.caption),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomNavArea() {
+    return Container(
+      height: 100,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.backgroundDeep.withOpacity(0),
+            AppColors.backgroundDeep.withOpacity(0.9),
+            AppColors.backgroundDeep,
+          ],
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Nav Bar
+          Positioned(
+            left: AppSpacing.md,
+            right: AppSpacing.md,
+            bottom: 20,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: AppColors.glassBgElevated.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
+                    border: Border.all(color: AppColors.glassBorder.withOpacity(0.2)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildNavItem(Icons.nightlight_round, 'Tracker', 0),
+                      _buildNavItem(Icons.music_note_rounded, 'Sounds', 1),
+                      const SizedBox(width: 48), // Space for Mid FAB
+                      _buildNavItem(Icons.auto_stories_rounded, 'Journal', 2),
+                      _buildNavItem(Icons.person_outline_rounded, 'Account', 3),
+                    ],
                   ),
                 ),
               ),
             ),
           ),
-        );
-      },
-    );
-  }
-
-  Widget _buildBottomNav() {
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(
-        top: Radius.circular(AppBorderRadius.xxl),
-      ),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          height: 80,
-          decoration: BoxDecoration(
-            color: AppColors.glassBg,
-            border: const Border(
-              top: BorderSide(color: AppColors.glassBorder),
+          // Floating Action Button
+          Positioned(
+            bottom: 40,
+            child: GestureDetector(
+              onTap: () {
+                HapticHelper.mediumImpact();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ThoughtClearingScreen()),
+                );
+              },
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  gradient: AppColors.gradientPrimary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accentPrimary.withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 28),
+              ),
             ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(Icons.home_rounded, 'Home', 0),
-              const SizedBox(width: 64), // Space for FAB
-              _buildNavItem(Icons.bar_chart_rounded, 'Stats', 1),
-            ],
-          ),
-        ),
+          ).animate(onPlay: (c) => c.repeat(reverse: true)).moveY(begin: 0, end: -4, duration: 1500.ms),
+        ],
       ),
     );
   }
 
   Widget _buildNavItem(IconData icon, String label, int index) {
     final isActive = _selectedNavIndex == index;
-    
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedNavIndex = index;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.sm,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isActive ? AppColors.accentPrimary : AppColors.textSecondary,
-              size: 28,
+      onTap: () => setState(() => _selectedNavIndex = index),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: isActive ? Colors.white : AppColors.textTertiary,
+            size: isActive ? 24 : 20,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(
+              color: isActive ? Colors.white : AppColors.textTertiary,
+              fontSize: 9,
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: AppTextStyles.caption.copyWith(
-                color: isActive ? AppColors.accentPrimary : AppColors.textSecondary,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+}
+
+class _GaugePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+
+    // Track
+    final trackPaint = Paint()
+      ..color = Colors.white.withOpacity(0.05)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 12
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -3.14159 / 2 - 2.5,
+      5.0,
+      false,
+      trackPaint,
+    );
+
+    // Active Progress
+    final progressGradient = const SweepGradient(
+      colors: [AppColors.accentPrimary, AppColors.accentAmber, AppColors.accentSkyBlue],
+      stops: [0.0, 0.4, 0.8],
+      transform: GradientRotation(-3.14159 / 2 - 2.5),
+    ).createShader(Rect.fromCircle(center: center, radius: radius));
+
+    final progressPaint = Paint()
+      ..shader = progressGradient
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 14
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -3.14159 / 2 - 2.5,
+      4.2, // Score mapped to arc
+      false,
+      progressPaint,
+    );
+
+    // Thumb Glow
+    final thumbPaint = Paint()
+      ..color = Colors.white
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
+    
+    // Position thumb at end of progress (trigonometry simplified)
+    // For demo, just skip or draw a simple dot
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
