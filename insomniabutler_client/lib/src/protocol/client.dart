@@ -441,6 +441,50 @@ class EndpointSleepSession extends _i2.EndpointRef {
       'latencyMinutes': latencyMinutes,
     },
   );
+
+  /// Log a manual sleep session (retroactive)
+  _i3.Future<_i7.SleepSession> logManualSession(
+    int userId,
+    DateTime bedTime,
+    DateTime wakeTime,
+    int sleepQuality,
+  ) => caller.callServerEndpoint<_i7.SleepSession>(
+    'sleepSession',
+    'logManualSession',
+    {
+      'userId': userId,
+      'bedTime': bedTime,
+      'wakeTime': wakeTime,
+      'sleepQuality': sleepQuality,
+    },
+  );
+
+  /// Update an existing sleep session
+  _i3.Future<_i7.SleepSession?> updateSession(
+    int sessionId,
+    DateTime bedTime,
+    DateTime wakeTime,
+    int sleepQuality,
+    int? sleepLatencyMinutes,
+  ) => caller.callServerEndpoint<_i7.SleepSession?>(
+    'sleepSession',
+    'updateSession',
+    {
+      'sessionId': sessionId,
+      'bedTime': bedTime,
+      'wakeTime': wakeTime,
+      'sleepQuality': sleepQuality,
+      'sleepLatencyMinutes': sleepLatencyMinutes,
+    },
+  );
+
+  /// Delete a sleep session
+  _i3.Future<bool> deleteSession(int sessionId) =>
+      caller.callServerEndpoint<bool>(
+        'sleepSession',
+        'deleteSession',
+        {'sessionId': sessionId},
+      );
 }
 
 /// Core thought clearing endpoint - processes user thoughts through AI

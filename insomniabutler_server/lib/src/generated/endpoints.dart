@@ -647,6 +647,105 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['latencyMinutes'],
                   ),
         ),
+        'logManualSession': _i1.MethodConnector(
+          name: 'logManualSession',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'bedTime': _i1.ParameterDescription(
+              name: 'bedTime',
+              type: _i1.getType<DateTime>(),
+              nullable: false,
+            ),
+            'wakeTime': _i1.ParameterDescription(
+              name: 'wakeTime',
+              type: _i1.getType<DateTime>(),
+              nullable: false,
+            ),
+            'sleepQuality': _i1.ParameterDescription(
+              name: 'sleepQuality',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+                  .logManualSession(
+                    session,
+                    params['userId'],
+                    params['bedTime'],
+                    params['wakeTime'],
+                    params['sleepQuality'],
+                  ),
+        ),
+        'updateSession': _i1.MethodConnector(
+          name: 'updateSession',
+          params: {
+            'sessionId': _i1.ParameterDescription(
+              name: 'sessionId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'bedTime': _i1.ParameterDescription(
+              name: 'bedTime',
+              type: _i1.getType<DateTime>(),
+              nullable: false,
+            ),
+            'wakeTime': _i1.ParameterDescription(
+              name: 'wakeTime',
+              type: _i1.getType<DateTime>(),
+              nullable: false,
+            ),
+            'sleepQuality': _i1.ParameterDescription(
+              name: 'sleepQuality',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'sleepLatencyMinutes': _i1.ParameterDescription(
+              name: 'sleepLatencyMinutes',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+                  .updateSession(
+                    session,
+                    params['sessionId'],
+                    params['bedTime'],
+                    params['wakeTime'],
+                    params['sleepQuality'],
+                    params['sleepLatencyMinutes'],
+                  ),
+        ),
+        'deleteSession': _i1.MethodConnector(
+          name: 'deleteSession',
+          params: {
+            'sessionId': _i1.ParameterDescription(
+              name: 'sessionId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+                  .deleteSession(
+                    session,
+                    params['sessionId'],
+                  ),
+        ),
       },
     );
     connectors['thoughtClearing'] = _i1.EndpointConnector(

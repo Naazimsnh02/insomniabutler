@@ -119,4 +119,56 @@ class SleepSessionEndpoint extends Endpoint {
     
     return await SleepSession.db.updateRow(session, updated);
   }
+
+  /// Log a manual sleep session (retroactive)
+  Future<SleepSession> logManualSession(
+    Session session,
+    int userId,
+    DateTime bedTime,
+    DateTime wakeTime,
+    int sleepQuality,
+  ) async {
+    final sleepSession = SleepSession(
+      userId: userId,
+      bedTime: bedTime,
+      wakeTime: wakeTime,
+      sleepQuality: sleepQuality,
+      usedButler: false,
+      thoughtsProcessed: 0,
+      sessionDate: bedTime,
+    );
+    
+    return await SleepSession.db.insertRow(session, sleepSession);
+  }
+
+  /// Update an existing sleep session
+  Future<SleepSession?> updateSession(
+    Session session,
+    int sessionId,
+    DateTime bedTime,
+    DateTime wakeTime,
+    int sleepQuality,
+    int? sleepLatencyMinutes,
+  ) async {
+    final sleepSession = await SleepSession.db.findById(session, sessionId);
+    if (sleepSession == null) return null;
+
+    final updated = sleepSession.copyWith(
+      bedTime: bedTime,
+      wakeTime: wakeTime,
+      sleepQuality: sleepQuality,
+      sleepLatencyMinutes: sleepLatencyMinutes,
+    );
+
+    return await SleepSession.db.updateRow(session, updated);
+  }
+
+  /// Delete a sleep session
+  Future<bool> deleteSession(Session session, int sessionId) async {
+    final sleepSession = await SleepSession.db.findById(session, sessionId);
+    if (sleepSession == null) return false;
+
+    await SleepSession.db.deleteRow(session, sleepSession);
+    return true;
+  }
 }

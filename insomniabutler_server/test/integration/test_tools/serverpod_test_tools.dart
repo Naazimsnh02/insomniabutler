@@ -1039,6 +1039,117 @@ class _SleepSessionEndpoint {
       }
     });
   }
+
+  _i3.Future<_i7.SleepSession> logManualSession(
+    _i1.TestSessionBuilder sessionBuilder,
+    int userId,
+    DateTime bedTime,
+    DateTime wakeTime,
+    int sleepQuality,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'sleepSession',
+            method: 'logManualSession',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'sleepSession',
+          methodName: 'logManualSession',
+          parameters: _i1.testObjectToJson({
+            'userId': userId,
+            'bedTime': bedTime,
+            'wakeTime': wakeTime,
+            'sleepQuality': sleepQuality,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i7.SleepSession>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i7.SleepSession?> updateSession(
+    _i1.TestSessionBuilder sessionBuilder,
+    int sessionId,
+    DateTime bedTime,
+    DateTime wakeTime,
+    int sleepQuality,
+    int? sleepLatencyMinutes,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'sleepSession',
+            method: 'updateSession',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'sleepSession',
+          methodName: 'updateSession',
+          parameters: _i1.testObjectToJson({
+            'sessionId': sessionId,
+            'bedTime': bedTime,
+            'wakeTime': wakeTime,
+            'sleepQuality': sleepQuality,
+            'sleepLatencyMinutes': sleepLatencyMinutes,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i7.SleepSession?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> deleteSession(
+    _i1.TestSessionBuilder sessionBuilder,
+    int sessionId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'sleepSession',
+            method: 'deleteSession',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'sleepSession',
+          methodName: 'deleteSession',
+          parameters: _i1.testObjectToJson({'sessionId': sessionId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _ThoughtClearingEndpoint {
