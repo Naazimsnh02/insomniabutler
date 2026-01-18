@@ -44,116 +44,62 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.bgPrimary,
-        ),
-        child: SafeArea(
-          child: Column(
+      backgroundColor: Colors.transparent, // Ensure no background color bleeds through
+      body: Stack(
+        children: [
+          // Page View (Full Screen - covers status bar)
+          PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _currentPage = index;
+              });
+            },
+            physics: const NeverScrollableScrollPhysics(),
             children: [
-              // Header with Skip Button
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: SizedBox(
-                  height: 48,
-                  child: Stack(
-                    children: [
-                      // Logo on Left
-                      Positioned(
-                        left: 0,
-                        top: 0,
-                        bottom: 0,
-                        child: Center(
-                          child: Image.asset(
-                            'assets/images/logo.png',
-                            height: 32,
-                          ),
-                        ),
-                      ),
-                      // Centered Title
-                      Center(
-                        child: Text(
-                          'Insomnia Butler',
-                          style: AppTextStyles.labelLg.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      // Positioned Skip Button on Right
-                      if (_currentPage < _totalPages - 1)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          bottom: 0,
-                          child: Center(
-                            child: TextButton(
-                              onPressed: _skipToEnd,
-                              child: Text(
-                                'Skip',
-                                style: AppTextStyles.labelLg.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+              WelcomeScreen(onNext: _nextPage),
+              ProblemScreen(onNext: _nextPage),
+              SolutionScreen(onNext: _nextPage),
+              DemoScreen(onNext: _nextPage),
+              PermissionsScreen(
+                onNext: _nextPage,
+                onSkip: _nextPage,
               ),
-              // Page Indicator
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
-                child: Row(
-                  children: List.generate(
-                    _totalPages,
-                    (index) => Expanded(
-                      child: Container(
-                        height: 3,
-                        margin: EdgeInsets.only(
-                          right: index < _totalPages - 1 ? AppSpacing.xs : 0,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: index <= _currentPage
-                              ? AppColors.gradientPrimary
-                              : null,
-                          color: index <= _currentPage
-                              ? null
-                              : AppColors.glassBg,
-                          borderRadius: BorderRadius.circular(AppBorderRadius.full),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              // Page View
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                  },
-                  physics: const NeverScrollableScrollPhysics(), // Disable swipe, use buttons only
-                  children: [
-                    WelcomeScreen(onNext: _nextPage),
-                    ProblemScreen(onNext: _nextPage),
-                    SolutionScreen(onNext: _nextPage),
-                    DemoScreen(onNext: _nextPage),
-                    PermissionsScreen(
-                      onNext: _nextPage,
-                      onSkip: _nextPage,
-                    ),
-                    SetupScreen(onComplete: _nextPage),
-                    AuthScreen(onComplete: widget.onComplete),
-                  ],
-                ),
-              ),
+              SetupScreen(onComplete: _nextPage),
+              AuthScreen(onComplete: widget.onComplete),
             ],
           ),
-        ),
+
+          // Bottom Overlay (Dots)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 32,
+            child: SafeArea(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  _totalPages,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    height: 8,
+                    width: _currentPage == index ? 24 : 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      gradient: _currentPage == index 
+                          ? AppColors.gradientPrimary 
+                          : null,
+                      color: _currentPage == index 
+                          ? null 
+                          : AppColors.textTertiary.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(AppBorderRadius.full),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

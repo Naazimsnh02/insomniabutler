@@ -11,78 +11,72 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: IntrinsicHeight(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.containerPadding),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Spacer(),
-                    // Illustration
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
-                      ),
-                      foregroundDecoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
-                        border: Border.all(color: AppColors.glassBorder, width: 1),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Image.asset(
-                        'assets/onboarding_welcome.png',
-                        height: 300,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    // Content Card
-                    SizedBox(
-                      width: double.infinity,
-                      child: GlassCard(
-                        child: Column(
-                          children: [
-                            Text(
-                              "It's 2 AM",
-                              style: AppTextStyles.displayMd,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: AppSpacing.md),
-                            Text(
-                              'Your mind is racing.\nYour body is exhausted.\nBut sleep won\'t come.',
-                              style: AppTextStyles.bodyLg.copyWith(
-                                color: AppColors.textSecondary,
-                                height: 1.6,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    const SizedBox(height: AppSpacing.lg),
-                    // CTA Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: PrimaryButton(
-                        text: 'I know this feeling',
-                        onPressed: onNext,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                  ],
-                ),
+    return Stack(
+      children: [
+        // Background Image (covers status bar)
+        Positioned.fill(
+          child: Image.asset(
+            'assets/onboarding/Welcome.png',
+            fit: BoxFit.cover,
+          ),
+        ),
+        // Dark Gradient for Readability
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.black.withOpacity(0.4),
+                  Colors.transparent,
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.4),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0, 0.3, 0.6, 1],
               ),
             ),
           ),
-        );
-      }
+        ),
+        // Content
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl,
+              vertical: AppSpacing.xxxl,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "It's 2 AM",
+                  style: AppTextStyles.displayMd,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'Your mind is racing.\nYour body is exhausted.\nBut sleep won\'t come.',
+                  style: AppTextStyles.bodyLg.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.xxl),
+                SizedBox(
+                  width: double.infinity,
+                  child: PrimaryButton(
+                    text: 'Help me now',
+                    onPressed: onNext,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xxl), // Space for dots
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -95,102 +89,72 @@ class ProblemScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: IntrinsicHeight(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.containerPadding),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Spacer(),
-                    // Illustration
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
-                      ),
-                      foregroundDecoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
-                        border: Border.all(color: AppColors.glassBorder, width: 1),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Image.asset(
-                        'assets/onboarding_problem.png',
-                        height: 300,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    // Content Card
-                    SizedBox(
-                      width: double.infinity,
-                      child: GlassCard(
-                        child: Column(
-                          children: [
-                            Text(
-                              "You've tried everything",
-                              style: AppTextStyles.h1,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: AppSpacing.lg),
-                            _buildTryItem('☁️', 'Counting sheep'),
-                            _buildTryItem('🎵', 'Sleep sounds'),
-                            _buildTryItem('😮‍💨', 'Breathing exercises'),
-                            _buildTryItem('📱', 'Closing your eyes harder'),
-                            const SizedBox(height: AppSpacing.lg),
-                            Text(
-                              'But the thoughts are still there,\nunresolved, demanding attention.',
-                              style: AppTextStyles.body.copyWith(
-                                color: AppColors.textSecondary,
-                                fontStyle: FontStyle.italic,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    const SizedBox(height: AppSpacing.lg),
-                    // CTA Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: PrimaryButton(
-                        text: "There's a better way",
-                        onPressed: onNext,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                  ],
-                ),
+    return Stack(
+      children: [
+        // Background Image
+        Positioned.fill(
+          child: Image.asset(
+            'assets/onboarding/Problem.png',
+            fit: BoxFit.cover,
+          ),
+        ),
+        // Dark Gradient for Readability
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.black.withOpacity(0.4),
+                  Colors.transparent,
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.4),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0, 0.3, 0.6, 1],
               ),
             ),
           ),
-        );
-      }
-    );
-  }
-
-  Widget _buildTryItem(String emoji, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-      child: Row(
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 20)),
-          const SizedBox(width: AppSpacing.md),
-          Text(
-            text,
-            style: AppTextStyles.body.copyWith(
-              color: AppColors.textSecondary,
-              decoration: TextDecoration.lineThrough,
+        ),
+        // Content
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl,
+              vertical: AppSpacing.xxxl,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: AppSpacing.xxl),
+                Text(
+                  "Tired of trying?",
+                  style: AppTextStyles.displayMd,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'Counting sheep, white noise, and breathing techniques feel like chores when your thoughts are loud.',
+                  style: AppTextStyles.bodyLg.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const Spacer(),
+                SizedBox(
+                  width: double.infinity,
+                  child: PrimaryButton(
+                    text: 'There is a better way',
+                    onPressed: onNext,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xxl), // Space for dots
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -203,102 +167,72 @@ class SolutionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: IntrinsicHeight(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.containerPadding),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Spacer(),
-                    // Illustration
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
-                      ),
-                      foregroundDecoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
-                        border: Border.all(color: AppColors.glassBorder, width: 1),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Image.asset(
-                        'assets/onboarding_solution.png',
-                        height: 300,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    // Content Card
-                    SizedBox(
-                      width: double.infinity,
-                      child: GlassCard(
-                        child: Column(
-                          children: [
-                            Text(
-                              'Meet Your Butler',
-                              style: AppTextStyles.displayMd,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: AppSpacing.md),
-                            Text(
-                              "Insomnia Butler doesn't just distract you.\nIt actively clears your mental clutter.",
-                              style: AppTextStyles.body.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: AppSpacing.lg),
-                            _buildFeature('✨', 'Categorizes anxious thoughts'),
-                            _buildFeature('🧘', 'Guides cognitive reframing'),
-                            _buildFeature('📝', 'Parks worries for tomorrow'),
-                            _buildFeature('💤', 'Helps you actually rest'),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    const SizedBox(height: AppSpacing.lg),
-                    // CTA Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: PrimaryButton(
-                        text: 'Show me how',
-                        onPressed: onNext,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                  ],
+    return Stack(
+      children: [
+        // Background Image
+        Positioned.fill(
+          child: Image.asset(
+            'assets/onboarding/Solution.png',
+            fit: BoxFit.cover,
+          ),
+        ),
+        // Dark Gradient for Readability
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.black.withOpacity(0.4),
+                  Colors.transparent,
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.4),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0, 0.3, 0.6, 1],
+              ),
+            ),
+          ),
+        ),
+        // Content
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl,
+              vertical: AppSpacing.xxxl,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "Meet your Butler",
+                  style: AppTextStyles.displayMd,
+                  textAlign: TextAlign.center,
                 ),
-              ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'Offload your racing thoughts through structured reframing and quiet your mind for rest.',
+                  style: AppTextStyles.bodyLg.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.xxl),
+                SizedBox(
+                  width: double.infinity,
+                  child: PrimaryButton(
+                    text: 'Show me how',
+                    onPressed: onNext,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xxl), // Space for dots
+              ],
             ),
           ),
-        );
-      }
-    );
-  }
-
-  Widget _buildFeature(String emoji, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      child: Row(
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 24)),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Text(
-              text,
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

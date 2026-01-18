@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
-import '../../widgets/glass_card.dart';
 import '../../widgets/primary_button.dart';
 import '../../main.dart';
 
@@ -30,24 +30,20 @@ class _AuthScreenState extends State<AuthScreen> {
     
     try {
       if (_isRegistering) {
-        // Register using custom endpoint
         final user = await client.auth.register(
           _emailController.text.trim(),
           _nameController.text.trim(),
         );
         
         if (user != null) {
-          // Success
           widget.onComplete();
         } else {
           _showError('Email already exists or registration failed.');
         }
       } else {
-        // Login using custom endpoint
         final user = await client.auth.login(_emailController.text.trim());
         
         if (user != null) {
-          // Success
           widget.onComplete();
         } else {
           _showError('Invalid email or user not found.');
@@ -63,8 +59,10 @@ class _AuthScreenState extends State<AuthScreen> {
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.accentError,
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: AppColors.accentError.withOpacity(0.9),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
@@ -81,130 +79,166 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.containerPadding),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: AppSpacing.xxl),
-              // Header
-              Text(
-                _isRegistering ? 'Create your Account' : 'Sign in to your Account',
-                style: AppTextStyles.h1,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                _isRegistering 
-                  ? 'Please fill in the details to create your account.' 
-                  : 'Please enter your credentials to continue.',
-                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-
-              // Form Fields
-              if (_isRegistering) ...[
-                _buildTextField(
-                  controller: _nameController,
-                  label: 'Full Name',
-                  hint: 'Enter your name',
-                  icon: Icons.person_outline,
-                  textCapitalization: TextCapitalization.words,
-                ),
-                const SizedBox(height: AppSpacing.lg),
-              ],
-              
-              _buildTextField(
-                controller: _emailController,
-                label: 'Email',
-                hint: 'name@example.com',
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              
-              _buildTextField(
-                controller: _passwordController,
-                label: 'Password',
-                hint: '••••••••',
-                icon: Icons.lock_outline,
-                obscureText: true,
-              ),
-              
-              if (!_isRegistering)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Forgot Password?',
-                      style: AppTextStyles.bodySm.copyWith(
-                        color: AppColors.accentPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+      child: Container(
+        color: const Color(0xFF080D20), // Fallback base color
+        child: Stack(
+          children: [
+            // Deep Night Background - Linear Gradient
+            Positioned.fill(
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF080D20), Color(0xFF0F172A)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                   ),
                 ),
-
-              const SizedBox(height: AppSpacing.xl),
-
-              // Action Button
-              PrimaryButton(
-                text: _isRegistering ? 'Register' : 'Login',
-                isLoading: _isLoading,
-                onPressed: _handleAuth,
               ),
+            ),
 
-              const SizedBox(height: AppSpacing.xl),
+            // Content
+            SafeArea(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: AppSpacing.xxl),
+                      
+                      // Title Section
+                      Text(
+                        _isRegistering ? 'Create Account' : 'Welcome Back',
+                        style: AppTextStyles.h2,
+                        textAlign: TextAlign.center,
+                      ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, end: 0),
+                      
+                      const SizedBox(height: AppSpacing.sm),
+                      
+                      Text(
+                        _isRegistering 
+                          ? 'Join us for a better night\'s sleep.' 
+                          : 'Sign in to rescue your rest.',
+                        style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                        textAlign: TextAlign.center,
+                      ).animate().fadeIn(delay: 200.ms),
+                      
+                      const SizedBox(height: AppSpacing.xxxl),
 
-              // Social Auth
-              Row(
-                children: [
-                  const Expanded(child: Divider(color: AppColors.glassBorder)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                    child: Text('Or login with', style: AppTextStyles.caption),
+                      // Form Fields
+                      if (_isRegistering) ...[
+                        _buildTextField(
+                          controller: _nameController,
+                          label: 'Full Name',
+                          hint: 'Your name',
+                          icon: Icons.person_outline_rounded,
+                          textCapitalization: TextCapitalization.words,
+                        ).animate().fadeIn(delay: 300.ms).slideX(begin: 0.1, end: 0),
+                        const SizedBox(height: AppSpacing.lg),
+                      ],
+                      
+                      _buildTextField(
+                        controller: _emailController,
+                        label: 'Email',
+                        hint: 'name@example.com',
+                        icon: Icons.email_outlined,
+                        keyboardType: TextInputType.emailAddress,
+                      ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1, end: 0),
+                      
+                      const SizedBox(height: AppSpacing.lg),
+                      
+                      _buildTextField(
+                        controller: _passwordController,
+                        label: 'Password',
+                        hint: '••••••••',
+                        icon: Icons.lock_outline_rounded,
+                        obscureText: true,
+                      ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1, end: 0),
+                      
+                      if (!_isRegistering)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {},
+                            child: Text(
+                              'Forgot Password?',
+                              style: AppTextStyles.bodySm.copyWith(
+                                color: AppColors.accentPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ).animate().fadeIn(delay: 600.ms),
+
+                      const SizedBox(height: AppSpacing.xl),
+
+                      // Action Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: PrimaryButton(
+                          text: _isRegistering ? 'Register' : 'Login',
+                          isLoading: _isLoading,
+                          onPressed: _handleAuth,
+                        ),
+                      ).animate().fadeIn(delay: 700.ms).scale(curve: Curves.easeOutBack),
+
+                      const SizedBox(height: AppSpacing.xxl),
+
+                      // Divider
+                      Row(
+                        children: [
+                          const Expanded(child: Divider(color: AppColors.glassBorder, thickness: 0.5)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                            child: Text('OR', style: AppTextStyles.caption.copyWith(letterSpacing: 1.2)),
+                          ),
+                          const Expanded(child: Divider(color: AppColors.glassBorder, thickness: 0.5)),
+                        ],
+                      ).animate().fadeIn(delay: 800.ms),
+
+                      const SizedBox(height: AppSpacing.xl),
+
+                      // Social Buttons
+                      Row(
+                        children: [
+                          Expanded(child: _buildSocialButton('Apple', Icons.apple)),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(child: _buildSocialButton('Google', Icons.g_mobiledata_rounded)),
+                        ],
+                      ).animate().fadeIn(delay: 900.ms).slideY(begin: 0.2, end: 0),
+
+                      const SizedBox(height: AppSpacing.xxxl),
+
+                      // Toggle Auth Mode
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _isRegistering ? 'Joined us before? ' : 'New to the Butler? ',
+                            style: AppTextStyles.bodySm.copyWith(color: AppColors.textSecondary),
+                          ),
+                          GestureDetector(
+                            onTap: () => setState(() => _isRegistering = !_isRegistering),
+                            child: AnimatedDefaultTextStyle(
+                              duration: const Duration(milliseconds: 200),
+                              style: AppTextStyles.bodySm.copyWith(
+                                color: AppColors.accentPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              child: Text(_isRegistering ? 'Log in' : 'Register'),
+                            ),
+                          ),
+                        ],
+                      ).animate().fadeIn(delay: 1.seconds),
+                      
+                      const SizedBox(height: 120), // Extra space for dots and scroll
+                    ],
                   ),
-                  const Expanded(child: Divider(color: AppColors.glassBorder)),
-                ],
+                ),
               ),
-              const SizedBox(height: AppSpacing.xl),
-              Row(
-                children: [
-                  Expanded(child: _buildSocialButton('Apple', Icons.apple)),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(child: _buildSocialButton('Google', Icons.g_mobiledata_rounded)),
-                ],
-              ),
-
-              const SizedBox(height: AppSpacing.xxl),
-
-              // Toggle
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _isRegistering ? 'Already have an account? ' : 'Don\'t have an account? ',
-                    style: AppTextStyles.bodySm.copyWith(color: AppColors.textSecondary),
-                  ),
-                  GestureDetector(
-                    onTap: () => setState(() => _isRegistering = !_isRegistering),
-                    child: Text(
-                      _isRegistering ? 'Log in' : 'Register',
-                      style: AppTextStyles.bodySm.copyWith(
-                        color: AppColors.accentPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -222,17 +256,23 @@ class _AuthScreenState extends State<AuthScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: AppTextStyles.label.copyWith(
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w600,
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            label,
+            style: AppTextStyles.label.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-        const SizedBox(height: AppSpacing.sm),
-        GlassCard(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 4),
-          borderRadius: AppBorderRadius.md,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          decoration: BoxDecoration(
+            color: AppColors.glassBgElevated,
+            borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+            border: Border.all(color: AppColors.glassBorder),
+          ),
           child: TextFormField(
             controller: controller,
             obscureText: obscureText,
@@ -241,12 +281,12 @@ class _AuthScreenState extends State<AuthScreen> {
             style: AppTextStyles.body,
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: AppTextStyles.body.copyWith(color: AppColors.textTertiary),
+              hintStyle: AppTextStyles.bodySm.copyWith(color: AppColors.textTertiary),
               border: InputBorder.none,
-              icon: Icon(icon, color: AppColors.accentPrimary, size: 20),
+              icon: Icon(icon, color: AppColors.accentPrimary.withOpacity(0.8), size: 18),
             ),
             validator: (value) {
-              if (value == null || value.isEmpty) return 'This field is required';
+              if (value == null || value.isEmpty) return 'Required';
               return null;
             },
           ),
@@ -257,18 +297,18 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Widget _buildSocialButton(String label, IconData icon) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: BoxDecoration(
         color: AppColors.glassBg,
         border: Border.all(color: AppColors.glassBorder),
-        borderRadius: BorderRadius.circular(AppBorderRadius.md),
+        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, color: Colors.white, size: 24),
           const SizedBox(width: AppSpacing.sm),
-          Text(label, style: AppTextStyles.labelLg),
+          Text(label, style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.w500)),
         ],
       ),
     );

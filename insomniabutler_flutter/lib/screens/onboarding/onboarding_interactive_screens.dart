@@ -3,7 +3,9 @@ import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/primary_button.dart';
 
-/// Onboarding Screen 4: Interactive Demo
+import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:ui';
+
 class DemoScreen extends StatefulWidget {
   final VoidCallback onNext;
 
@@ -16,10 +18,21 @@ class DemoScreen extends StatefulWidget {
 class _DemoScreenState extends State<DemoScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  bool _showResponse = false;
-  bool _showButtons = false;
-  bool _showClosure = false;
+  final List<Map<String, dynamic>> _messages = [];
+  bool _isTyping = false;
+  bool _showFinalCta = false;
   int _sleepReadiness = 45;
+
+  @override
+  void initState() {
+    super.initState();
+    // Start with the initial prompt
+    _messages.add({
+      'isUser': false,
+      'text': "What's worrying you tonight?",
+      'type': 'initial'
+    });
+  }
 
   @override
   void dispose() {
@@ -29,290 +42,318 @@ class _DemoScreenState extends State<DemoScreen> {
   }
 
   void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutCubic,
         );
       }
     });
   }
 
-  void _onSubmit() {
-    if (_controller.text.trim().isNotEmpty) {
-      FocusScope.of(context).unfocus();
-      setState(() {
-        _showResponse = true;
-      });
-      _scrollToBottom();
-      Future.delayed(const Duration(milliseconds: 800), () {
-        if (mounted) {
-          setState(() {
-            _showButtons = true;
-          });
-          _scrollToBottom();
-        }
-      });
-    }
-  }
+  void _handleSend() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
 
-  void _onAnswerNo() {
     setState(() {
-      _showClosure = true;
-      _sleepReadiness = 75;
+      _messages.add({'isUser': true, 'text': text});
+      _controller.clear();
+      _isTyping = true;
     });
     _scrollToBottom();
+
+    // Simulate Butler thinking
+    Future.delayed(const Duration(seconds: 1), () {
+      if (!mounted) return;
+      setState(() {
+        _isTyping = false;
+        _messages.add({
+          'isUser': false,
+          'text': "I hear you. That sounds exhausting.\n\nFirst - can you do anything about this right now, at 2 AM?",
+          'type': 'question'
+        });
+      });
+      _scrollToBottom();
+    });
+  }
+
+  void _handleOption(String option) {
+    setState(() {
+      _messages.last['isSelected'] = true; // Mark question as answered
+      _messages.add({'isUser': true, 'text': option});
+      _isTyping = true;
+    });
+    _scrollToBottom();
+
+    Future.delayed(const Duration(seconds: 1), () {
+      if (!mounted) return;
+      setState(() {
+        _isTyping = false;
+        _sleepReadiness = 75;
+        _showFinalCta = true;
+        _messages.add({
+          'isUser': false,
+          'text': "Exactly. Your 2 AM brain is trying to solve a problem your morning-self is better equipped for.\n\nLet's park this thought properly.",
+          'type': 'closure'
+        });
+      });
+      _scrollToBottom();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      behavior: HitTestBehavior.opaque,
       onTap: () => FocusScope.of(context).unfocus(),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.containerPadding),
-        child: Column(
+      behavior: HitTestBehavior.opaque,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Stack(
           children: [
-            const SizedBox(height: AppSpacing.xxl),
-            Text(
-              'Try it now',
-              style: AppTextStyles.h1,
-              textAlign: TextAlign.center,
+            // Deep Night Background
+            Positioned.fill(
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF080D20), Color(0xFF0F172A)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+              ),
             ),
-            const SizedBox(height: AppSpacing.lg),
-            Expanded(
-              child: SingleChildScrollView(
+
+            // Chat Messages
+            SafeArea(
+              bottom: false,
+              child: ListView.builder(
                 controller: _scrollController,
-                child: Column(
-                  children: [
-                    // User Input
-                    GlassCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "What's worrying you tonight?",
-                            style: AppTextStyles.body.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          TextField(
-                            controller: _controller,
-                            style: AppTextStyles.body,
-                            maxLines: 3,
-                            decoration: InputDecoration(
-                              hintText: "I'm worried about...",
-                              hintStyle: AppTextStyles.body.copyWith(
-                                color: AppColors.textTertiary,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                                borderSide: BorderSide(color: AppColors.glassBorder),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                                borderSide: BorderSide(color: AppColors.glassBorder),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                                borderSide: BorderSide(color: AppColors.accentPrimary),
-                              ),
-                            ),
-                            onSubmitted: (_) => _onSubmit(),
-                          ),
-                          if (!_showResponse) ...[
-                            const SizedBox(height: AppSpacing.md),
-                            SizedBox(
-                              width: double.infinity,
-                              child: PrimaryButton(
-                                text: 'Submit',
-                                onPressed: _onSubmit,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    // AI Response
-                    if (_showResponse) ...[
-                      const SizedBox(height: AppSpacing.lg),
-                      GlassCard(
-                        elevated: true,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(AppSpacing.sm),
-                                  decoration: BoxDecoration(
-                                    gradient: AppColors.gradientPrimary,
-                                    borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                                  ),
-                                  child: const Icon(
-                                    Icons.psychology,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.md),
-                                Text(
-                                  'AI Butler',
-                                  style: AppTextStyles.labelLg.copyWith(
-                                    color: AppColors.accentPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: AppSpacing.md),
-                            Text(
-                              "Let's work through this together.\n\nFirst - can you do anything about this right now, at 2 AM?",
-                              style: AppTextStyles.body,
-                            ),
-                            if (_showButtons) ...[
-                              const SizedBox(height: AppSpacing.lg),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: _onAnswerNo,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: AppSpacing.md,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          gradient: AppColors.gradientPrimary,
-                                          borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                                        ),
-                                        child: Text(
-                                          'No',
-                                          style: AppTextStyles.labelLg.copyWith(
-                                            color: Colors.white,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: AppSpacing.md),
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: _onAnswerNo,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: AppSpacing.md,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.glassBg,
-                                          border: Border.all(color: AppColors.glassBorder),
-                                          borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                                        ),
-                                        child: Text(
-                                          'Yes, but...',
-                                          style: AppTextStyles.labelLg,
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ],
-                    // Closure
-                    if (_showClosure) ...[
-                      const SizedBox(height: AppSpacing.lg),
-                      GlassCard(
-                        gradient: AppColors.gradientCalm,
-                        child: Column(
-                          children: [
-                            Text(
-                              "Exactly. Your 2 AM brain is trying to solve a problem your morning-self is much better equipped to handle.\n\nLet's park this thought properly.",
-                              style: AppTextStyles.body.copyWith(
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.lg),
-                            Container(
-                              padding: const EdgeInsets.all(AppSpacing.md),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Sleep Readiness',
-                                    style: AppTextStyles.labelLg.copyWith(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        '45%',
-                                        style: AppTextStyles.h4.copyWith(
-                                          color: Colors.white.withOpacity(0.6),
-                                          decoration: TextDecoration.lineThrough,
-                                        ),
-                                      ),
-                                      const SizedBox(width: AppSpacing.sm),
-                                      const Icon(
-                                        Icons.arrow_forward,
-                                        color: Colors.white,
-                                        size: 16,
-                                      ),
-                                      const SizedBox(width: AppSpacing.sm),
-                                      Text(
-                                        '75%',
-                                        style: AppTextStyles.h4.copyWith(
-                                          color: AppColors.accentSuccess,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(width: AppSpacing.xs),
-                                      const Icon(
-                                        Icons.check_circle,
-                                        color: AppColors.accentSuccess,
-                                        size: 20,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+                padding: const EdgeInsets.fromLTRB(20, 100, 20, 150),
+                itemCount: _messages.length + (_isTyping ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == _messages.length && _isTyping) {
+                    return _buildTypingIndicator();
+                  }
+
+                  final msg = _messages[index];
+                  if (msg['isUser']) {
+                    return _buildUserBubble(msg['text']);
+                  } else {
+                    return _buildButlerBubble(msg);
+                  }
+                },
               ),
             ),
-            const SizedBox(height: AppSpacing.lg),
-            if (_showClosure)
-              SizedBox(
-                width: double.infinity,
-                child: PrimaryButton(
-                  text: 'I want this',
-                  onPressed: widget.onNext,
-                  gradient: AppColors.gradientSuccess,
-                ),
+
+            // Bottom Input Area or CTA
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Column(
+                children: [
+                  if (_showFinalCta)
+                    _buildFinalCta()
+                  else if (_messages.length == 1 && !_isTyping)
+                    _buildInputArea()
+                  else if (_messages.last['type'] == 'question' && !_isTyping && _messages.last['isSelected'] != true)
+                    _buildOptionsArea()
+                  else
+                    const SizedBox(height: 100), // Padding for dots
+                  const SizedBox(height: 60), // Space for dots Overlay
+                ],
               ),
-            const SizedBox(height: AppSpacing.lg),
+            ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildUserBubble(String text) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20, left: 40),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.accentCopper.withOpacity(0.15),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+          border: Border.all(color: AppColors.accentCopper.withOpacity(0.3)),
+        ),
+        child: Text(text, style: AppTextStyles.body),
+      ),
+    ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.1, end: 0);
+  }
+
+  Widget _buildButlerBubble(Map<String, dynamic> msg) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(bottom: 24, right: 40),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.glassBgElevated,
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(20),
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+              ),
+              border: Border.all(color: AppColors.glassBorder),
+            ),
+            child: Text(
+              msg['text'],
+              style: AppTextStyles.body.copyWith(height: 1.5),
+            ),
+          ),
+          if (msg['type'] == 'closure') _buildSleepStats(),
+        ],
+      ),
+    ).animate().fadeIn(duration: 500.ms).slideX(begin: -0.1, end: 0);
+  }
+
+  Widget _buildSleepStats() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 24, right: 0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.accentSuccess.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.accentSuccess.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          const Icon(Icons.bolt, color: AppColors.accentSuccess, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              "Sleep Readiness increased: 45% → 75%",
+              style: AppTextStyles.label.copyWith(
+                color: AppColors.accentSuccess,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const Icon(Icons.check_circle, color: AppColors.accentSuccess, size: 18),
+        ],
+      ),
+    ).animate().scale(delay: 600.ms);
+  }
+
+  Widget _buildTypingIndicator() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.glassBg,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text("...", style: AppTextStyles.labelLg),
+      ),
+    ).animate(onPlay: (controller) => controller.repeat()).shimmer(duration: 1.seconds);
+  }
+
+  Widget _buildInputArea() {
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: 20),
+          decoration: BoxDecoration(
+            color: AppColors.glassBg,
+            border: const Border(top: BorderSide(color: AppColors.glassBorder)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  style: AppTextStyles.body,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    hintText: "E.g. Work deadline tomorrow...",
+                    hintStyle: AppTextStyles.bodySm.copyWith(color: AppColors.textTertiary),
+                    border: InputBorder.none,
+                  ),
+                  onSubmitted: (_) => _handleSend(),
+                ),
+              ),
+              IconButton(
+                onPressed: _handleSend,
+                icon: const Icon(Icons.send_rounded, color: AppColors.accentCopper),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).animate().slideY(begin: 1, end: 0);
+  }
+
+  Widget _buildOptionsArea() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: 20),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildOptionButton("No", () => _handleOption("No"), true),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _buildOptionButton("Yes, but...", () => _handleOption("Yes, but..."), false),
+          ),
+        ],
+      ),
+    ).animate().fadeIn().slideY(begin: 0.2, end: 0);
+  }
+
+  Widget _buildOptionButton(String text, VoidCallback onTap, bool primary) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          gradient: primary ? AppColors.gradientPrimary : null,
+          color: primary ? null : AppColors.glassBg,
+          borderRadius: BorderRadius.circular(12),
+          border: primary ? null : Border.all(color: AppColors.glassBorder),
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.labelLg.copyWith(
+            color: primary ? Colors.white : AppColors.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFinalCta() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: 20),
+      child: PrimaryButton(
+        text: 'I want this',
+        onPressed: widget.onNext,
+        gradient: AppColors.gradientSuccess,
+      ),
+    ).animate().fadeIn().scale();
+  }
 }
+
 
 /// Onboarding Screen 5: Permissions
 class PermissionsScreen extends StatefulWidget {
@@ -334,110 +375,144 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: IntrinsicHeight(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.containerPadding),
-                child: Column(
-                  children: [
-                    const Spacer(),
-                    // Icon
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      decoration: BoxDecoration(
-                        gradient: AppColors.gradientPrimary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.shield_outlined,
-                        size: 64,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                    Text(
-                      'We respect your privacy',
-                      style: AppTextStyles.h1,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      'To help you sleep better, we need:',
-                      style: AppTextStyles.body.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                    // Permissions List
-                    _buildPermissionItem(
-                      '🔔',
-                      'Notifications',
-                      'Gentle reminders for sleep window',
-                      _notificationsEnabled,
-                      (value) => setState(() => _notificationsEnabled = value),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    // Privacy Statement
-                    GlassCard(
-                      child: Row(
-                        children: [
-                          const Text('🔒', style: TextStyle(fontSize: 32)),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Your thoughts are encrypted',
-                                  style: AppTextStyles.labelLg.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: AppSpacing.xs),
-                                Text(
-                                  '✓ You control all data. ✓ No ads. Ever.',
-                                  style: AppTextStyles.bodySm.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    // CTA Buttons
-                    SizedBox(
-                      width: double.infinity,
-                      child: PrimaryButton(
-                        text: 'Grant permissions',
-                        onPressed: widget.onNext,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    TextButton(
-                      onPressed: widget.onSkip,
-                      child: Text(
-                        'Skip for now',
-                        style: AppTextStyles.labelLg.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                  ],
+    return Container(
+      color: const Color(0xFF080D20), // Fallback
+      child: Stack(
+        children: [
+          // Deep Night Background
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF080D20), Color(0xFF0F172A)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
               ),
             ),
           ),
-        );
-      }
+
+          // Content
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+              child: Column(
+                children: [
+                  const Spacer(),
+                  
+                  // Icon/Header Section
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.xl),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentPrimary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.accentPrimary.withOpacity(0.2)),
+                    ),
+                    child: const Icon(
+                      Icons.security_rounded,
+                      size: 64,
+                      color: AppColors.accentPrimary,
+                    ),
+                  ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
+                  
+                  const SizedBox(height: AppSpacing.xxl),
+                  
+                  Text(
+                    'We respect your privacy',
+                    style: AppTextStyles.h2,
+                    textAlign: TextAlign.center,
+                  ).animate().fadeIn(delay: 200.ms),
+                  
+                  const SizedBox(height: AppSpacing.md),
+                  
+                  Text(
+                    'To help you sleep better, we need your permission to send gentle reminders.',
+                    style: AppTextStyles.body.copyWith(
+                      color: AppColors.textSecondary,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ).animate().fadeIn(delay: 400.ms),
+                  
+                  const SizedBox(height: AppSpacing.xxl),
+                  
+                  // Permission Item
+                  _buildPermissionItem(
+                    '🔔',
+                    'Notifications',
+                    'Gentle reminders for your sleep window.',
+                    _notificationsEnabled,
+                    (value) => setState(() => _notificationsEnabled = value),
+                  ).animate().slideY(begin: 0.2, end: 0, delay: 600.ms).fadeIn(),
+                  
+                  const SizedBox(height: AppSpacing.lg),
+                  
+                  // Privacy Statement
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: AppColors.glassBg,
+                      borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+                      border: Border.all(color: AppColors.glassBorder),
+                    ),
+                    child: Row(
+                      children: [
+                        const Text('🔒', style: TextStyle(fontSize: 24)),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Your thoughts are encrypted',
+                                style: AppTextStyles.labelLg.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              Text(
+                                '✓ You control all data. ✓ No ads.',
+                                style: AppTextStyles.bodySm.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ).animate().slideY(begin: 0.2, end: 0, delay: 800.ms).fadeIn(),
+                  
+                  const Spacer(),
+                  
+                  // CTA Section
+                  SizedBox(
+                    width: double.infinity,
+                    child: PrimaryButton(
+                      text: 'Grant permissions',
+                      onPressed: widget.onNext,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: AppSpacing.md),
+                  
+                  TextButton(
+                    onPressed: widget.onSkip,
+                    child: Text(
+                      'Skip for now',
+                      style: AppTextStyles.labelLg.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 100), // Space for indicators
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -448,7 +523,13 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     bool value,
     ValueChanged<bool> onChanged,
   ) {
-    return GlassCard(
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.glassBgElevated,
+        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        border: Border.all(color: AppColors.glassBorder),
+      ),
       child: Row(
         children: [
           Text(emoji, style: const TextStyle(fontSize: 32)),
@@ -477,9 +558,11 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
             value: value,
             onChanged: onChanged,
             activeColor: AppColors.accentPrimary,
+            activeTrackColor: AppColors.accentPrimary.withOpacity(0.3),
           ),
         ],
       ),
     );
   }
 }
+

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
-import '../../widgets/glass_card.dart';
 import '../../widgets/primary_button.dart';
 
 /// Onboarding Screen 6: Setup/Personalization
@@ -61,101 +61,92 @@ class _SetupScreenState extends State<SetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.containerPadding),
-      child: Column(
+    return Container(
+      color: const Color(0xFF080D20), // Fallback
+      child: Stack(
         children: [
-          const SizedBox(height: AppSpacing.xxl),
-          Text(
-            'Almost there',
-            style: AppTextStyles.h1,
-            textAlign: TextAlign.center,
+          // Deep Night Background
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF080D20), Color(0xFF0F172A)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+            ),
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Expanded(
-            child: SingleChildScrollView(
+
+          // Content
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Sleep Goals
+                  const SizedBox(height: AppSpacing.xxl),
                   Text(
-                    'Choose your sleep goal:',
-                    style: AppTextStyles.bodyLg.copyWith(
+                    'Almost there',
+                    style: AppTextStyles.h2,
+                    textAlign: TextAlign.center,
+                  ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, end: 0),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Personalize your dashboard for the best results.',
+                    style: AppTextStyles.body.copyWith(
                       color: AppColors.textSecondary,
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  ..._goals.map((goal) => _buildGoalCard(goal)),
-                  const SizedBox(height: AppSpacing.xl),
-                  // Bedtime Selection
-                  Text(
-                    'What time do you usually go to bed?',
-                    style: AppTextStyles.bodyLg.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  GestureDetector(
-                    onTap: _selectBedtime,
-                    child: GlassCard(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    textAlign: TextAlign.center,
+                  ).animate().fadeIn(delay: 200.ms),
+                  const SizedBox(height: AppSpacing.xxl),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(AppSpacing.md),
-                                decoration: BoxDecoration(
-                                  gradient: AppColors.gradientPrimary,
-                                  borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                                ),
-                                child: const Icon(
-                                  Icons.bedtime,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.md),
-                              Text(
-                                'Bedtime',
-                                style: AppTextStyles.body,
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                _bedtime.format(context),
-                                style: AppTextStyles.h3.copyWith(
-                                  color: AppColors.accentPrimary,
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.sm),
-                              const Icon(
-                                Icons.arrow_forward_ios,
-                                color: AppColors.textTertiary,
-                                size: 16,
-                              ),
-                            ],
-                          ),
+                          Text(
+                            'Your sleep goal:',
+                            style: AppTextStyles.labelLg.copyWith(color: AppColors.textSecondary),
+                          ).animate().fadeIn(delay: 300.ms),
+                          const SizedBox(height: AppSpacing.md),
+                          ..._goals.asMap().entries.map((entry) {
+                            return _buildGoalCard(entry.value)
+                                .animate()
+                                .fadeIn(delay: (400 + (entry.key * 100)).ms)
+                                .slideX(begin: 0.1, end: 0);
+                          }),
+                          const SizedBox(height: AppSpacing.xl),
+                          Text(
+                            'Usual bedtime:',
+                            style: AppTextStyles.labelLg.copyWith(color: AppColors.textSecondary),
+                          ).animate().fadeIn(delay: 800.ms),
+                          const SizedBox(height: AppSpacing.md),
+                          _buildBedtimeSelector()
+                              .animate()
+                              .fadeIn(delay: 900.ms)
+                              .slideY(begin: 0.2, end: 0),
+                          const SizedBox(height: AppSpacing.xxl),
                         ],
                       ),
                     ),
                   ),
+                  const SizedBox(height: AppSpacing.lg),
+                  // CTA Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: PrimaryButton(
+                      text: 'Start sleeping better',
+                      onPressed: widget.onComplete,
+                      gradient: AppColors.gradientSuccess,
+                    ),
+                  ).animate().fadeIn(delay: 1100.ms).scale(curve: Curves.easeOutBack),
+                  const SizedBox(height: 100), // Space for indicators
                 ],
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
-          // CTA Button
-          SizedBox(
-            width: double.infinity,
-            child: PrimaryButton(
-              text: 'Start sleeping better',
-              onPressed: widget.onComplete,
-              gradient: AppColors.gradientSuccess,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
         ],
       ),
     );
@@ -167,16 +158,26 @@ class _SetupScreenState extends State<SetupScreen> {
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: GestureDetector(
         onTap: () => _toggleGoal(goal['text']!),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 16),
           decoration: BoxDecoration(
             gradient: isSelected ? AppColors.gradientPrimary : null,
-            color: isSelected ? null : AppColors.glassBg,
+            color: isSelected ? null : AppColors.glassBgElevated,
+            borderRadius: BorderRadius.circular(AppBorderRadius.lg),
             border: Border.all(
               color: isSelected ? AppColors.accentPrimary : AppColors.glassBorder,
               width: isSelected ? 2 : 1,
             ),
-            borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppColors.accentPrimary.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    )
+                  ]
+                : [],
           ),
           child: Row(
             children: [
@@ -198,11 +199,76 @@ class _SetupScreenState extends State<SetupScreen> {
                 const Icon(
                   Icons.check_circle,
                   color: Colors.white,
-                ),
+                  size: 20,
+                ).animate().scale(),
             ],
           ),
         ),
       ),
     );
   }
+
+  Widget _buildBedtimeSelector() {
+    return GestureDetector(
+      onTap: _selectBedtime,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: AppColors.glassBg,
+          borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+          border: Border.all(color: AppColors.glassBorder),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentPrimary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.bedtime_rounded,
+                      color: AppColors.accentPrimary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Text(
+                      'Bedtime reminder',
+                      style: AppTextStyles.body,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _bedtime.format(context),
+                  style: AppTextStyles.h4.copyWith(
+                    color: AppColors.accentPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: AppColors.textTertiary,
+                  size: 14,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
+

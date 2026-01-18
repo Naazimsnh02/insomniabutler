@@ -67,9 +67,9 @@ flutter:
   assets:
     - assets/config.json
     - assets/images/
-    - assets/onboarding_welcome.png
-    - assets/onboarding_problem.png
-    - assets/onboarding_solution.png
+    - assets/onboarding/Welcome.png
+    - assets/onboarding/Problem.png
+    - assets/onboarding/Solution.png
 dependency_overrides:
   flutter_secure_storage: ^10.0.0
 
