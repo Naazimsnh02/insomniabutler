@@ -2,97 +2,105 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 
 /// Comprehensive Design System for Insomnia Butler
-/// Glassmorphic Night-Time Companion
+/// Deep Blue + Warm Copper Glassmorphic UI
+/// Optimized for late-night, 2 AM usage
 
 class AppColors {
-  // Background Gradients
+  // --- Backgrounds ---
+  static const Color backgroundDeep = Color(0xFF0B1C2D); // Deep Ink Blue
+  static const Color surfaceBlueBlack = Color(0xFF10263A); // Secondary Surface
+
+  // --- Background Gradients (Subtle Night Blues) ---
   static const bgPrimary = LinearGradient(
-    colors: [Color(0xFF0A0E27), Color(0xFF1A1E3E)],
+    colors: [Color(0xFF0B1C2D), Color(0xFF081421)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
 
   static const bgSecondary = LinearGradient(
-    colors: [Color(0xFF1E2347), Color(0xFF2A1E4F)],
+    colors: [Color(0xFF10263A), Color(0xFF0B1C2D)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const bgCard = LinearGradient(
-    colors: [Color(0x992A1E4F), Color(0x661E2347)],
+    colors: [Color(0xCC10263A), Color(0x990B1C2D)], // Translucent blue-black
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  // Accent Colors
-  static const accentPrimary = Color(0xFFA78BFA); // Soft Purple
-  static const accentSecondary = Color(0xFFC084FC); // Vibrant Purple
-  static const accentTertiary = Color(0xFF60A5FA); // Sky Blue
-  static const accentSuccess = Color(0xFF34D399); // Mint Green
-  static const accentWarning = Color(0xFFFBBF24); // Warm Gold
-  static const accentError = Color(0xFFEF4444); // Red
+  // --- Accent Colors ---
+  static const accentCopper = Color(0xFFC38E5C); // Primary Accent
+  static const accentAmber = Color(0xFFD9A76F); // Warm Lamp Glow
+  static const accentSkyBlue = Color(0xFF5FA8D3); // Secondary Accent
+  
+  static const accentSuccess = Color(0xFF4A7C59); // Muted Calm Green
+  static const accentWarning = Color(0xFFB8860B); // Muted Dark Gold/Amber
+  static const accentError = Color(0xFF9B4444); // Softened Red
 
-  // Glass Effects
-  static const glassBg = Color(0x14FFFFFF); // rgba(255, 255, 255, 0.08)
-  static const glassBgElevated = Color(0x1FFFFFFF); // rgba(255, 255, 255, 0.12)
-  static const glassBorder = Color(0x1FFFFFFF); // rgba(255, 255, 255, 0.12)
+  // --- Glass Effects (Translucent blue-black, reduced brightness) ---
+  static const glassBg = Color(0x1A10263A); // rgba(16, 38, 58, 0.1)
+  static const glassBgElevated = Color(0x2610263A); // rgba(16, 38, 58, 0.15)
+  static const glassBorder = Color(0x265FA8D3); // Subtle Sky Blue border (15% opacity)
 
-  // Text Colors
-  static const textPrimary = Color(0xF2FFFFFF); // rgba(255, 255, 255, 0.95)
-  static const textSecondary = Color(0xA6FFFFFF); // rgba(255, 255, 255, 0.65)
-  static const textTertiary = Color(0x73FFFFFF); // rgba(255, 255, 255, 0.45)
-  static const textDisabled = Color(0x40FFFFFF); // rgba(255, 255, 255, 0.25)
+  // --- Text Colors (Warm Off-Whites & Desaturated Calm Tones) ---
+  static const textPrimary = Color(0xFFF5F5F0); // Warm off-white
+  static const textSecondary = Color(0xFF94A3B8); // Desaturated Blue-Grey
+  static const textTertiary = Color(0xFF64748B); // Slate Blue-Grey
+  static const textDisabled = Color(0xFF334155); // Dark Slate
 
-  // Semantic Colors
-  static const sleepReadyLow = Color(0xFFEF4444); // Red
-  static const sleepReadyMid = Color(0xFFFBBF24); // Gold
-  static const sleepReadyHigh = Color(0xFF34D399); // Green
+  // --- Hero & UI Gradients ---
+  static const gradientPrimary = LinearGradient(
+    colors: [accentCopper, accentAmber],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
-  // Hero Gradients
   static const gradientHero = LinearGradient(
-    colors: [Color(0xFF667EEA), Color(0xFF764BA2), Color(0xFFF093FB)],
+    colors: [Color(0xFF0B1C2D), Color(0xFF1E3A8A)], // Deep Night Blue to Navy
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const gradientThought = LinearGradient(
-    colors: [Color(0xFFA78BFA), Color(0xFFEC4899)],
+    colors: [accentCopper, Color(0xFF8E5C3C)], // Copper to Deep Bronze
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const gradientCalm = LinearGradient(
-    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+    colors: [accentSkyBlue, Color(0xFF2E5B75)], // Sky Blue to Deep Teal
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const gradientSuccess = LinearGradient(
-    colors: [Color(0xFF10B981), Color(0xFF3B82F6)],
+    colors: [accentSuccess, Color(0xFF2D4C38)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  static const gradientPrimary = LinearGradient(
-    colors: [accentPrimary, accentSecondary],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  // Shimmer Effect
+  // --- Shimmer Effect (Blue-toned) ---
   static const gradientShimmer = LinearGradient(
     colors: [
-      Color(0x00FFFFFF),
-      Color(0x1AFFFFFF),
-      Color(0x00FFFFFF),
+      Color(0x005FA8D3),
+      Color(0x1A5FA8D3),
+      Color(0x005FA8D3),
     ],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
+
+  // --- Legacy Mappings (for backward compatibility) ---
+  static const accentPrimary = accentCopper;
+  static const accentSecondary = accentSkyBlue;
+  static const accentTertiary = accentSkyBlue; // Map to secondary accent
+  static const sleepReadyLow = accentError;
+  static const sleepReadyMid = accentWarning;
+  static const sleepReadyHigh = accentSuccess;
 }
 
 class AppTextStyles {
-  // Display
   static const displayXl = TextStyle(
     fontSize: 56,
     fontWeight: FontWeight.w700,
@@ -117,7 +125,6 @@ class AppTextStyles {
     color: AppColors.textPrimary,
   );
 
-  // Headings
   static const h1 = TextStyle(
     fontSize: 32,
     fontWeight: FontWeight.w600,
@@ -148,7 +155,6 @@ class AppTextStyles {
     color: AppColors.textPrimary,
   );
 
-  // Body
   static const bodyLg = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w400,
@@ -170,7 +176,6 @@ class AppTextStyles {
     color: AppColors.textPrimary,
   );
 
-  // Labels
   static const labelLg = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w500,
@@ -219,7 +224,7 @@ class AppBorderRadius {
 class AppShadows {
   static const glassShadow = [
     BoxShadow(
-      color: Color(0x4D000000), // rgba(0, 0, 0, 0.3)
+      color: Color(0x66040C14), // Deep Navy Shadow
       blurRadius: 32,
       offset: Offset(0, 8),
     ),
@@ -227,7 +232,7 @@ class AppShadows {
 
   static const cardShadow = [
     BoxShadow(
-      color: Color(0x26000000), // rgba(0, 0, 0, 0.15)
+      color: Color(0x40040C14), // Deep Navy Shadow
       blurRadius: 24,
       offset: Offset(0, 4),
     ),
@@ -235,7 +240,7 @@ class AppShadows {
 
   static const buttonShadow = [
     BoxShadow(
-      color: Color(0x66A78BFA), // rgba(167, 139, 250, 0.4)
+      color: Color(0x33C38E5C), // Subtle copper glow (20% opacity)
       blurRadius: 24,
       offset: Offset(0, 4),
     ),
