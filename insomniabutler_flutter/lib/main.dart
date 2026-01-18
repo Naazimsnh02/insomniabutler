@@ -6,6 +6,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'screens/home_screen.dart';
+import 'screens/new_home_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'core/theme.dart';
 
@@ -123,7 +124,7 @@ class _AppInitializerState extends State<AppInitializer> {
       );
     }
 
-    return const HomeScreen(title: 'Insomnia Butler');
+    return const NewHomeScreen();
   }
 }
 
