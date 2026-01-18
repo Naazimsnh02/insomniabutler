@@ -13,6 +13,7 @@ import '../utils/haptic_helper.dart';
 import 'sleep_tracking/sleep_timer_screen.dart';
 import 'sleep_tracking/manual_log_screen.dart';
 import 'sleep_tracking/sleep_history_screen.dart';
+import '../services/sleep_timer_service.dart';
 
 /// Home Dashboard - Main app screen
 /// Redesigned with premium high-fidelity UI inspired by modern sleep trackers
@@ -24,6 +25,7 @@ class NewHomeScreen extends StatefulWidget {
 }
 
 class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProviderStateMixin {
+  final _timerService = SleepTimerService();
   int _selectedNavIndex = 0;
   DateTime _selectedDate = DateTime.now();
   String? _selectedMood;
@@ -56,6 +58,11 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
     super.initState();
     _loadUserData();
     _loadInsights();
+    
+    // Listen to timer changes
+    _timerService.onTick.listen((_) {
+      if (mounted) setState(() {});
+    });
   }
   
   Future<void> _loadUserData() async {
@@ -236,6 +243,10 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                       const SizedBox(height: AppSpacing.xl),
                       _buildStartTrackingButton(),
                       const SizedBox(height: AppSpacing.xl),
+                      if (_timerService.isRunning) ...[
+                        _buildActiveTimerCard(),
+                        const SizedBox(height: AppSpacing.xl),
+                      ],
                       _buildMoodTracker(),
                       const SizedBox(height: AppSpacing.xl),
                       _buildImpactSection(),
@@ -823,6 +834,53 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
               fontSize: 9,
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActiveTimerCard() {
+    return GlassCard(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const SleepTimerScreen()),
+        );
+      },
+      gradient: LinearGradient(
+        colors: AppColors.gradientSuccess.colors.map((c) => c.withAlpha(25)).toList(),
+      ),
+      child: Row(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.accentSuccess.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+              ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(
+                duration: 2.seconds,
+                begin: const Offset(1, 1),
+                end: const Offset(1.2, 1.2),
+              ),
+              const Icon(Icons.nightlight_round, color: AppColors.accentSuccess),
+            ],
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Sleep Tracking Active', style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.bold)),
+                Text('Tap to view your silent timer', style: AppTextStyles.caption),
+              ],
+            ),
+          ),
+          const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textTertiary),
         ],
       ),
     );

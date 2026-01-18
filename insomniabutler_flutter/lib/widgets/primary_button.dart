@@ -4,7 +4,7 @@ import '../core/theme.dart';
 /// Primary Gradient Button Component
 class PrimaryButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool isLoading;
   final IconData? icon;
   final Gradient? gradient;

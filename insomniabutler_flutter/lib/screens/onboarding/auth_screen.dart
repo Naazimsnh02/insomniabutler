@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../widgets/primary_button.dart';
 import '../../main.dart';
+import '../../services/user_service.dart';
 
 /// Onboarding Screen 7: Registration/Login
 class AuthScreen extends StatefulWidget {
@@ -36,6 +37,7 @@ class _AuthScreenState extends State<AuthScreen> {
         );
         
         if (user != null) {
+          await UserService.setCurrentUser(user);
           widget.onComplete();
         } else {
           _showError('Email already exists or registration failed.');
@@ -44,6 +46,7 @@ class _AuthScreenState extends State<AuthScreen> {
         final user = await client.auth.login(_emailController.text.trim());
         
         if (user != null) {
+          await UserService.setCurrentUser(user);
           widget.onComplete();
         } else {
           _showError('Invalid email or user not found.');

@@ -5,6 +5,9 @@ import 'dart:async';
 import '../../core/theme.dart';
 import '../../widgets/primary_button.dart';
 import '../../utils/haptic_helper.dart';
+import '../../main.dart';
+import '../../services/user_service.dart';
+import '../../services/sleep_timer_service.dart';
 
 class SleepTimerScreen extends StatefulWidget {
   const SleepTimerScreen({Key? key}) : super(key: key);
@@ -14,25 +17,24 @@ class SleepTimerScreen extends StatefulWidget {
 }
 
 class _SleepTimerScreenState extends State<SleepTimerScreen> {
-  DateTime _startTime = DateTime.now();
-  late Timer _timer;
+  final _timerService = SleepTimerService();
   Duration _elapsed = Duration.zero;
+  late StreamSubscription _tickSubscription;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _elapsed = _timerService.currentDuration;
+    _tickSubscription = _timerService.onTick.listen((duration) {
       if (mounted) {
-        setState(() {
-          _elapsed = DateTime.now().difference(_startTime);
-        });
+        setState(() => _elapsed = duration);
       }
     });
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _tickSubscription.cancel();
     super.dispose();
   }
 
@@ -129,14 +131,14 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
                     .moveY(begin: 0, end: -10, duration: 2.seconds),
                 const SizedBox(height: 20),
                 Text(
-                  _formatDuration(_elapsed),
+                  _timerService.isRunning ? _formatDuration(_elapsed) : "00:00:00",
                   style: AppTextStyles.displayLg.copyWith(
                     fontFeatures: [const FontFeature.tabularFigures()],
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  'Elapsed Time',
+                  _timerService.isRunning ? 'Elapsed Time' : 'Ready to Sleep',
                   style: AppTextStyles.label.copyWith(color: AppColors.textSecondary),
                 ),
               ],
@@ -145,7 +147,9 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
         ),
         const SizedBox(height: 60),
         Text(
-          'Rest well. Your phone is silent and tracking.',
+          _timerService.isRunning 
+              ? 'Rest well. Your sleep is being tracked.'
+              : 'Tap start when you\'re ready to sleep.',
           style: AppTextStyles.bodyLg.copyWith(color: AppColors.textSecondary),
           textAlign: TextAlign.center,
         ).animate().fadeIn(duration: 1.seconds),
@@ -156,15 +160,24 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
   Widget _buildActionButtons() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-      child: PrimaryButton(
-        text: 'Wake Up & Finish',
-        onPressed: () async {
-          await HapticHelper.mediumImpact();
-          _showWakeUpSheet();
-        },
-        gradient: AppColors.gradientSuccess,
-        icon: Icons.sunny,
-      ),
+      child: _timerService.isRunning 
+        ? PrimaryButton(
+            text: 'Wake Up & Finish',
+            onPressed: () async {
+              await HapticHelper.mediumImpact();
+              _showWakeUpSheet();
+            },
+            gradient: AppColors.gradientSuccess,
+            icon: Icons.sunny,
+          )
+        : PrimaryButton(
+            text: 'Start Night Timer',
+            onPressed: () {
+              HapticHelper.mediumImpact();
+              setState(() => _timerService.start());
+            },
+            icon: Icons.play_arrow_rounded,
+          ),
     );
   }
 
@@ -187,8 +200,43 @@ class _WakeUpFeedbackSheet extends StatefulWidget {
 }
 
 class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
+  final _timerService = SleepTimerService();
   int _quality = 3;
   String _mood = '😊';
+  bool _isSaving = false;
+
+  Future<void> _saveSession() async {
+    setState(() => _isSaving = true);
+    HapticHelper.lightImpact();
+
+    try {
+      final userId = await UserService.getCurrentUserId();
+      if (userId == null) throw Exception('User not logged in');
+
+      // Use the current time as wake time, and subtract duration for startTime
+      final wakeTime = DateTime.now();
+      final bedTime = wakeTime.subtract(widget.duration);
+
+      await client.sleepSession.logManualSession(
+        userId,
+        bedTime,
+        wakeTime,
+        _quality,
+      );
+
+      HapticHelper.success();
+      if (mounted) {
+        _timerService.reset();
+        Navigator.pop(context); // Close sheet
+        Navigator.pop(context); // Close timer
+      }
+    } catch (e) {
+      debugPrint('Error saving timer session: $e');
+      HapticHelper.error();
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -250,12 +298,9 @@ class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
           ),
           const SizedBox(height: AppSpacing.xl),
           PrimaryButton(
-            text: 'Save Session',
-            onPressed: () {
-              HapticHelper.success();
-              Navigator.pop(context); // Close sheet
-              Navigator.pop(context); // Close timer
-            },
+            text: _isSaving ? 'Saving...' : 'Save Session',
+            isLoading: _isSaving,
+            onPressed: () => _saveSession(),
           ),
           const SizedBox(height: AppSpacing.xl),
         ],

@@ -4,6 +4,9 @@ import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../utils/haptic_helper.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../main.dart';
+import '../../services/user_service.dart';
+import 'package:insomniabutler_client/insomniabutler_client.dart';
 import 'manual_log_screen.dart';
 
 class SleepHistoryScreen extends StatefulWidget {
@@ -14,21 +17,31 @@ class SleepHistoryScreen extends StatefulWidget {
 }
 
 class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
-  // Mock data for demo - will be replaced with real backend calls
-  final List<Map<String, dynamic>> _sessions = [
-    {
-      'sessionDate': DateTime.now().subtract(const Duration(days: 1)),
-      'bedTime': DateTime.now().subtract(const Duration(days: 1, hours: 8)),
-      'wakeTime': DateTime.now().subtract(const Duration(days: 1)),
-      'sleepQuality': 4,
-    },
-    {
-      'sessionDate': DateTime.now().subtract(const Duration(days: 2)),
-      'bedTime': DateTime.now().subtract(const Duration(days: 2, hours: 7)),
-      'wakeTime': DateTime.now().subtract(const Duration(days: 2)),
-      'sleepQuality': 3,
-    },
-  ];
+  List<SleepSession> _sessions = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    setState(() => _isLoading = true);
+    try {
+      final userId = await UserService.getCurrentUserId();
+      if (userId == null) throw Exception('User not logged in');
+      
+      final sessions = await client.sleepSession.getUserSessions(userId, 50);
+      setState(() {
+        _sessions = sessions;
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Error loading history: $e');
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,20 +53,33 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             children: [
               _buildTopBar(),
               Expanded(
-                child: _sessions.isEmpty 
-                    ? _buildEmptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(AppSpacing.containerPadding),
-                        itemCount: _sessions.length,
-                        itemBuilder: (context, index) => _buildSessionCard(_sessions[index]),
-                      ),
+                child: _isLoading 
+                    ? const Center(child: CircularProgressIndicator(color: AppColors.accentPrimary))
+                    : _sessions.isEmpty 
+                        ? _buildEmptyState()
+                        : RefreshIndicator(
+                            onRefresh: _loadHistory,
+                            color: AppColors.accentPrimary,
+                            backgroundColor: AppColors.backgroundDeep,
+                            child: ListView.builder(
+                                padding: const EdgeInsets.all(AppSpacing.containerPadding),
+                                itemCount: _sessions.length,
+                                itemBuilder: (context, index) => _buildSessionCard(_sessions[index]),
+                              ),
+                          ),
               ),
             ],
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ManualLogScreen())),
+        onPressed: () async {
+          final result = await Navigator.push(
+            context, 
+            MaterialPageRoute(builder: (_) => const ManualLogScreen())
+          );
+          if (result == true) _loadHistory();
+        },
         backgroundColor: AppColors.accentPrimary,
         child: const Icon(Icons.add_rounded, color: Colors.white),
       ).animate().scale(delay: 400.ms, curve: Curves.easeOutBack),
@@ -90,34 +116,48 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     );
   }
 
-  Widget _buildSessionCard(Map<String, dynamic> session) {
-    final dateStr = DateFormat('EEE, MMM d').format(session['sessionDate']);
-    final duration = session['wakeTime'].difference(session['bedTime']);
+  Widget _buildSessionCard(SleepSession session) {
+    final dateStr = DateFormat('EEE, MMM d').format(session.sessionDate);
+    
+    // Safety checks for wakeTime
+    final wakeTime = session.wakeTime ?? DateTime.now();
+    final duration = wakeTime.difference(session.bedTime);
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
+    final quality = session.sleepQuality ?? 3;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: GlassCard(
-        onTap: () {
+        onTap: () async {
           HapticHelper.lightImpact();
-          Navigator.push(
+          // Prepare data for editing
+          final editData = {
+            'id': session.id,
+            'sessionDate': session.sessionDate,
+            'bedTime': session.bedTime,
+            'wakeTime': wakeTime,
+            'sleepQuality': quality,
+          };
+          
+          final result = await Navigator.push(
             context, 
-            MaterialPageRoute(builder: (_) => ManualLogScreen(initialData: session))
+            MaterialPageRoute(builder: (_) => ManualLogScreen(initialData: editData))
           );
+          if (result == true) _loadHistory();
         },
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _getQualityColor(session['sleepQuality']).withOpacity(0.1),
+                color: _getQualityColor(quality).withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Text(
-                '${session['sleepQuality']}',
+                '$quality',
                 style: AppTextStyles.h4.copyWith(
-                  color: _getQualityColor(session['sleepQuality']),
+                  color: _getQualityColor(quality),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -129,7 +169,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                 children: [
                   Text(dateStr, style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.bold)),
                   Text(
-                    '${DateFormat.jm().format(session['bedTime'])} - ${DateFormat.jm().format(session['wakeTime'])}',
+                    '${DateFormat.jm().format(session.bedTime)} - ${DateFormat.jm().format(wakeTime)}',
                     style: AppTextStyles.caption,
                   ),
                 ],

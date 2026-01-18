@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:insomniabutler_client/insomniabutler_client.dart';
 import '../main.dart';
@@ -17,12 +18,14 @@ class UserService {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt(_userIdKey);
     
+    // If we have no ID, we can't fetch from server by ID
     if (userId == null) return null;
     
     try {
       _currentUser = await client.auth.getUserById(userId);
       return _currentUser;
     } catch (e) {
+      debugPrint('Error fetching user: $e');
       return null;
     }
   }
@@ -30,7 +33,21 @@ class UserService {
   /// Get current user ID (faster than getting full user)
   static Future<int?> getCurrentUserId() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_userIdKey);
+    int? userId = prefs.getInt(_userIdKey);
+    
+    // If not in prefs, try to get from session or server
+    if (userId == null) {
+      final user = await getCurrentUser();
+      if (user != null) {
+        userId = user.id;
+        // Cache it for next time
+        if (userId != null) {
+          await prefs.setInt(_userIdKey, userId);
+        }
+      }
+    }
+    
+    return userId;
   }
   
   /// Set the current user after login/registration

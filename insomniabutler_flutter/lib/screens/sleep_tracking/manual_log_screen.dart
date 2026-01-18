@@ -4,6 +4,9 @@ import '../../core/theme.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/glass_card.dart';
 import '../../utils/haptic_helper.dart';
+import '../../main.dart';
+import '../../services/user_service.dart';
+import 'package:insomniabutler_client/insomniabutler_client.dart';
 
 class ManualLogScreen extends StatefulWidget {
   final Map<String, dynamic>? initialData; // Pass if editing
@@ -19,6 +22,7 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
   late TimeOfDay _bedtime;
   late TimeOfDay _waketime;
   int _quality = 3;
+  bool _isLoading = false;
   
   @override
   void initState() {
@@ -247,13 +251,71 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.containerPadding),
       child: PrimaryButton(
-        text: isEdit ? 'Update Session' : 'Save Session',
-        onPressed: () {
-          HapticHelper.success();
-          Navigator.pop(context);
-        },
+        text: _isLoading 
+            ? (isEdit ? 'Updating...' : 'Saving...') 
+            : (isEdit ? 'Update Session' : 'Save Session'),
+        isLoading: _isLoading,
+        onPressed: () => _handleSave(isEdit),
       ),
     );
+  }
+
+  Future<void> _handleSave(bool isEdit) async {
+    setState(() => _isLoading = true);
+    HapticHelper.lightImpact();
+
+    try {
+      final userId = await UserService.getCurrentUserId();
+      if (userId == null) throw Exception('User not logged in');
+
+      // Construct DateTime objects
+      final bedDateTime = DateTime(
+        _date.year, _date.month, _date.day, _bedtime.hour, _bedtime.minute
+      );
+      
+      // Handle overnight wake time
+      DateTime wakeDateTime = DateTime(
+        _date.year, _date.month, _date.day, _waketime.hour, _waketime.minute
+      );
+      if (wakeDateTime.isBefore(bedDateTime)) {
+        wakeDateTime = wakeDateTime.add(const Duration(days: 1));
+      }
+
+      if (isEdit) {
+        await client.sleepSession.updateSession(
+          widget.initialData!['id'],
+          bedDateTime,
+          wakeDateTime,
+          _quality,
+          null, // sleepLatencyMinutes
+        );
+      } else {
+        await client.sleepSession.logManualSession(
+          userId,
+          bedDateTime,
+          wakeDateTime,
+          _quality,
+        );
+      }
+
+      HapticHelper.success();
+      if (mounted) {
+        Navigator.pop(context, true); // Return true to trigger refresh
+      }
+    } catch (e) {
+      debugPrint('Error saving session: $e');
+      HapticHelper.error();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save session: ${e.toString()}'),
+            backgroundColor: AppColors.accentError,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _showDeleteConfirm() {
@@ -266,15 +328,30 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           TextButton(
-            onPressed: () {
-              HapticHelper.mediumImpact();
+            onPressed: () async {
               Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Close screen
+              await _handleDelete();
             },
             child: const Text('Delete', style: TextStyle(color: AppColors.accentError)),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _handleDelete() async {
+    setState(() => _isLoading = true);
+    try {
+      await client.sleepSession.deleteSession(widget.initialData!['id']);
+      HapticHelper.success();
+      if (mounted) {
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      debugPrint('Error deleting session: $e');
+      HapticHelper.error();
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 }
