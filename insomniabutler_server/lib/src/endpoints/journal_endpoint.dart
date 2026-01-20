@@ -72,7 +72,11 @@ class JournalEndpoint extends Endpoint {
   }
 
   /// Get a single journal entry
-  Future<JournalEntry?> getEntry(Session session, int entryId, int userId) async {
+  Future<JournalEntry?> getEntry(
+    Session session,
+    int entryId,
+    int userId,
+  ) async {
     final entry = await JournalEntry.db.findById(session, entryId);
     if (entry == null || entry.userId != userId) {
       return null;
@@ -102,7 +106,9 @@ class JournalEndpoint extends Endpoint {
     if (startDate != null) {
       query = JournalEntry.db.find(
         session,
-        where: (t) => t.userId.equals(userId) & t.entryDate.between(startDate, endDate ?? DateTime.now().toUtc()),
+        where: (t) =>
+            t.userId.equals(userId) &
+            t.entryDate.between(startDate, endDate ?? DateTime.now().toUtc()),
         orderBy: (t) => t.entryDate,
         orderDescending: true,
         limit: limit,
@@ -131,7 +137,8 @@ class JournalEndpoint extends Endpoint {
     );
 
     return allEntries.where((entry) {
-      final matchesQuery = query.isEmpty ||
+      final matchesQuery =
+          query.isEmpty ||
           entry.content.toLowerCase().contains(query.toLowerCase()) ||
           (entry.title?.toLowerCase().contains(query.toLowerCase()) ?? false);
 
@@ -143,7 +150,11 @@ class JournalEndpoint extends Endpoint {
   }
 
   /// Toggle favorite status
-  Future<JournalEntry?> toggleFavorite(Session session, int entryId, int userId) async {
+  Future<JournalEntry?> toggleFavorite(
+    Session session,
+    int entryId,
+    int userId,
+  ) async {
     final entry = await JournalEntry.db.findById(session, entryId);
     if (entry == null || entry.userId != userId) {
       return null;
@@ -196,8 +207,12 @@ class JournalEndpoint extends Endpoint {
       ..sort((a, b) => b.entryDate.compareTo(a.entryDate));
 
     for (var entry in sortedEntries) {
-      final entryDate = DateTime(entry.entryDate.year, entry.entryDate.month, entry.entryDate.day);
-      
+      final entryDate = DateTime(
+        entry.entryDate.year,
+        entry.entryDate.month,
+        entry.entryDate.day,
+      );
+
       if (lastDate == null) {
         tempStreak = 1;
         lastDate = entryDate;
@@ -219,7 +234,9 @@ class JournalEndpoint extends Endpoint {
 
     // This week's entries
     final weekAgo = DateTime.now().toUtc().subtract(const Duration(days: 7));
-    final thisWeekEntries = allEntries.where((e) => e.entryDate.isAfter(weekAgo)).length;
+    final thisWeekEntries = allEntries
+        .where((e) => e.entryDate.isAfter(weekAgo))
+        .length;
 
     // Mood distribution
     final moodCounts = <String, int>{};
@@ -240,7 +257,10 @@ class JournalEndpoint extends Endpoint {
   }
 
   /// Get AI-powered insights
-  Future<List<JournalInsight>> getJournalInsights(Session session, int userId) async {
+  Future<List<JournalInsight>> getJournalInsights(
+    Session session,
+    int userId,
+  ) async {
     final insights = <JournalInsight>[];
 
     // Get recent entries
@@ -258,20 +278,28 @@ class JournalEndpoint extends Endpoint {
 
     // Insight 1: Journaling frequency
     final weekAgo = DateTime.now().toUtc().subtract(const Duration(days: 7));
-    final thisWeekCount = recentEntries.where((e) => e.entryDate.isAfter(weekAgo)).length;
-    
+    final thisWeekCount = recentEntries
+        .where((e) => e.entryDate.isAfter(weekAgo))
+        .length;
+
     if (thisWeekCount >= 5) {
-      insights.add(JournalInsight(
-        insightType: 'frequency',
-        message: '🔥 Amazing! You journaled $thisWeekCount times this week. Consistency is key to better sleep.',
-        confidence: 1.0,
-      ));
+      insights.add(
+        JournalInsight(
+          insightType: 'frequency',
+          message:
+              '🔥 Amazing! You journaled $thisWeekCount times this week. Consistency is key to better sleep.',
+          confidence: 1.0,
+        ),
+      );
     } else if (thisWeekCount >= 3) {
-      insights.add(JournalInsight(
-        insightType: 'frequency',
-        message: '✨ You journaled $thisWeekCount times this week. Keep building that habit!',
-        confidence: 0.8,
-      ));
+      insights.add(
+        JournalInsight(
+          insightType: 'frequency',
+          message:
+              '✨ You journaled $thisWeekCount times this week. Keep building that habit!',
+          confidence: 0.8,
+        ),
+      );
     }
 
     // Insight 2: Mood patterns
@@ -283,7 +311,9 @@ class JournalEndpoint extends Endpoint {
     }
 
     if (moodCounts.isNotEmpty) {
-      final dominantMood = moodCounts.entries.reduce((a, b) => a.value > b.value ? a : b);
+      final dominantMood = moodCounts.entries.reduce(
+        (a, b) => a.value > b.value ? a : b,
+      );
       final moodEmojis = {
         'Great': '😊',
         'Good': '🙂',
@@ -294,32 +324,43 @@ class JournalEndpoint extends Endpoint {
         'Calm': '😌',
         'Tired': '🥱',
       };
-      
-      insights.add(JournalInsight(
-        insightType: 'mood',
-        message: '${moodEmojis[dominantMood.key] ?? '💭'} Your most common mood lately is "${dominantMood.key}". Journaling helps process these feelings.',
-        confidence: 0.7,
-      ));
+
+      insights.add(
+        JournalInsight(
+          insightType: 'mood',
+          message:
+              '${moodEmojis[dominantMood.key] ?? '💭'} Your most common mood lately is "${dominantMood.key}". Journaling helps process these feelings.',
+          confidence: 0.7,
+        ),
+      );
     }
 
     // Insight 3: Sleep correlation (if entries are linked to sleep sessions)
-    final entriesWithSleep = recentEntries.where((e) => e.sleepSessionId != null).toList();
+    final entriesWithSleep = recentEntries
+        .where((e) => e.sleepSessionId != null)
+        .toList();
     if (entriesWithSleep.length >= 5) {
-      insights.add(JournalInsight(
-        insightType: 'sleep_correlation',
-        message: '💤 You\'ve linked ${entriesWithSleep.length} journal entries to sleep sessions. This helps track what affects your rest.',
-        confidence: 0.9,
-      ));
+      insights.add(
+        JournalInsight(
+          insightType: 'sleep_correlation',
+          message:
+              '💤 You\'ve linked ${entriesWithSleep.length} journal entries to sleep sessions. This helps track what affects your rest.',
+          confidence: 0.9,
+        ),
+      );
     }
 
     // Insight 4: Streak motivation
     final stats = await getJournalStats(session, userId);
     if (stats.currentStreak >= 7) {
-      insights.add(JournalInsight(
-        insightType: 'streak',
-        message: '🏆 ${stats.currentStreak}-day streak! You\'re building a powerful habit for better sleep.',
-        confidence: 1.0,
-      ));
+      insights.add(
+        JournalInsight(
+          insightType: 'streak',
+          message:
+              '🏆 ${stats.currentStreak}-day streak! You\'re building a powerful habit for better sleep.',
+          confidence: 1.0,
+        ),
+      );
     }
 
     return insights;
@@ -362,7 +403,7 @@ class JournalEndpoint extends Endpoint {
         isSystemPrompt: true,
         createdAt: DateTime.now().toUtc(),
       ),
-      
+
       // Morning prompts
       JournalPrompt(
         category: 'morning',
@@ -385,7 +426,7 @@ class JournalEndpoint extends Endpoint {
         isSystemPrompt: true,
         createdAt: DateTime.now().toUtc(),
       ),
-      
+
       // Weekly prompts
       JournalPrompt(
         category: 'weekly',

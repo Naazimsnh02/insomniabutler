@@ -30,7 +30,7 @@ class _DemoScreenState extends State<DemoScreen> {
     _messages.add({
       'isUser': false,
       'text': "What's worrying you tonight?",
-      'type': 'initial'
+      'type': 'initial',
     });
   }
 
@@ -71,8 +71,9 @@ class _DemoScreenState extends State<DemoScreen> {
         _isTyping = false;
         _messages.add({
           'isUser': false,
-          'text': "I hear you. That sounds exhausting.\n\nFirst - can you do anything about this right now, at 2 AM?",
-          'type': 'question'
+          'text':
+              "I hear you. That sounds exhausting.\n\nFirst - can you do anything about this right now, at 2 AM?",
+          'type': 'question',
         });
       });
       _scrollToBottom();
@@ -95,8 +96,9 @@ class _DemoScreenState extends State<DemoScreen> {
         _showFinalCta = true;
         _messages.add({
           'isUser': false,
-          'text': "Exactly. Your 2 AM brain is trying to solve a problem your morning-self is better equipped for.\n\nLet's park this thought properly.",
-          'type': 'closure'
+          'text':
+              "Exactly. Your 2 AM brain is trying to solve a problem your morning-self is better equipped for.\n\nLet's park this thought properly.",
+          'type': 'closure',
         });
       });
       _scrollToBottom();
@@ -158,7 +160,9 @@ class _DemoScreenState extends State<DemoScreen> {
                     _buildFinalCta()
                   else if (_messages.length == 1 && !_isTyping)
                     _buildInputArea()
-                  else if (_messages.last['type'] == 'question' && !_isTyping && _messages.last['isSelected'] != true)
+                  else if (_messages.last['type'] == 'question' &&
+                      !_isTyping &&
+                      _messages.last['isSelected'] != true)
                     _buildOptionsArea()
                   else
                     const SizedBox(height: 100), // Padding for dots
@@ -245,7 +249,11 @@ class _DemoScreenState extends State<DemoScreen> {
               ),
             ),
           ),
-          const Icon(Icons.check_circle, color: AppColors.accentSuccess, size: 18),
+          const Icon(
+            Icons.check_circle,
+            color: AppColors.accentSuccess,
+            size: 18,
+          ),
         ],
       ),
     ).animate().scale(delay: 600.ms);
@@ -253,17 +261,19 @@ class _DemoScreenState extends State<DemoScreen> {
 
   Widget _buildTypingIndicator() {
     return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 24),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: AppColors.glassBg,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text("...", style: AppTextStyles.labelLg),
-      ),
-    ).animate(onPlay: (controller) => controller.repeat()).shimmer(duration: 1.seconds);
+          alignment: Alignment.centerLeft,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.glassBg,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text("...", style: AppTextStyles.labelLg),
+          ),
+        )
+        .animate(onPlay: (controller) => controller.repeat())
+        .shimmer(duration: 1.seconds);
   }
 
   Widget _buildInputArea() {
@@ -271,7 +281,10 @@ class _DemoScreenState extends State<DemoScreen> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: 20),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xl,
+            vertical: 20,
+          ),
           decoration: BoxDecoration(
             color: AppColors.glassBg,
             border: const Border(top: BorderSide(color: AppColors.glassBorder)),
@@ -285,7 +298,9 @@ class _DemoScreenState extends State<DemoScreen> {
                   textCapitalization: TextCapitalization.sentences,
                   decoration: InputDecoration(
                     hintText: "E.g. Work deadline tomorrow...",
-                    hintStyle: AppTextStyles.bodySm.copyWith(color: AppColors.textTertiary),
+                    hintStyle: AppTextStyles.bodySm.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
                     border: InputBorder.none,
                   ),
                   onSubmitted: (_) => _handleSend(),
@@ -293,7 +308,10 @@ class _DemoScreenState extends State<DemoScreen> {
               ),
               IconButton(
                 onPressed: _handleSend,
-                icon: const Icon(Icons.send_rounded, color: AppColors.accentCopper),
+                icon: const Icon(
+                  Icons.send_rounded,
+                  color: AppColors.accentCopper,
+                ),
               ),
             ],
           ),
@@ -304,7 +322,10 @@ class _DemoScreenState extends State<DemoScreen> {
 
   Widget _buildOptionsArea() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: 20),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xl,
+        vertical: 20,
+      ),
       child: Row(
         children: [
           Expanded(
@@ -312,7 +333,11 @@ class _DemoScreenState extends State<DemoScreen> {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: _buildOptionButton("Yes, but...", () => _handleOption("Yes, but..."), false),
+            child: _buildOptionButton(
+              "Yes, but...",
+              () => _handleOption("Yes, but..."),
+              false,
+            ),
           ),
         ],
       ),
@@ -344,7 +369,10 @@ class _DemoScreenState extends State<DemoScreen> {
 
   Widget _buildFinalCta() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: 20),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xl,
+        vertical: 20,
+      ),
       child: PrimaryButton(
         text: 'I want this',
         onPressed: widget.onNext,
@@ -353,7 +381,6 @@ class _DemoScreenState extends State<DemoScreen> {
     ).animate().fadeIn().scale();
   }
 }
-
 
 /// Onboarding Screen 5: Permissions
 class PermissionsScreen extends StatefulWidget {
@@ -399,32 +426,37 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
               child: Column(
                 children: [
                   const Spacer(),
-                  
+
                   // Icon/Header Section
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.xl),
                     decoration: BoxDecoration(
                       color: AppColors.accentPrimary.withOpacity(0.1),
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.accentPrimary.withOpacity(0.2)),
+                      border: Border.all(
+                        color: AppColors.accentPrimary.withOpacity(0.2),
+                      ),
                     ),
                     child: const Icon(
                       Icons.security_rounded,
                       size: 64,
                       color: AppColors.accentPrimary,
                     ),
-                  ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
-                  
+                  ).animate().scale(
+                    duration: 600.ms,
+                    curve: Curves.easeOutBack,
+                  ),
+
                   const SizedBox(height: AppSpacing.xxl),
-                  
+
                   Text(
                     'We respect your privacy',
                     style: AppTextStyles.h2,
                     textAlign: TextAlign.center,
                   ).animate().fadeIn(delay: 200.ms),
-                  
+
                   const SizedBox(height: AppSpacing.md),
-                  
+
                   Text(
                     'To help you sleep better, we need your permission to send gentle reminders.',
                     style: AppTextStyles.body.copyWith(
@@ -433,58 +465,67 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                     ),
                     textAlign: TextAlign.center,
                   ).animate().fadeIn(delay: 400.ms),
-                  
+
                   const SizedBox(height: AppSpacing.xxl),
-                  
+
                   // Permission Item
                   _buildPermissionItem(
-                    '🔔',
-                    'Notifications',
-                    'Gentle reminders for your sleep window.',
-                    _notificationsEnabled,
-                    (value) => setState(() => _notificationsEnabled = value),
-                  ).animate().slideY(begin: 0.2, end: 0, delay: 600.ms).fadeIn(),
-                  
+                        '🔔',
+                        'Notifications',
+                        'Gentle reminders for your sleep window.',
+                        _notificationsEnabled,
+                        (value) =>
+                            setState(() => _notificationsEnabled = value),
+                      )
+                      .animate()
+                      .slideY(begin: 0.2, end: 0, delay: 600.ms)
+                      .fadeIn(),
+
                   const SizedBox(height: AppSpacing.lg),
-                  
+
                   // Privacy Statement
                   Container(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    decoration: BoxDecoration(
-                      color: AppColors.glassBg,
-                      borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-                      border: Border.all(color: AppColors.glassBorder),
-                    ),
-                    child: Row(
-                      children: [
-                        const Text('🔒', style: TextStyle(fontSize: 24)),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Your thoughts are encrypted',
-                                style: AppTextStyles.labelLg.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.xs),
-                              Text(
-                                '✓ You control all data. ✓ No ads.',
-                                style: AppTextStyles.bodySm.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ],
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        decoration: BoxDecoration(
+                          color: AppColors.glassBg,
+                          borderRadius: BorderRadius.circular(
+                            AppBorderRadius.lg,
                           ),
+                          border: Border.all(color: AppColors.glassBorder),
                         ),
-                      ],
-                    ),
-                  ).animate().slideY(begin: 0.2, end: 0, delay: 800.ms).fadeIn(),
-                  
+                        child: Row(
+                          children: [
+                            const Text('🔒', style: TextStyle(fontSize: 24)),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Your thoughts are encrypted',
+                                    style: AppTextStyles.labelLg.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  Text(
+                                    '✓ You control all data. ✓ No ads.',
+                                    style: AppTextStyles.bodySm.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                      .animate()
+                      .slideY(begin: 0.2, end: 0, delay: 800.ms)
+                      .fadeIn(),
+
                   const Spacer(),
-                  
+
                   // CTA Section
                   SizedBox(
                     width: double.infinity,
@@ -493,9 +534,9 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                       onPressed: widget.onNext,
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.md),
-                  
+
                   TextButton(
                     onPressed: widget.onSkip,
                     child: Text(
@@ -505,7 +546,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 100), // Space for indicators
                 ],
               ),
@@ -565,4 +606,3 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     );
   }
 }
-

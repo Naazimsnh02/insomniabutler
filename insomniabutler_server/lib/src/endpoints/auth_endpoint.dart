@@ -15,19 +15,19 @@ class AuthEndpoint extends Endpoint {
       session,
       where: (t) => t.email.equals(email),
     );
-    
+
     if (existing != null) return null;
-    
+
     // Create user
     var user = User(
       email: email,
       name: name,
       createdAt: DateTime.now(),
     );
-    
+
     return await User.db.insertRow(session, user);
   }
-  
+
   /// Login user by email
   /// Returns the user if found, null otherwise
   Future<User?> login(Session session, String email) async {
@@ -36,12 +36,12 @@ class AuthEndpoint extends Endpoint {
       where: (t) => t.email.equals(email),
     );
   }
-  
+
   /// Get user by ID
   Future<User?> getUserById(Session session, int userId) async {
     return await User.db.findById(session, userId);
   }
-  
+
   /// Update user preferences
   Future<User?> updatePreferences(
     Session session,
@@ -50,17 +50,17 @@ class AuthEndpoint extends Endpoint {
     DateTime? bedtimePreference,
   ) async {
     var user = await User.db.findById(session, userId);
-    
+
     if (user == null) return null;
-    
+
     var updated = user.copyWith(
       sleepGoal: sleepGoal ?? user.sleepGoal,
       bedtimePreference: bedtimePreference ?? user.bedtimePreference,
     );
-    
+
     return await User.db.updateRow(session, updated);
   }
-  
+
   /// Update user profile (name)
   Future<User?> updateUserProfile(
     Session session,
@@ -68,20 +68,20 @@ class AuthEndpoint extends Endpoint {
     String name,
   ) async {
     var user = await User.db.findById(session, userId);
-    
+
     if (user == null) return null;
-    
+
     var updated = user.copyWith(name: name);
-    
+
     return await User.db.updateRow(session, updated);
   }
-  
+
   /// Delete user and all associated data
   Future<bool> deleteUser(Session session, int userId) async {
     try {
       var user = await User.db.findById(session, userId);
       if (user == null) return false;
-      
+
       // Delete user (cascade delete will handle related data if configured)
       await User.db.deleteRow(session, user);
       return true;
@@ -90,7 +90,7 @@ class AuthEndpoint extends Endpoint {
       return false;
     }
   }
-  
+
   /// Get user statistics
   /// Returns total sleep sessions, journal entries, and current streak
   Future<Map<String, int>> getUserStats(Session session, int userId) async {

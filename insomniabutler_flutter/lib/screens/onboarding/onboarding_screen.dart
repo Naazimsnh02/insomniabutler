@@ -9,7 +9,8 @@ import 'auth_screen.dart';
 class OnboardingScreen extends StatefulWidget {
   final VoidCallback onComplete;
 
-  const OnboardingScreen({Key? key, required this.onComplete}) : super(key: key);
+  const OnboardingScreen({Key? key, required this.onComplete})
+    : super(key: key);
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -44,7 +45,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent, // Ensure no background color bleeds through
+      backgroundColor:
+          Colors.transparent, // Ensure no background color bleeds through
       body: Stack(
         children: [
           // Page View (Full Screen - covers status bar)
@@ -86,11 +88,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     width: _currentPage == index ? 24 : 8,
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
-                      gradient: _currentPage == index 
-                          ? AppColors.gradientPrimary 
+                      gradient: _currentPage == index
+                          ? AppColors.gradientPrimary
                           : null,
-                      color: _currentPage == index 
-                          ? null 
+                      color: _currentPage == index
+                          ? null
                           : AppColors.textTertiary.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(AppBorderRadius.full),
                     ),

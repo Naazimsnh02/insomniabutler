@@ -23,13 +23,15 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
   late TimeOfDay _waketime;
   int _quality = 3;
   bool _isLoading = false;
-  
+
   @override
   void initState() {
     super.initState();
     if (widget.initialData != null) {
       final d = widget.initialData!;
-      _date = d['sessionDate'] is DateTime ? (d['sessionDate'] as DateTime).toLocal() : d['sessionDate'];
+      _date = d['sessionDate'] is DateTime
+          ? (d['sessionDate'] as DateTime).toLocal()
+          : d['sessionDate'];
       _bedtime = TimeOfDay.fromDateTime((d['bedTime'] as DateTime).toLocal());
       _waketime = TimeOfDay.fromDateTime((d['wakeTime'] as DateTime).toLocal());
       _quality = d['sleepQuality'] ?? 3;
@@ -59,8 +61,10 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
     );
     if (picked != null) {
       setState(() {
-        if (isBedtime) _bedtime = picked;
-        else _waketime = picked;
+        if (isBedtime)
+          _bedtime = picked;
+        else
+          _waketime = picked;
       });
     }
   }
@@ -105,9 +109,21 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
                       const SizedBox(height: AppSpacing.lg),
                       Row(
                         children: [
-                          Expanded(child: _buildTimePicker('In Bed', _bedtime, () => _selectTime(true))),
+                          Expanded(
+                            child: _buildTimePicker(
+                              'In Bed',
+                              _bedtime,
+                              () => _selectTime(true),
+                            ),
+                          ),
                           const SizedBox(width: AppSpacing.md),
-                          Expanded(child: _buildTimePicker('Woke Up', _waketime, () => _selectTime(false))),
+                          Expanded(
+                            child: _buildTimePicker(
+                              'Woke Up',
+                              _waketime,
+                              () => _selectTime(false),
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: AppSpacing.lg),
@@ -134,14 +150,21 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
             style: IconButton.styleFrom(backgroundColor: AppColors.glassBg),
           ),
           Text(isEdit ? 'Edit Session' : 'Log Sleep', style: AppTextStyles.h4),
           if (isEdit)
             IconButton(
               onPressed: () => _showDeleteConfirm(),
-              icon: const Icon(Icons.delete_outline_rounded, color: AppColors.accentError),
+              icon: const Icon(
+                Icons.delete_outline_rounded,
+                color: AppColors.accentError,
+              ),
             )
           else
             const SizedBox(width: 48),
@@ -155,17 +178,27 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
       onTap: _selectDate,
       child: Row(
         children: [
-          const Icon(Icons.calendar_today_rounded, color: AppColors.accentPrimary),
+          const Icon(
+            Icons.calendar_today_rounded,
+            color: AppColors.accentPrimary,
+          ),
           const SizedBox(width: AppSpacing.md),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Session Date', style: AppTextStyles.caption),
-              Text(DateFormat('EEEE, MMM d, yyyy').format(_date), style: AppTextStyles.bodyLg),
+              Text(
+                DateFormat('EEEE, MMM d, yyyy').format(_date),
+                style: AppTextStyles.bodyLg,
+              ),
             ],
           ),
           const Spacer(),
-          const Icon(Icons.edit_outlined, size: 16, color: AppColors.textTertiary),
+          const Icon(
+            Icons.edit_outlined,
+            size: 16,
+            color: AppColors.textTertiary,
+          ),
         ],
       ),
     );
@@ -179,7 +212,10 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
         children: [
           Text(label, style: AppTextStyles.caption),
           const SizedBox(height: 4),
-          Text(time.format(context), style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            time.format(context),
+            style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );
@@ -199,7 +235,10 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
           const SizedBox(width: AppSpacing.md),
           Text('Total Sleep Duration', style: AppTextStyles.body),
           const Spacer(),
-          Text(_calculateDuration(), style: AppTextStyles.h4.copyWith(color: AppColors.accentPrimary)),
+          Text(
+            _calculateDuration(),
+            style: AppTextStyles.h4.copyWith(color: AppColors.accentPrimary),
+          ),
         ],
       ),
     );
@@ -223,13 +262,31 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
                 width: 55,
                 height: 55,
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.accentPrimary : AppColors.glassBgElevated,
+                  color: isSelected
+                      ? AppColors.accentPrimary
+                      : AppColors.glassBgElevated,
                   borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                  border: Border.all(color: isSelected ? AppColors.accentPrimary : AppColors.glassBorder),
-                  boxShadow: isSelected ? [BoxShadow(color: AppColors.accentPrimary.withOpacity(0.3), blurRadius: 10)] : null,
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.accentPrimary
+                        : AppColors.glassBorder,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.accentPrimary.withOpacity(0.3),
+                            blurRadius: 10,
+                          ),
+                        ]
+                      : null,
                 ),
                 child: Center(
-                  child: Text('$val', style: AppTextStyles.h3.copyWith(color: isSelected ? Colors.white : AppColors.textPrimary)),
+                  child: Text(
+                    '$val',
+                    style: AppTextStyles.h3.copyWith(
+                      color: isSelected ? Colors.white : AppColors.textPrimary,
+                    ),
+                  ),
                 ),
               ),
             );
@@ -251,8 +308,8 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.containerPadding),
       child: PrimaryButton(
-        text: _isLoading 
-            ? (isEdit ? 'Updating...' : 'Saving...') 
+        text: _isLoading
+            ? (isEdit ? 'Updating...' : 'Saving...')
             : (isEdit ? 'Update Session' : 'Save Session'),
         isLoading: _isLoading,
         onPressed: () => _handleSave(isEdit),
@@ -270,12 +327,20 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
 
       // Construct DateTime objects
       final bedDateTime = DateTime(
-        _date.year, _date.month, _date.day, _bedtime.hour, _bedtime.minute
+        _date.year,
+        _date.month,
+        _date.day,
+        _bedtime.hour,
+        _bedtime.minute,
       );
-      
+
       // Handle overnight wake time
       DateTime wakeDateTime = DateTime(
-        _date.year, _date.month, _date.day, _waketime.hour, _waketime.minute
+        _date.year,
+        _date.month,
+        _date.day,
+        _waketime.hour,
+        _waketime.minute,
       );
       if (wakeDateTime.isBefore(bedDateTime)) {
         wakeDateTime = wakeDateTime.add(const Duration(days: 1));
@@ -326,13 +391,19 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
         title: const Text('Delete Session?'),
         content: const Text('This action cannot be undone.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context); // Close dialog
               await _handleDelete();
             },
-            child: const Text('Delete', style: TextStyle(color: AppColors.accentError)),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: AppColors.accentError),
+            ),
           ),
         ],
       ),

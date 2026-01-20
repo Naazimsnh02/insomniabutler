@@ -29,22 +29,30 @@ class GlassCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius ?? AppBorderRadius.xxl),
+        borderRadius: BorderRadius.circular(
+          borderRadius ?? AppBorderRadius.xxl,
+        ),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
           child: Container(
             padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
             margin: margin,
             decoration: BoxDecoration(
-              gradient: gradient ??
+              gradient:
+                  gradient ??
                   LinearGradient(
                     colors: elevated
                         ? [AppColors.glassBgElevated, AppColors.glassBg]
-                        : [AppColors.glassBg, AppColors.glassBg.withOpacity(0.6)],
+                        : [
+                            AppColors.glassBg,
+                            AppColors.glassBg.withOpacity(0.6),
+                          ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-              borderRadius: BorderRadius.circular(borderRadius ?? AppBorderRadius.xxl),
+              borderRadius: BorderRadius.circular(
+                borderRadius ?? AppBorderRadius.xxl,
+              ),
               border: Border.all(
                 color: AppColors.glassBorder,
                 width: 1,

@@ -12,8 +12,9 @@ import 'journal_editor_screen.dart';
 /// Journal Detail Screen - View and manage individual journal entry
 class JournalDetailScreen extends StatefulWidget {
   final int entryId;
-  
-  const JournalDetailScreen({Key? key, required this.entryId}) : super(key: key);
+
+  const JournalDetailScreen({Key? key, required this.entryId})
+    : super(key: key);
 
   @override
   State<JournalDetailScreen> createState() => _JournalDetailScreenState();
@@ -32,7 +33,7 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
 
   Future<void> _loadEntry() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final userId = await UserService.getCurrentUserId();
       if (userId == null) return;
@@ -50,12 +51,15 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
 
   Future<void> _toggleFavorite() async {
     await HapticHelper.mediumImpact();
-    
+
     try {
       final userId = await UserService.getCurrentUserId();
       if (userId == null) return;
 
-      final updated = await client.journal.toggleFavorite(widget.entryId, userId);
+      final updated = await client.journal.toggleFavorite(
+        widget.entryId,
+        userId,
+      );
       if (updated != null) {
         setState(() => _entry = updated);
       }
@@ -77,11 +81,21 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: AppTextStyles.bodySm.copyWith(color: AppColors.textSecondary)),
+            child: Text(
+              'Cancel',
+              style: AppTextStyles.bodySm.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Delete', style: AppTextStyles.bodySm.copyWith(color: AppColors.accentError)),
+            child: Text(
+              'Delete',
+              style: AppTextStyles.bodySm.copyWith(
+                color: AppColors.accentError,
+              ),
+            ),
           ),
         ],
       ),
@@ -158,7 +172,9 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
                     if (title != null && title.isNotEmpty) ...[
                       Text(
                         title,
-                        style: AppTextStyles.h2.copyWith(fontWeight: FontWeight.bold),
+                        style: AppTextStyles.h2.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ).animate().fadeIn(delay: 100.ms),
                       const SizedBox(height: AppSpacing.lg),
                     ],
@@ -228,12 +244,17 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => JournalEditorScreen(entryId: widget.entryId),
+                      builder: (_) =>
+                          JournalEditorScreen(entryId: widget.entryId),
                     ),
                   );
                   _loadEntry(); // Refresh after edit
                 },
-                icon: const Icon(Icons.edit_rounded, color: Colors.white, size: 22),
+                icon: const Icon(
+                  Icons.edit_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
                 style: IconButton.styleFrom(
                   backgroundColor: AppColors.glassBgElevated,
                   padding: const EdgeInsets.all(10),
@@ -267,22 +288,33 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
               children: [
                 Text(
                   DateFormat('EEEE, MMMM d, y').format(date),
-                  style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.bold),
+                  style: AppTextStyles.labelLg.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     Text(
                       DateFormat('h:mm a').format(date),
-                      style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
                     ),
                     if (mood != null) ...[
                       const SizedBox(width: 8),
-                      Text('•', style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)),
+                      Text(
+                        '•',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         mood,
-                        style: AppTextStyles.caption.copyWith(color: AppColors.accentPrimary),
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.accentPrimary,
+                        ),
                       ),
                     ],
                   ],
@@ -323,7 +355,9 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  _isDeleting ? Icons.hourglass_empty : Icons.delete_outline_rounded,
+                  _isDeleting
+                      ? Icons.hourglass_empty
+                      : Icons.delete_outline_rounded,
                   color: AppColors.accentError,
                   size: 20,
                 ),

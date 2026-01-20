@@ -31,7 +31,7 @@ class _AccountScreenState extends State<AccountScreen> {
   int _totalJournalEntries = 0;
   int _currentStreak = 0;
   String _appVersion = '';
-  
+
   // Settings state
   bool _bedtimeNotifications = true;
   bool _insightsNotifications = true;
@@ -39,7 +39,7 @@ class _AccountScreenState extends State<AccountScreen> {
   bool _hapticsEnabled = true;
   bool _soundEffectsEnabled = true;
   bool _autoStartTracking = false;
-  
+
   bool _isLoading = true;
 
   @override
@@ -50,29 +50,32 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       // Load user data
       final user = await UserService.getCurrentUser();
       final userName = await UserService.getCachedUserName();
       final userId = await UserService.getCurrentUserId();
-      
+
       // Load app settings
-      final bedtimeNotif = await AccountSettingsService.getBedtimeNotifications();
-      final insightsNotif = await AccountSettingsService.getInsightsNotifications();
-      final journalNotif = await AccountSettingsService.getJournalNotifications();
+      final bedtimeNotif =
+          await AccountSettingsService.getBedtimeNotifications();
+      final insightsNotif =
+          await AccountSettingsService.getInsightsNotifications();
+      final journalNotif =
+          await AccountSettingsService.getJournalNotifications();
       final haptics = await AccountSettingsService.getHapticsEnabled();
       final sounds = await AccountSettingsService.getSoundEffectsEnabled();
       final autoStart = await AccountSettingsService.getAutoStartTracking();
-      
+
       // Load app version
       final packageInfo = await PackageInfo.fromPlatform();
-      
+
       // Load user stats from backend
       int totalSessions = 0;
       int totalJournalEntries = 0;
       int currentStreak = 0;
-      
+
       if (userId != null) {
         try {
           final stats = await client.auth.getUserStats(userId);
@@ -83,7 +86,7 @@ class _AccountScreenState extends State<AccountScreen> {
           debugPrint('Error loading user stats: $e');
         }
       }
-      
+
       setState(() {
         _userName = user?.name ?? userName;
         _userEmail = user?.email ?? '';
@@ -150,37 +153,39 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
         ),
-        
+
         // Settings Sections
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.containerPadding,
+          ),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               _buildSectionHeader('Sleep Preferences'),
               const SizedBox(height: AppSpacing.md),
               _buildSleepPreferences(),
               const SizedBox(height: AppSpacing.xl),
-              
+
               _buildSectionHeader('Notifications'),
               const SizedBox(height: AppSpacing.md),
               _buildNotificationSettings(),
               const SizedBox(height: AppSpacing.xl),
-              
+
               _buildSectionHeader('Display & Sound'),
               const SizedBox(height: AppSpacing.md),
               _buildDisplaySettings(),
               const SizedBox(height: AppSpacing.xl),
-              
+
               _buildSectionHeader('Data & Privacy'),
               const SizedBox(height: AppSpacing.md),
               _buildDataPrivacy(),
               const SizedBox(height: AppSpacing.xl),
-              
+
               _buildSectionHeader('Support & About'),
               const SizedBox(height: AppSpacing.md),
               _buildSupportAbout(),
               const SizedBox(height: AppSpacing.xl),
-              
+
               _buildLogoutButton(),
               const SizedBox(height: AppSpacing.xxl),
               const SizedBox(height: 100), // Bottom nav spacing
@@ -223,28 +228,32 @@ class _AccountScreenState extends State<AccountScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            
+
             // Name
             Text(
               _userName,
               style: AppTextStyles.h2.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
-            
+
             // Email
             Text(
               _userEmail,
-              style: AppTextStyles.bodySm.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.bodySm.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
             const SizedBox(height: 8),
-            
+
             // Account age
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: AppColors.accentPrimary.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.accentPrimary.withOpacity(0.3)),
+                border: Border.all(
+                  color: AppColors.accentPrimary.withOpacity(0.3),
+                ),
               ),
               child: Text(
                 'Member for ${_getAccountAge()}',
@@ -263,11 +272,25 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _buildStatsRow() {
     return Row(
       children: [
-        Expanded(child: _buildStatCard('🌙', _totalSessions.toString(), 'Sleep Sessions')),
+        Expanded(
+          child: _buildStatCard(
+            '🌙',
+            _totalSessions.toString(),
+            'Sleep Sessions',
+          ),
+        ),
         const SizedBox(width: AppSpacing.md),
-        Expanded(child: _buildStatCard('📔', _totalJournalEntries.toString(), 'Journal Entries')),
+        Expanded(
+          child: _buildStatCard(
+            '📔',
+            _totalJournalEntries.toString(),
+            'Journal Entries',
+          ),
+        ),
         const SizedBox(width: AppSpacing.md),
-        Expanded(child: _buildStatCard('🔥', _currentStreak.toString(), 'Day Streak')),
+        Expanded(
+          child: _buildStatCard('🔥', _currentStreak.toString(), 'Day Streak'),
+        ),
       ],
     );
   }
@@ -314,7 +337,10 @@ class _AccountScreenState extends State<AccountScreen> {
             icon: Icons.bedtime_rounded,
             title: 'Sleep Goal',
             subtitle: '8 hours per night',
-            trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary),
+            trailing: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
             onTap: () {
               HapticHelper.lightImpact();
               _showSleepGoalDialog();
@@ -325,7 +351,10 @@ class _AccountScreenState extends State<AccountScreen> {
             icon: Icons.alarm_rounded,
             title: 'Preferred Bedtime',
             subtitle: '11:00 PM',
-            trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary),
+            trailing: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
             onTap: () {
               HapticHelper.lightImpact();
               _showBedtimeDialog();
@@ -432,7 +461,10 @@ class _AccountScreenState extends State<AccountScreen> {
             icon: Icons.download_rounded,
             title: 'Export Sleep Data',
             subtitle: 'Download your data as CSV',
-            trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary),
+            trailing: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
             onTap: () {
               HapticHelper.lightImpact();
               _showExportDialog();
@@ -443,7 +475,10 @@ class _AccountScreenState extends State<AccountScreen> {
             icon: Icons.cleaning_services_rounded,
             title: 'Clear Cache',
             subtitle: 'Free up storage space',
-            trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary),
+            trailing: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
             onTap: () {
               HapticHelper.lightImpact();
               _showClearCacheDialog();
@@ -454,7 +489,11 @@ class _AccountScreenState extends State<AccountScreen> {
             icon: Icons.privacy_tip_rounded,
             title: 'Privacy Policy',
             subtitle: 'How we protect your data',
-            trailing: const Icon(Icons.open_in_new_rounded, color: AppColors.textTertiary, size: 18),
+            trailing: const Icon(
+              Icons.open_in_new_rounded,
+              color: AppColors.textTertiary,
+              size: 18,
+            ),
             onTap: () {
               HapticHelper.lightImpact();
               // TODO: Open privacy policy URL
@@ -465,7 +504,10 @@ class _AccountScreenState extends State<AccountScreen> {
             icon: Icons.delete_forever_rounded,
             title: 'Delete Account',
             subtitle: 'Permanently delete your account',
-            trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.accentError),
+            trailing: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.accentError,
+            ),
             titleColor: AppColors.accentError,
             onTap: () {
               HapticHelper.mediumImpact();
@@ -492,7 +534,11 @@ class _AccountScreenState extends State<AccountScreen> {
             icon: Icons.email_outlined,
             title: 'Contact Support',
             subtitle: 'naazimsnh02@gmail.com',
-            trailing: const Icon(Icons.open_in_new_rounded, color: AppColors.textTertiary, size: 18),
+            trailing: const Icon(
+              Icons.open_in_new_rounded,
+              color: AppColors.textTertiary,
+              size: 18,
+            ),
             onTap: () {
               HapticHelper.lightImpact();
               _launchEmail();
@@ -503,7 +549,10 @@ class _AccountScreenState extends State<AccountScreen> {
             icon: Icons.article_outlined,
             title: 'About Insomnia Butler',
             subtitle: 'Learn more about the app',
-            trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary),
+            trailing: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
             onTap: () {
               HapticHelper.lightImpact();
               _showAboutDialog();
@@ -535,7 +584,11 @@ class _AccountScreenState extends State<AccountScreen> {
                 color: AppColors.glassBgElevated,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: titleColor ?? AppColors.accentPrimary, size: 20),
+              child: Icon(
+                icon,
+                color: titleColor ?? AppColors.accentPrimary,
+                size: 20,
+              ),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -552,7 +605,9 @@ class _AccountScreenState extends State<AccountScreen> {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -590,12 +645,16 @@ class _AccountScreenState extends State<AccountScreen> {
               children: [
                 Text(
                   title,
-                  style: AppTextStyles.bodyLg.copyWith(fontWeight: FontWeight.w600),
+                  style: AppTextStyles.bodyLg.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -643,7 +702,7 @@ class _AccountScreenState extends State<AccountScreen> {
   // Dialog methods
   void _showSleepGoalDialog() {
     final goals = ['6 hours', '7 hours', '8 hours', '9 hours', '10 hours'];
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -651,16 +710,23 @@ class _AccountScreenState extends State<AccountScreen> {
         title: const Text('Sleep Goal', style: TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: goals.map((goal) => ListTile(
-            title: Text(goal, style: const TextStyle(color: AppColors.textPrimary)),
-            onTap: () async {
-              await UserService.updateSleepPreferences(sleepGoal: goal);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Sleep goal set to $goal')),
-              );
-            },
-          )).toList(),
+          children: goals
+              .map(
+                (goal) => ListTile(
+                  title: Text(
+                    goal,
+                    style: const TextStyle(color: AppColors.textPrimary),
+                  ),
+                  onTap: () async {
+                    await UserService.updateSleepPreferences(sleepGoal: goal);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Sleep goal set to $goal')),
+                    );
+                  },
+                ),
+              )
+              .toList(),
         ),
       ),
     );
@@ -682,12 +748,18 @@ class _AccountScreenState extends State<AccountScreen> {
         );
       },
     );
-    
+
     if (picked != null) {
       final now = DateTime.now();
-      final bedtime = DateTime(now.year, now.month, now.day, picked.hour, picked.minute);
+      final bedtime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        picked.hour,
+        picked.minute,
+      );
       await UserService.updateSleepPreferences(bedtimePreference: bedtime);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Bedtime set to ${picked.format(context)}')),
@@ -708,7 +780,10 @@ class _AccountScreenState extends State<AccountScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.backgroundDeep,
-        title: const Text('Clear Cache?', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Clear Cache?',
+          style: TextStyle(color: Colors.white),
+        ),
         content: const Text(
           'This will clear temporary files and free up storage space.',
           style: TextStyle(color: AppColors.textSecondary),
@@ -716,7 +791,10 @@ class _AccountScreenState extends State<AccountScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -726,7 +804,10 @@ class _AccountScreenState extends State<AccountScreen> {
                 const SnackBar(content: Text('Cache cleared successfully')),
               );
             },
-            child: const Text('Clear', style: TextStyle(color: AppColors.accentPrimary)),
+            child: const Text(
+              'Clear',
+              style: TextStyle(color: AppColors.accentPrimary),
+            ),
           ),
         ],
       ),
@@ -746,25 +827,33 @@ class _AccountScreenState extends State<AccountScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () async {
               await UserService.clearCurrentUser();
               Navigator.pop(context);
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => OnboardingScreen(
-                  onComplete: () {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => NewHomeScreen()),
-                      (route) => false,
-                    );
-                  },
-                )),
+                MaterialPageRoute(
+                  builder: (_) => OnboardingScreen(
+                    onComplete: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => NewHomeScreen()),
+                        (route) => false,
+                      );
+                    },
+                  ),
+                ),
                 (route) => false,
               );
             },
-            child: const Text('Logout', style: TextStyle(color: AppColors.accentError)),
+            child: const Text(
+              'Logout',
+              style: TextStyle(color: AppColors.accentError),
+            ),
           ),
         ],
       ),
@@ -776,7 +865,10 @@ class _AccountScreenState extends State<AccountScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.backgroundDeep,
-        title: const Text('Delete Account?', style: TextStyle(color: AppColors.accentError)),
+        title: const Text(
+          'Delete Account?',
+          style: TextStyle(color: AppColors.accentError),
+        ),
         content: const Text(
           'This action cannot be undone. All your data will be permanently deleted.',
           style: TextStyle(color: AppColors.textSecondary),
@@ -784,64 +876,76 @@ class _AccountScreenState extends State<AccountScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              
+
               // Show loading indicator
               showDialog(
                 context: context,
                 barrierDismissible: false,
                 builder: (context) => const Center(
-                  child: CircularProgressIndicator(color: AppColors.accentPrimary),
+                  child: CircularProgressIndicator(
+                    color: AppColors.accentPrimary,
+                  ),
                 ),
               );
-              
+
               // Delete account
               final success = await UserService.deleteAccount();
-              
+
               if (mounted) {
                 Navigator.pop(context); // Close loading dialog
-                
+
                 if (success) {
                   // Navigate to onboarding
                   Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => OnboardingScreen(
-                      onComplete: () {
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (_) => NewHomeScreen()),
-                          (route) => false,
-                        );
-                      },
-                    )),
+                    MaterialPageRoute(
+                      builder: (_) => OnboardingScreen(
+                        onComplete: () {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (_) => NewHomeScreen()),
+                            (route) => false,
+                          );
+                        },
+                      ),
+                    ),
                     (route) => false,
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Failed to delete account. Please try again.'),
+                      content: Text(
+                        'Failed to delete account. Please try again.',
+                      ),
                       backgroundColor: AppColors.accentError,
                     ),
                   );
                 }
               }
             },
-            child: const Text('Delete', style: TextStyle(color: AppColors.accentError)),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: AppColors.accentError),
+            ),
           ),
         ],
       ),
     );
   }
-  
+
   Future<void> _launchEmail() async {
     final Uri emailUri = Uri(
       scheme: 'mailto',
       path: 'naazimsnh02@gmail.com',
       query: 'subject=Insomnia Butler Support',
     );
-    
+
     try {
       if (await canLaunchUrl(emailUri)) {
         await launchUrl(emailUri);
@@ -861,7 +965,7 @@ class _AccountScreenState extends State<AccountScreen> {
       }
     }
   }
-  
+
   void _showAboutDialog() {
     showDialog(
       context: context,
@@ -876,10 +980,17 @@ class _AccountScreenState extends State<AccountScreen> {
                 gradient: AppColors.gradientPrimary,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.nightlight_round, color: Colors.white, size: 24),
+              child: const Icon(
+                Icons.nightlight_round,
+                color: Colors.white,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 12),
-            const Text('Insomnia Butler', style: TextStyle(color: Colors.white)),
+            const Text(
+              'Insomnia Butler',
+              style: TextStyle(color: Colors.white),
+            ),
           ],
         ),
         content: SingleChildScrollView(
@@ -889,7 +1000,9 @@ class _AccountScreenState extends State<AccountScreen> {
             children: [
               Text(
                 'Version $_appVersion',
-                style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -904,7 +1017,10 @@ class _AccountScreenState extends State<AccountScreen> {
               const SizedBox(height: 16),
               const Text(
                 'Built with ❤️ to help you sleep better',
-                style: TextStyle(color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ],
           ),
@@ -912,13 +1028,16 @@ class _AccountScreenState extends State<AccountScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close', style: TextStyle(color: AppColors.accentPrimary)),
+            child: const Text(
+              'Close',
+              style: TextStyle(color: AppColors.accentPrimary),
+            ),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildAboutFeature(String emoji, String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),

@@ -28,11 +28,13 @@ void main() async {
 
   // Enable edge-to-edge display and set transparent system bars
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    systemNavigationBarColor: Colors.transparent,
-    systemNavigationBarDividerColor: Colors.transparent,
-  ));
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+    ),
+  );
 
   // When you are running the app on a physical device, you need to set the
   // server URL to the IP address of your computer. You can find the IP
@@ -95,8 +97,9 @@ class _AppInitializerState extends State<AppInitializer> {
 
   Future<void> _checkFirstLaunch() async {
     final prefs = await SharedPreferences.getInstance();
-    final hasCompletedOnboarding = prefs.getBool('onboarding_completed') ?? false;
-    
+    final hasCompletedOnboarding =
+        prefs.getBool('onboarding_completed') ?? false;
+
     setState(() {
       _showOnboarding = !hasCompletedOnboarding;
       _isLoading = false;
@@ -106,7 +109,7 @@ class _AppInitializerState extends State<AppInitializer> {
   Future<void> _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_completed', true);
-    
+
     setState(() {
       _showOnboarding = false;
     });
@@ -136,5 +139,3 @@ class _AppInitializerState extends State<AppInitializer> {
     return const NewHomeScreen();
   }
 }
-
-

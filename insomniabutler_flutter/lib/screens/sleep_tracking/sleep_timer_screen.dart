@@ -93,24 +93,26 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
           children: [
             // Pulsing Background Glow
             Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.accentPrimary.withOpacity(0.1),
-                    blurRadius: 100,
-                    spreadRadius: 20,
+                  width: 280,
+                  height: 280,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.accentPrimary.withOpacity(0.1),
+                        blurRadius: 100,
+                        spreadRadius: 20,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(
+                )
+                .animate(onPlay: (c) => c.repeat(reverse: true))
+                .scale(
                   duration: 4.seconds,
                   begin: const Offset(1, 1),
                   end: const Offset(1.2, 1.2),
                 ),
-            
+
             // Outer Ring
             Container(
               width: 260,
@@ -126,12 +128,18 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
 
             Column(
               children: [
-                const Icon(Icons.nightlight_round, size: 40, color: AppColors.accentPrimary)
+                const Icon(
+                      Icons.nightlight_round,
+                      size: 40,
+                      color: AppColors.accentPrimary,
+                    )
                     .animate(onPlay: (c) => c.repeat(reverse: true))
                     .moveY(begin: 0, end: -10, duration: 2.seconds),
                 const SizedBox(height: 20),
                 Text(
-                  _timerService.isRunning ? _formatDuration(_elapsed) : "00:00:00",
+                  _timerService.isRunning
+                      ? _formatDuration(_elapsed)
+                      : "00:00:00",
                   style: AppTextStyles.displayLg.copyWith(
                     fontFeatures: [const FontFeature.tabularFigures()],
                     fontWeight: FontWeight.bold,
@@ -139,7 +147,9 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
                 ),
                 Text(
                   _timerService.isRunning ? 'Elapsed Time' : 'Ready to Sleep',
-                  style: AppTextStyles.label.copyWith(color: AppColors.textSecondary),
+                  style: AppTextStyles.label.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -147,7 +157,7 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
         ),
         const SizedBox(height: 60),
         Text(
-          _timerService.isRunning 
+          _timerService.isRunning
               ? 'Rest well. Your sleep is being tracked.'
               : 'Tap start when you\'re ready to sleep.',
           style: AppTextStyles.bodyLg.copyWith(color: AppColors.textSecondary),
@@ -160,24 +170,24 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
   Widget _buildActionButtons() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-      child: _timerService.isRunning 
-        ? PrimaryButton(
-            text: 'Wake Up & Finish',
-            onPressed: () async {
-              await HapticHelper.mediumImpact();
-              _showWakeUpSheet();
-            },
-            gradient: AppColors.gradientSuccess,
-            icon: Icons.sunny,
-          )
-        : PrimaryButton(
-            text: 'Start Night Timer',
-            onPressed: () {
-              HapticHelper.mediumImpact();
-              setState(() => _timerService.start());
-            },
-            icon: Icons.play_arrow_rounded,
-          ),
+      child: _timerService.isRunning
+          ? PrimaryButton(
+              text: 'Wake Up & Finish',
+              onPressed: () async {
+                await HapticHelper.mediumImpact();
+                _showWakeUpSheet();
+              },
+              gradient: AppColors.gradientSuccess,
+              icon: Icons.sunny,
+            )
+          : PrimaryButton(
+              text: 'Start Night Timer',
+              onPressed: () {
+                HapticHelper.mediumImpact();
+                setState(() => _timerService.start());
+              },
+              icon: Icons.play_arrow_rounded,
+            ),
     );
   }
 
@@ -193,7 +203,8 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
 
 class _WakeUpFeedbackSheet extends StatefulWidget {
   final Duration duration;
-  const _WakeUpFeedbackSheet({Key? key, required this.duration}) : super(key: key);
+  const _WakeUpFeedbackSheet({Key? key, required this.duration})
+    : super(key: key);
 
   @override
   State<_WakeUpFeedbackSheet> createState() => _WakeUpFeedbackSheetState();
@@ -244,7 +255,9 @@ class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: const BoxDecoration(
         color: AppColors.backgroundDeep,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppBorderRadius.xxl)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppBorderRadius.xxl),
+        ),
         gradient: AppColors.bgSecondary,
       ),
       child: Column(
@@ -279,16 +292,23 @@ class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.accentPrimary : AppColors.glassBgElevated,
+                    color: isSelected
+                        ? AppColors.accentPrimary
+                        : AppColors.glassBgElevated,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isSelected ? AppColors.accentPrimary : AppColors.glassBorder,
+                      color: isSelected
+                          ? AppColors.accentPrimary
+                          : AppColors.glassBorder,
                     ),
                   ),
                   child: Center(
-                    child: Text('$val', 
+                    child: Text(
+                      '$val',
                       style: AppTextStyles.h4.copyWith(
-                        color: isSelected ? Colors.white : AppColors.textPrimary,
+                        color: isSelected
+                            ? Colors.white
+                            : AppColors.textPrimary,
                       ),
                     ),
                   ),

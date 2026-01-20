@@ -27,19 +27,20 @@ class NewHomeScreen extends StatefulWidget {
   State<NewHomeScreen> createState() => _NewHomeScreenState();
 }
 
-class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProviderStateMixin {
+class _NewHomeScreenState extends State<NewHomeScreen>
+    with SingleTickerProviderStateMixin {
   final _timerService = SleepTimerService();
   final GlobalKey<JournalScreenState> _journalKey = GlobalKey();
   int _selectedNavIndex = 0;
   DateTime _selectedDate = DateTime.now();
   String? _selectedMood;
-  
+
   // User data
   String _userName = 'User';
   int? _userId;
-  
+
   // Insights data - Initialized with premium demo values
-  int _latencyImprovement = 82; 
+  int _latencyImprovement = 82;
   double _avgSleep = 7.5;
   int _streakDays = 5;
   bool _isLoadingInsights = true;
@@ -69,7 +70,7 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
     super.initState();
     _loadUserData();
     _loadInsights();
-    
+
     // Listen to timer ticks and status changes
     _timerService.onTick.listen((_) {
       if (mounted) setState(() {});
@@ -78,12 +79,12 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
       if (mounted) setState(() {});
     });
   }
-  
+
   Future<void> _loadUserData() async {
     try {
       final userId = await UserService.getCurrentUserId();
       final userName = await UserService.getCachedUserName();
-      
+
       setState(() {
         _userId = userId;
         _userName = userName;
@@ -92,7 +93,7 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
       debugPrint('Error loading user data: $e');
     }
   }
-  
+
   Future<void> _loadInsights() async {
     try {
       final userId = await UserService.getCurrentUserId();
@@ -100,17 +101,17 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
         setState(() => _isLoadingInsights = false);
         return;
       }
-      
+
       final insights = await client.insights.getUserInsights(userId);
-      
+
       // Calculate streak (simplified)
       final sessions = await client.insights.getSleepTrend(userId, 30);
       int streak = 0;
       DateTime? lastDate;
-      
+
       for (var session in sessions.reversed) {
         if (session.usedButler) {
-          if (lastDate == null || 
+          if (lastDate == null ||
               lastDate.difference(session.sessionDate.toLocal()).inDays == 1) {
             streak++;
             lastDate = session.sessionDate.toLocal();
@@ -125,28 +126,37 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
       if (lastNight != null && lastNight.wakeTime != null) {
         final duration = lastNight.wakeTime!.difference(lastNight.bedTime);
         final timeInBed = duration;
-        
+
         // Calculate sleep efficiency (assuming minimal interruptions for now)
         // In a real app, this would come from accelerometer data
-        final efficiency = (duration.inMinutes / timeInBed.inMinutes * 100).clamp(0, 100);
-        
+        final efficiency = (duration.inMinutes / timeInBed.inMinutes * 100)
+            .clamp(0, 100);
+
         setState(() {
           _lastNightDuration = duration;
           _lastNightQuality = lastNight.sleepQuality;
           _sleepEfficiency = efficiency.toDouble();
           _hasLastNightData = true;
           // Estimate interruptions based on efficiency (demo logic)
-          _lastNightInterruptions = efficiency > 90 ? 0 : efficiency > 80 ? 1 : 2;
+          _lastNightInterruptions = efficiency > 90
+              ? 0
+              : efficiency > 80
+              ? 1
+              : 2;
         });
       }
-      
+
       setState(() {
-        if (insights.latencyImprovement > 0) _latencyImprovement = insights.latencyImprovement;
-        if (insights.avgLatencyWithButler > 0) _avgSleep = (insights.avgLatencyWithButler / 60).clamp(0, 12).toDouble();
+        if (insights.latencyImprovement > 0)
+          _latencyImprovement = insights.latencyImprovement;
+        if (insights.avgLatencyWithButler > 0)
+          _avgSleep = (insights.avgLatencyWithButler / 60)
+              .clamp(0, 12)
+              .toDouble();
         if (streak > 0) _streakDays = streak;
         _isLoadingInsights = false;
       });
-      
+
       // Update affirmation based on time of day (mock real functionality)
       _updateAffirmationForTime();
     } catch (e) {
@@ -160,9 +170,11 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
     final hour = DateTime.now().hour;
     setState(() {
       if (hour >= 5 && hour < 12) {
-        _affirmation = '"The morning breeze has secrets to tell you. Don\'t go back to sleep."';
+        _affirmation =
+            '"The morning breeze has secrets to tell you. Don\'t go back to sleep."';
       } else if (hour >= 12 && hour < 17) {
-        _affirmation = '"Your energy is a precious resource. Use it wisely today."';
+        _affirmation =
+            '"Your energy is a precious resource. Use it wisely today."';
       } else if (hour >= 17 && hour < 21) {
         _affirmation = '"As the sun sets, let go of any worries from the day."';
       } else {
@@ -229,14 +241,14 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
   String _calculateDuration() {
     int bedMinutes = _bedtime.hour * 60 + _bedtime.minute;
     int alarmMinutes = _alarm.hour * 60 + _alarm.minute;
-    
+
     int diff;
     if (alarmMinutes >= bedMinutes) {
       diff = alarmMinutes - bedMinutes;
     } else {
       diff = (24 * 60 - bedMinutes) + alarmMinutes;
     }
-    
+
     int hours = diff ~/ 60;
     int minutes = diff % 60;
     return '${hours}h ${minutes}m';
@@ -318,7 +330,9 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
         _buildTopBar(),
         _buildCalendarStrip(),
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.containerPadding,
+          ),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               const SizedBox(height: AppSpacing.lg),
@@ -361,7 +375,9 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
               children: [
                 Text(
                   _getGreeting(),
-                  style: AppTextStyles.bodySm.copyWith(color: AppColors.textSecondary),
+                  style: AppTextStyles.bodySm.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 Text(
                   'Home',
@@ -376,10 +392,16 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                     HapticHelper.lightImpact();
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const SleepHistoryScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const SleepHistoryScreen(),
+                      ),
                     );
                   },
-                  icon: const Icon(Icons.history_rounded, color: Colors.white, size: 22),
+                  icon: const Icon(
+                    Icons.history_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                   style: IconButton.styleFrom(
                     backgroundColor: AppColors.glassBgElevated,
                     padding: const EdgeInsets.all(10),
@@ -391,7 +413,11 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                     HapticHelper.lightImpact();
                     // TODO: Implement full calendar history
                   },
-                  icon: const Icon(Icons.calendar_today_rounded, color: Colors.white, size: 22),
+                  icon: const Icon(
+                    Icons.calendar_today_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                   style: IconButton.styleFrom(
                     backgroundColor: AppColors.glassBgElevated,
                     padding: const EdgeInsets.all(10),
@@ -407,7 +433,10 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
 
   Widget _buildCalendarStrip() {
     final now = DateTime.now();
-    final days = List.generate(7, (index) => now.subtract(Duration(days: 3 - index)));
+    final days = List.generate(
+      7,
+      (index) => now.subtract(Duration(days: 3 - index)),
+    );
 
     return SliverToBoxAdapter(
       child: SizedBox(
@@ -418,7 +447,9 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
           itemCount: days.length,
           itemBuilder: (context, index) {
             final date = days[index];
-            final isSelected = date.day == _selectedDate.day && date.month == _selectedDate.month;
+            final isSelected =
+                date.day == _selectedDate.day &&
+                date.month == _selectedDate.month;
             final isToday = date.day == now.day && date.month == now.month;
 
             return GestureDetector(
@@ -431,9 +462,15 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                 width: 50,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.accentPrimary.withOpacity(0.2) : Colors.transparent,
+                  color: isSelected
+                      ? AppColors.accentPrimary.withOpacity(0.2)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppBorderRadius.full),
-                  border: isSelected ? Border.all(color: AppColors.accentPrimary.withOpacity(0.5)) : null,
+                  border: isSelected
+                      ? Border.all(
+                          color: AppColors.accentPrimary.withOpacity(0.5),
+                        )
+                      : null,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -441,7 +478,9 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                     Text(
                       DateFormat('E').format(date).toUpperCase()[0],
                       style: AppTextStyles.label.copyWith(
-                        color: isSelected ? AppColors.accentPrimary : AppColors.textTertiary,
+                        color: isSelected
+                            ? AppColors.accentPrimary
+                            : AppColors.textTertiary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -452,15 +491,20 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: isSelected ? AppColors.gradientPrimary : null,
-                        border: isToday && !isSelected 
-                            ? Border.all(color: AppColors.accentPrimary, width: 1.5) 
+                        border: isToday && !isSelected
+                            ? Border.all(
+                                color: AppColors.accentPrimary,
+                                width: 1.5,
+                              )
                             : null,
                       ),
                       child: Center(
                         child: Text(
                           date.day.toString(),
                           style: AppTextStyles.bodySm.copyWith(
-                            color: isSelected ? Colors.white : AppColors.textPrimary,
+                            color: isSelected
+                                ? Colors.white
+                                : AppColors.textPrimary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -491,11 +535,15 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const Icon(Icons.auto_awesome_rounded, size: 16, color: AppColors.accentAmber),
+              const Icon(
+                Icons.auto_awesome_rounded,
+                size: 16,
+                color: AppColors.accentAmber,
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-           Text(
+          Text(
             _affirmation,
             style: AppTextStyles.bodyLg.copyWith(
               fontStyle: FontStyle.italic,
@@ -507,9 +555,17 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.favorite_rounded, size: 14, color: Colors.white.withOpacity(0.5)),
+              Icon(
+                Icons.favorite_rounded,
+                size: 14,
+                color: Colors.white.withOpacity(0.5),
+              ),
               const SizedBox(width: 12),
-              Icon(Icons.share_rounded, size: 14, color: Colors.white.withOpacity(0.5)),
+              Icon(
+                Icons.share_rounded,
+                size: 14,
+                color: Colors.white.withOpacity(0.5),
+              ),
             ],
           ),
         ],
@@ -523,7 +579,7 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
     final hours = _lastNightDuration!.inHours;
     final minutes = _lastNightDuration!.inMinutes.remainder(60);
     final quality = _lastNightQuality ?? 3;
-    
+
     // Quality-based colors
     Color qualityColor = AppColors.accentPrimary;
     String qualityText = 'Good';
@@ -574,11 +630,16 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: qualityColor.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: qualityColor.withOpacity(0.3)),
+                          border: Border.all(
+                            color: qualityColor.withOpacity(0.3),
+                          ),
                         ),
                         child: Text(
                           qualityText,
@@ -596,10 +657,16 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [qualityColor.withOpacity(0.3), qualityColor.withOpacity(0.1)],
+                    colors: [
+                      qualityColor.withOpacity(0.3),
+                      qualityColor.withOpacity(0.1),
+                    ],
                   ),
                   shape: BoxShape.circle,
-                  border: Border.all(color: qualityColor.withOpacity(0.5), width: 2),
+                  border: Border.all(
+                    color: qualityColor.withOpacity(0.5),
+                    width: 2,
+                  ),
                 ),
                 child: Icon(
                   Icons.bedtime_rounded,
@@ -630,8 +697,8 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                   icon: Icons.notifications_off_rounded,
                   value: '$_lastNightInterruptions',
                   label: 'Interruptions',
-                  color: _lastNightInterruptions == 0 
-                      ? AppColors.accentSuccess 
+                  color: _lastNightInterruptions == 0
+                      ? AppColors.accentSuccess
                       : AppColors.accentAmber,
                 ),
               ),
@@ -684,14 +751,18 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
 
   Widget _buildSleepGauge() {
     final dateStr = DateFormat('EEE, dd MMMM').format(_selectedDate);
-    
+
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(dateStr, style: AppTextStyles.h4),
-            const Icon(Icons.ios_share_rounded, color: AppColors.textSecondary, size: 20),
+            const Icon(
+              Icons.ios_share_rounded,
+              color: AppColors.textSecondary,
+              size: 20,
+            ),
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -724,7 +795,7 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white10, width: 2),
                 ),
-                 child: CustomPaint(
+                child: CustomPaint(
                   painter: _GaugePainter(_latencyImprovement.toDouble() / 100),
                 ),
               ),
@@ -733,24 +804,32 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '${_latencyImprovement.clamp(0, 100)}%',
-                    style: AppTextStyles.displayMd.copyWith(
-                      color: AppColors.accentPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ).animate(onPlay: (c) => c.repeat(reverse: true)).shimmer(duration: 3.seconds, color: Colors.white24),
+                        '${_latencyImprovement.clamp(0, 100)}%',
+                        style: AppTextStyles.displayMd.copyWith(
+                          color: AppColors.accentPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                      .animate(onPlay: (c) => c.repeat(reverse: true))
+                      .shimmer(duration: 3.seconds, color: Colors.white24),
                   Text(
                     'Sleep Score',
-                    style: AppTextStyles.label.copyWith(color: AppColors.textSecondary),
+                    style: AppTextStyles.label.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     _calculateDuration(),
-                    style: AppTextStyles.h2.copyWith(fontWeight: FontWeight.bold),
+                    style: AppTextStyles.h2.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     'Sleep duration',
-                    style: AppTextStyles.label.copyWith(color: AppColors.textSecondary),
+                    style: AppTextStyles.label.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -762,8 +841,9 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                 return Positioned.fill(
                   child: Align(
                     alignment: Alignment(
-                      math.cos(angle) * 1.15, // Move slightly OUTSIDE the ring for better clarity
-                      math.sin(angle) * 1.15
+                      math.cos(angle) *
+                          1.15, // Move slightly OUTSIDE the ring for better clarity
+                      math.sin(angle) * 1.15,
                     ),
                     child: Text(
                       time,
@@ -784,12 +864,14 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-             Column(
+            Column(
               children: [
                 Text('Time in bed', style: AppTextStyles.caption),
                 Text(
-                  '${_bedtime.format(context)} - ${_alarm.format(context)}', 
-                  style: AppTextStyles.bodySm.copyWith(fontWeight: FontWeight.bold)
+                  '${_bedtime.format(context)} - ${_alarm.format(context)}',
+                  style: AppTextStyles.bodySm.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -798,11 +880,11 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
               children: [
                 Text('Sleep Quality', style: AppTextStyles.caption),
                 Text(
-                  _getQualityText(), 
+                  _getQualityText(),
                   style: AppTextStyles.bodySm.copyWith(
                     color: _getQualityColor(),
                     fontWeight: FontWeight.bold,
-                  )
+                  ),
                 ),
               ],
             ),
@@ -812,13 +894,13 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
     ).animate().fadeIn().scale(begin: const Offset(0.9, 0.9));
   }
 
-   Widget _buildControlPanel() {
+  Widget _buildControlPanel() {
     return Row(
       children: [
         Expanded(
           child: _buildTimeCard(
-            'Bedtime', 
-            _bedtime.format(context), 
+            'Bedtime',
+            _bedtime.format(context),
             Icons.bedtime_rounded,
             onTap: () => _selectTime(context, true),
           ),
@@ -826,8 +908,8 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
         const SizedBox(width: AppSpacing.md),
         Expanded(
           child: _buildTimeCard(
-            'Alarm', 
-            _alarm.format(context), 
+            'Alarm',
+            _alarm.format(context),
             Icons.alarm_rounded,
             onTap: () => _selectTime(context, false),
           ),
@@ -854,7 +936,12 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildTimeCard(String title, String time, IconData icon, {VoidCallback? onTap}) {
+  Widget _buildTimeCard(
+    String title,
+    String time,
+    IconData icon, {
+    VoidCallback? onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -877,7 +964,11 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                     Text(title, style: AppTextStyles.caption),
                   ],
                 ),
-                const Icon(Icons.edit_outlined, size: 14, color: AppColors.textTertiary),
+                const Icon(
+                  Icons.edit_outlined,
+                  size: 14,
+                  color: AppColors.textTertiary,
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -916,7 +1007,10 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                 try {
                   final userId = await UserService.getCurrentUserId();
                   if (userId != null) {
-                    await client.sleepSession.updateMoodForLatestSession(userId, mood['label']!);
+                    await client.sleepSession.updateMoodForLatestSession(
+                      userId,
+                      mood['label']!,
+                    );
                   }
                 } catch (e) {
                   debugPrint('Error saving mood: $e');
@@ -926,10 +1020,14 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.accentPrimary : AppColors.glassBgElevated,
+                  color: isSelected
+                      ? AppColors.accentPrimary
+                      : AppColors.glassBgElevated,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected ? AppColors.accentPrimary : AppColors.glassBorder,
+                    color: isSelected
+                        ? AppColors.accentPrimary
+                        : AppColors.glassBorder,
                   ),
                 ),
                 child: Text(
@@ -953,13 +1051,28 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
         GlassCard(
           child: Row(
             children: [
-              _buildSimpleStat('⚡', '${_latencyImprovement}%', 'Faster Sleep', color: AppColors.accentPrimary),
+              _buildSimpleStat(
+                '⚡',
+                '${_latencyImprovement}%',
+                'Faster Sleep',
+                color: AppColors.accentPrimary,
+              ),
               const VerticalDivider(color: AppColors.glassBorder, width: 40),
               if (_sleepEfficiency != null) ...[
-                _buildSimpleStat('✨', '${_sleepEfficiency!.toStringAsFixed(0)}%', 'Efficiency', color: AppColors.accentSuccess),
+                _buildSimpleStat(
+                  '✨',
+                  '${_sleepEfficiency!.toStringAsFixed(0)}%',
+                  'Efficiency',
+                  color: AppColors.accentSuccess,
+                ),
                 const VerticalDivider(color: AppColors.glassBorder, width: 40),
               ],
-              _buildSimpleStat('�', '${_streakDays}d', 'Streak', color: AppColors.accentAmber),
+              _buildSimpleStat(
+                '�',
+                '${_streakDays}d',
+                'Streak',
+                color: AppColors.accentAmber,
+              ),
             ],
           ),
         ),
@@ -967,18 +1080,23 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
     ).animate().fadeIn();
   }
 
-  Widget _buildSimpleStat(String emoji, String value, String label, {Color? color}) {
+  Widget _buildSimpleStat(
+    String emoji,
+    String value,
+    String label, {
+    Color? color,
+  }) {
     return Expanded(
       child: Column(
         children: [
           Text(emoji, style: const TextStyle(fontSize: 20)),
           const SizedBox(height: 4),
           Text(
-            value, 
+            value,
             style: AppTextStyles.bodyLg.copyWith(
               fontWeight: FontWeight.bold,
               color: color,
-            )
+            ),
           ),
           Text(label, style: AppTextStyles.caption),
         ],
@@ -1017,7 +1135,9 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                   decoration: BoxDecoration(
                     color: AppColors.glassBgElevated.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
-                    border: Border.all(color: AppColors.glassBorder.withOpacity(0.2)),
+                    border: Border.all(
+                      color: AppColors.glassBorder.withOpacity(0.2),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -1035,34 +1155,41 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
           ),
           // Floating Action Button (Thought Clearing)
           Positioned(
-            bottom: 40,
-            child: GestureDetector(
-              onTap: () {
-                HapticHelper.mediumImpact();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ThoughtClearingScreen()),
-                );
-              },
-              child: Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  gradient: AppColors.gradientPrimary,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.accentPrimary.withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
+                bottom: 40,
+                child: GestureDetector(
+                  onTap: () {
+                    HapticHelper.mediumImpact();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ThoughtClearingScreen(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.gradientPrimary,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.accentPrimary.withOpacity(0.3),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
                     ),
-                  ],
+                    child: const Icon(
+                      Icons.chat_bubble_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
                 ),
-                child: const Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 28),
-              ),
-            ),
-          ).animate(onPlay: (c) => c.repeat(reverse: true)).moveY(begin: 0, end: -4, duration: 1500.ms),
-
+              )
+              .animate(onPlay: (c) => c.repeat(reverse: true))
+              .moveY(begin: 0, end: -4, duration: 1500.ms),
         ],
       ),
     );
@@ -1078,23 +1205,33 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
         );
         _journalKey.currentState?.loadData();
       },
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          gradient: AppColors.gradientCalm,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.accentSkyBlue.withOpacity(0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
-      ).animate(onPlay: (c) => c.repeat(reverse: true))
-        .scale(begin: const Offset(1, 1), end: const Offset(1.1, 1.1), duration: 2.seconds),
+      child:
+          Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: AppColors.gradientCalm,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accentSkyBlue.withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.add_rounded,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              )
+              .animate(onPlay: (c) => c.repeat(reverse: true))
+              .scale(
+                begin: const Offset(1, 1),
+                end: const Offset(1.1, 1.1),
+                duration: 2.seconds,
+              ),
     );
   }
 
@@ -1135,7 +1272,9 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
         );
       },
       gradient: LinearGradient(
-        colors: AppColors.gradientSuccess.colors.map((c) => c.withAlpha(25)).toList(),
+        colors: AppColors.gradientSuccess.colors
+            .map((c) => c.withAlpha(25))
+            .toList(),
       ),
       child: Row(
         children: [
@@ -1143,18 +1282,23 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
             alignment: Alignment.center,
             children: [
               Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.accentSuccess.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-              ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(
-                duration: 2.seconds,
-                begin: const Offset(1, 1),
-                end: const Offset(1.2, 1.2),
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: AppColors.accentSuccess.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                  )
+                  .animate(onPlay: (c) => c.repeat(reverse: true))
+                  .scale(
+                    duration: 2.seconds,
+                    begin: const Offset(1, 1),
+                    end: const Offset(1.2, 1.2),
+                  ),
+              const Icon(
+                Icons.nightlight_round,
+                color: AppColors.accentSuccess,
               ),
-              const Icon(Icons.nightlight_round, color: AppColors.accentSuccess),
             ],
           ),
           const SizedBox(width: AppSpacing.md),
@@ -1162,12 +1306,24 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Sleep Tracking Active', style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.bold)),
-                Text('Tap to view your silent timer', style: AppTextStyles.caption),
+                Text(
+                  'Sleep Tracking Active',
+                  style: AppTextStyles.labelLg.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  'Tap to view your silent timer',
+                  style: AppTextStyles.caption,
+                ),
               ],
             ),
           ),
-          const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textTertiary),
+          const Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 14,
+            color: AppColors.textTertiary,
+          ),
         ],
       ),
     );
@@ -1201,7 +1357,11 @@ class _GaugePainter extends CustomPainter {
 
     // Active Progress
     final progressGradient = const SweepGradient(
-      colors: [AppColors.accentPrimary, AppColors.accentAmber, AppColors.accentSkyBlue],
+      colors: [
+        AppColors.accentPrimary,
+        AppColors.accentAmber,
+        AppColors.accentSkyBlue,
+      ],
       stops: [0.0, 0.4, 0.8],
       transform: GradientRotation(-3.14159 / 2 - 2.5),
     ).createShader(Rect.fromCircle(center: center, radius: radius));
@@ -1224,7 +1384,7 @@ class _GaugePainter extends CustomPainter {
     final thumbPaint = Paint()
       ..color = Colors.white
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
-    
+
     // Position thumb at end of progress (trigonometry simplified)
     // For demo, just skip or draw a simple dot
   }
@@ -1232,6 +1392,7 @@ class _GaugePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
 class _TrackingSelectorSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -1239,7 +1400,9 @@ class _TrackingSelectorSheet extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: const BoxDecoration(
         color: AppColors.backgroundDeep,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppBorderRadius.xxl)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppBorderRadius.xxl),
+        ),
         gradient: AppColors.bgSecondary,
       ),
       child: Column(
@@ -1267,7 +1430,12 @@ class _TrackingSelectorSheet extends StatelessWidget {
             AppColors.gradientPrimary,
             () {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const ThoughtClearingScreen()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ThoughtClearingScreen(),
+                ),
+              );
             },
           ),
           const SizedBox(height: AppSpacing.md),
@@ -1279,7 +1447,10 @@ class _TrackingSelectorSheet extends StatelessWidget {
             AppColors.gradientCalm,
             () {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const SleepTimerScreen()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SleepTimerScreen()),
+              );
             },
           ),
           const SizedBox(height: AppSpacing.md),
@@ -1291,7 +1462,10 @@ class _TrackingSelectorSheet extends StatelessWidget {
             null,
             () {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const ManualLogScreen()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ManualLogScreen()),
+              );
             },
           ),
           const SizedBox(height: AppSpacing.xxl),
@@ -1326,12 +1500,21 @@ class _TrackingSelectorSheet extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: AppTextStyles.labelLg.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 Text(subtitle, style: AppTextStyles.caption),
               ],
             ),
           ),
-          const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textTertiary),
+          const Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 14,
+            color: AppColors.textTertiary,
+          ),
         ],
       ),
     );

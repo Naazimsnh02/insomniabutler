@@ -12,10 +12,10 @@ class SleepSessionEndpoint extends Endpoint {
       thoughtsProcessed: 0,
       sessionDate: DateTime.now().toUtc(),
     );
-    
+
     return await SleepSession.db.insertRow(session, sleepSession);
   }
-  
+
   /// End a sleep session with quality feedback
   Future<SleepSession?> endSession(
     Session session,
@@ -25,23 +25,23 @@ class SleepSessionEndpoint extends Endpoint {
     int? sleepLatencyMinutes,
   ) async {
     final sleepSession = await SleepSession.db.findById(session, sessionId);
-    
+
     if (sleepSession == null) {
       throw Exception('Session not found');
     }
-    
+
     final wakeTime = DateTime.now().toUtc();
-    
+
     final updated = sleepSession.copyWith(
       wakeTime: wakeTime,
       sleepQuality: sleepQuality,
       morningMood: morningMood,
       sleepLatencyMinutes: sleepLatencyMinutes,
     );
-    
+
     return await SleepSession.db.updateRow(session, updated);
   }
-  
+
   /// Mark that Butler was used during this session
   Future<void> markButlerUsed(
     Session session,
@@ -49,7 +49,7 @@ class SleepSessionEndpoint extends Endpoint {
     int thoughtCount,
   ) async {
     final sleepSession = await SleepSession.db.findById(session, sessionId);
-    
+
     if (sleepSession != null) {
       await SleepSession.db.updateRow(
         session,
@@ -60,7 +60,7 @@ class SleepSessionEndpoint extends Endpoint {
       );
     }
   }
-  
+
   /// Get user's sleep sessions with optional limit
   Future<List<SleepSession>> getUserSessions(
     Session session,
@@ -75,7 +75,7 @@ class SleepSessionEndpoint extends Endpoint {
       limit: limit,
     );
   }
-  
+
   /// Get the most recent active session for a user
   Future<SleepSession?> getActiveSession(Session session, int userId) async {
     final sessions = await SleepSession.db.find(
@@ -85,13 +85,12 @@ class SleepSessionEndpoint extends Endpoint {
       orderDescending: true,
       limit: 1,
     );
-    
+
     return sessions.isNotEmpty ? sessions.first : null;
   }
-  
+
   /// Get last night's session
   Future<SleepSession?> getLastNightSession(Session session, int userId) async {
-    final yesterday = DateTime.now().toUtc().subtract(Duration(days: 1));
     final sessions = await SleepSession.db.find(
       session,
       where: (t) => t.userId.equals(userId),
@@ -99,10 +98,10 @@ class SleepSessionEndpoint extends Endpoint {
       orderDescending: true,
       limit: 1,
     );
-    
+
     return sessions.isNotEmpty ? sessions.first : null;
   }
-  
+
   /// Update sleep latency for a session
   Future<SleepSession?> updateSleepLatency(
     Session session,
@@ -110,13 +109,13 @@ class SleepSessionEndpoint extends Endpoint {
     int latencyMinutes,
   ) async {
     final sleepSession = await SleepSession.db.findById(session, sessionId);
-    
+
     if (sleepSession == null) return null;
-    
+
     final updated = sleepSession.copyWith(
       sleepLatencyMinutes: latencyMinutes,
     );
-    
+
     return await SleepSession.db.updateRow(session, updated);
   }
 
@@ -137,7 +136,7 @@ class SleepSessionEndpoint extends Endpoint {
       thoughtsProcessed: 0,
       sessionDate: bedTime,
     );
-    
+
     return await SleepSession.db.insertRow(session, sleepSession);
   }
 

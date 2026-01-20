@@ -33,7 +33,7 @@ class AppColors {
   static const accentCopper = Color(0xFFC38E5C); // Primary Accent
   static const accentAmber = Color(0xFFD9A76F); // Warm Lamp Glow
   static const accentSkyBlue = Color(0xFF5FA8D3); // Secondary Accent
-  
+
   static const accentSuccess = Color(0xFF4A7C59); // Muted Calm Green
   static const accentWarning = Color(0xFFB8860B); // Muted Dark Gold/Amber
   static const accentError = Color(0xFF9B4444); // Softened Red
@@ -41,7 +41,9 @@ class AppColors {
   // --- Glass Effects (Translucent blue-black, reduced brightness) ---
   static const glassBg = Color(0x1A10263A); // rgba(16, 38, 58, 0.1)
   static const glassBgElevated = Color(0x2610263A); // rgba(16, 38, 58, 0.15)
-  static const glassBorder = Color(0x265FA8D3); // Subtle Sky Blue border (15% opacity)
+  static const glassBorder = Color(
+    0x265FA8D3,
+  ); // Subtle Sky Blue border (15% opacity)
 
   // --- Text Colors (Warm Off-Whites & Desaturated Calm Tones) ---
   static const textPrimary = Color(0xFFF5F5F0); // Warm off-white

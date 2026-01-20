@@ -19,7 +19,7 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isRegistering = true;
   bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
-  
+
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -28,14 +28,14 @@ class _AuthScreenState extends State<AuthScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-    
+
     try {
       if (_isRegistering) {
         final user = await client.auth.register(
           _emailController.text.trim(),
           _nameController.text.trim(),
         );
-        
+
         if (user != null) {
           await UserService.setCurrentUser(user);
           widget.onComplete();
@@ -44,7 +44,7 @@ class _AuthScreenState extends State<AuthScreen> {
         }
       } else {
         final user = await client.auth.login(_emailController.text.trim());
-        
+
         if (user != null) {
           await UserService.setCurrentUser(user);
           widget.onComplete();
@@ -109,56 +109,70 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: Column(
                     children: [
                       const SizedBox(height: AppSpacing.xxl),
-                      
+
                       // Title Section
                       Text(
-                        _isRegistering ? 'Create Account' : 'Welcome Back',
-                        style: AppTextStyles.h2,
-                        textAlign: TextAlign.center,
-                      ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, end: 0),
-                      
+                            _isRegistering ? 'Create Account' : 'Welcome Back',
+                            style: AppTextStyles.h2,
+                            textAlign: TextAlign.center,
+                          )
+                          .animate()
+                          .fadeIn(duration: 400.ms)
+                          .slideY(begin: -0.2, end: 0),
+
                       const SizedBox(height: AppSpacing.sm),
-                      
+
                       Text(
-                        _isRegistering 
-                          ? 'Join us for a better night\'s sleep.' 
-                          : 'Sign in to rescue your rest.',
-                        style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                        _isRegistering
+                            ? 'Join us for a better night\'s sleep.'
+                            : 'Sign in to rescue your rest.',
+                        style: AppTextStyles.body.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                         textAlign: TextAlign.center,
                       ).animate().fadeIn(delay: 200.ms),
-                      
+
                       const SizedBox(height: AppSpacing.xxxl),
 
                       // Form Fields
                       if (_isRegistering) ...[
                         _buildTextField(
-                          controller: _nameController,
-                          label: 'Full Name',
-                          hint: 'Your name',
-                          icon: Icons.person_outline_rounded,
-                          textCapitalization: TextCapitalization.words,
-                        ).animate().fadeIn(delay: 300.ms).slideX(begin: 0.1, end: 0),
+                              controller: _nameController,
+                              label: 'Full Name',
+                              hint: 'Your name',
+                              icon: Icons.person_outline_rounded,
+                              textCapitalization: TextCapitalization.words,
+                            )
+                            .animate()
+                            .fadeIn(delay: 300.ms)
+                            .slideX(begin: 0.1, end: 0),
                         const SizedBox(height: AppSpacing.lg),
                       ],
-                      
+
                       _buildTextField(
-                        controller: _emailController,
-                        label: 'Email',
-                        hint: 'name@example.com',
-                        icon: Icons.email_outlined,
-                        keyboardType: TextInputType.emailAddress,
-                      ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1, end: 0),
-                      
+                            controller: _emailController,
+                            label: 'Email',
+                            hint: 'name@example.com',
+                            icon: Icons.email_outlined,
+                            keyboardType: TextInputType.emailAddress,
+                          )
+                          .animate()
+                          .fadeIn(delay: 400.ms)
+                          .slideX(begin: 0.1, end: 0),
+
                       const SizedBox(height: AppSpacing.lg),
-                      
+
                       _buildTextField(
-                        controller: _passwordController,
-                        label: 'Password',
-                        hint: '••••••••',
-                        icon: Icons.lock_outline_rounded,
-                        obscureText: true,
-                      ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1, end: 0),
-                      
+                            controller: _passwordController,
+                            label: 'Password',
+                            hint: '••••••••',
+                            icon: Icons.lock_outline_rounded,
+                            obscureText: true,
+                          )
+                          .animate()
+                          .fadeIn(delay: 500.ms)
+                          .slideX(begin: 0.1, end: 0),
+
                       if (!_isRegistering)
                         Align(
                           alignment: Alignment.centerRight,
@@ -178,25 +192,45 @@ class _AuthScreenState extends State<AuthScreen> {
 
                       // Action Button
                       SizedBox(
-                        width: double.infinity,
-                        child: PrimaryButton(
-                          text: _isRegistering ? 'Register' : 'Login',
-                          isLoading: _isLoading,
-                          onPressed: _handleAuth,
-                        ),
-                      ).animate().fadeIn(delay: 700.ms).scale(curve: Curves.easeOutBack),
+                            width: double.infinity,
+                            child: PrimaryButton(
+                              text: _isRegistering ? 'Register' : 'Login',
+                              isLoading: _isLoading,
+                              onPressed: _handleAuth,
+                            ),
+                          )
+                          .animate()
+                          .fadeIn(delay: 700.ms)
+                          .scale(curve: Curves.easeOutBack),
 
                       const SizedBox(height: AppSpacing.xxl),
 
                       // Divider
                       Row(
                         children: [
-                          const Expanded(child: Divider(color: AppColors.glassBorder, thickness: 0.5)),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                            child: Text('OR', style: AppTextStyles.caption.copyWith(letterSpacing: 1.2)),
+                          const Expanded(
+                            child: Divider(
+                              color: AppColors.glassBorder,
+                              thickness: 0.5,
+                            ),
                           ),
-                          const Expanded(child: Divider(color: AppColors.glassBorder, thickness: 0.5)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md,
+                            ),
+                            child: Text(
+                              'OR',
+                              style: AppTextStyles.caption.copyWith(
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ),
+                          const Expanded(
+                            child: Divider(
+                              color: AppColors.glassBorder,
+                              thickness: 0.5,
+                            ),
+                          ),
                         ],
                       ).animate().fadeIn(delay: 800.ms),
 
@@ -204,12 +238,22 @@ class _AuthScreenState extends State<AuthScreen> {
 
                       // Social Buttons
                       Row(
-                        children: [
-                          Expanded(child: _buildSocialButton('Apple', Icons.apple)),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(child: _buildSocialButton('Google', Icons.g_mobiledata_rounded)),
-                        ],
-                      ).animate().fadeIn(delay: 900.ms).slideY(begin: 0.2, end: 0),
+                            children: [
+                              Expanded(
+                                child: _buildSocialButton('Apple', Icons.apple),
+                              ),
+                              const SizedBox(width: AppSpacing.md),
+                              Expanded(
+                                child: _buildSocialButton(
+                                  'Google',
+                                  Icons.g_mobiledata_rounded,
+                                ),
+                              ),
+                            ],
+                          )
+                          .animate()
+                          .fadeIn(delay: 900.ms)
+                          .slideY(begin: 0.2, end: 0),
 
                       const SizedBox(height: AppSpacing.xxxl),
 
@@ -218,24 +262,34 @@ class _AuthScreenState extends State<AuthScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            _isRegistering ? 'Joined us before? ' : 'New to the Butler? ',
-                            style: AppTextStyles.bodySm.copyWith(color: AppColors.textSecondary),
+                            _isRegistering
+                                ? 'Joined us before? '
+                                : 'New to the Butler? ',
+                            style: AppTextStyles.bodySm.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                           GestureDetector(
-                            onTap: () => setState(() => _isRegistering = !_isRegistering),
+                            onTap: () => setState(
+                              () => _isRegistering = !_isRegistering,
+                            ),
                             child: AnimatedDefaultTextStyle(
                               duration: const Duration(milliseconds: 200),
                               style: AppTextStyles.bodySm.copyWith(
                                 color: AppColors.accentPrimary,
                                 fontWeight: FontWeight.bold,
                               ),
-                              child: Text(_isRegistering ? 'Log in' : 'Register'),
+                              child: Text(
+                                _isRegistering ? 'Log in' : 'Register',
+                              ),
                             ),
                           ),
                         ],
                       ).animate().fadeIn(delay: 1.seconds),
-                      
-                      const SizedBox(height: 120), // Extra space for dots and scroll
+
+                      const SizedBox(
+                        height: 120,
+                      ), // Extra space for dots and scroll
                     ],
                   ),
                 ),
@@ -284,9 +338,15 @@ class _AuthScreenState extends State<AuthScreen> {
             style: AppTextStyles.body,
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: AppTextStyles.bodySm.copyWith(color: AppColors.textTertiary),
+              hintStyle: AppTextStyles.bodySm.copyWith(
+                color: AppColors.textTertiary,
+              ),
               border: InputBorder.none,
-              icon: Icon(icon, color: AppColors.accentPrimary.withOpacity(0.8), size: 18),
+              icon: Icon(
+                icon,
+                color: AppColors.accentPrimary.withOpacity(0.8),
+                size: 18,
+              ),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) return 'Required';
@@ -311,7 +371,10 @@ class _AuthScreenState extends State<AuthScreen> {
         children: [
           Icon(icon, color: Colors.white, size: 24),
           const SizedBox(width: AppSpacing.sm),
-          Text(label, style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.w500)),
+          Text(
+            label,
+            style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );

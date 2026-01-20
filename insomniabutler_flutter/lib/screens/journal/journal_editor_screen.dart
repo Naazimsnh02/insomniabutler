@@ -13,7 +13,7 @@ import '../../utils/haptic_helper.dart';
 /// Beautiful glassmorphic editor with mood selection and tags
 class JournalEditorScreen extends StatefulWidget {
   final int? entryId; // null for new entry
-  
+
   const JournalEditorScreen({Key? key, this.entryId}) : super(key: key);
 
   @override
@@ -24,7 +24,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  
+
   String? _selectedMood;
   DateTime _selectedDate = DateTime.now();
   bool _isSaving = false;
@@ -65,7 +65,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
 
   Future<void> _loadEntry() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final userId = await UserService.getCurrentUserId();
       if (userId == null) return;
@@ -90,8 +90,12 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
   Future<void> _loadPrompts() async {
     try {
       final hour = DateTime.now().hour;
-      final category = hour < 12 ? 'morning' : hour < 17 ? 'evening' : 'evening';
-      
+      final category = hour < 12
+          ? 'morning'
+          : hour < 17
+          ? 'evening'
+          : 'evening';
+
       final prompts = await client.journal.getDailyPrompts(category);
       setState(() => _prompts = prompts);
     } catch (e) {
@@ -122,7 +126,9 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
         await client.journal.createEntry(
           userId,
           _contentController.text.trim(),
-          title: _titleController.text.trim().isEmpty ? null : _titleController.text.trim(),
+          title: _titleController.text.trim().isEmpty
+              ? null
+              : _titleController.text.trim(),
           mood: _selectedMood,
           isFavorite: false,
           entryDate: _selectedDate.toUtc(),
@@ -132,7 +138,9 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
         await client.journal.updateEntry(
           widget.entryId!,
           userId,
-          title: _titleController.text.trim().isEmpty ? null : _titleController.text.trim(),
+          title: _titleController.text.trim().isEmpty
+              ? null
+              : _titleController.text.trim(),
           content: _contentController.text.trim(),
           mood: _selectedMood,
         );
@@ -274,7 +282,11 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
                 HapticHelper.lightImpact();
                 setState(() => _showPrompts = false);
               },
-              icon: const Icon(Icons.close, size: 18, color: AppColors.textTertiary),
+              icon: const Icon(
+                Icons.close,
+                size: 18,
+                color: AppColors.textTertiary,
+              ),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
@@ -305,15 +317,25 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
         ),
         child: Row(
           children: [
-            const Icon(Icons.lightbulb_outline_rounded, color: AppColors.accentAmber, size: 20),
+            const Icon(
+              Icons.lightbulb_outline_rounded,
+              color: AppColors.accentAmber,
+              size: 20,
+            ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 prompt.promptText,
-                style: AppTextStyles.bodySm.copyWith(color: AppColors.textSecondary),
+                style: AppTextStyles.bodySm.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textTertiary),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: AppColors.textTertiary,
+            ),
           ],
         ),
       ),
@@ -327,18 +349,26 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.calendar_today_rounded, color: AppColors.accentSkyBlue, size: 20),
+              const Icon(
+                Icons.calendar_today_rounded,
+                color: AppColors.accentSkyBlue,
+                size: 20,
+              ),
               const SizedBox(width: AppSpacing.sm),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     DateFormat('EEEE, MMMM d').format(_selectedDate),
-                    style: AppTextStyles.bodySm.copyWith(fontWeight: FontWeight.bold),
+                    style: AppTextStyles.bodySm.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     DateFormat('h:mm a').format(_selectedDate),
-                    style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
                   ),
                 ],
               ),
@@ -369,7 +399,11 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
                 setState(() => _selectedDate = date);
               }
             },
-            icon: const Icon(Icons.edit_calendar_rounded, size: 20, color: AppColors.textTertiary),
+            icon: const Icon(
+              Icons.edit_calendar_rounded,
+              size: 20,
+              color: AppColors.textTertiary,
+            ),
           ),
         ],
       ),
@@ -394,12 +428,19 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.accentPrimary.withOpacity(0.2) : AppColors.glassBg,
+                  color: isSelected
+                      ? AppColors.accentPrimary.withOpacity(0.2)
+                      : AppColors.glassBg,
                   borderRadius: BorderRadius.circular(AppBorderRadius.full),
                   border: Border.all(
-                    color: isSelected ? AppColors.accentPrimary : AppColors.glassBorder,
+                    color: isSelected
+                        ? AppColors.accentPrimary
+                        : AppColors.glassBorder,
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -411,8 +452,12 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
                     Text(
                       mood['label']!,
                       style: AppTextStyles.bodySm.copyWith(
-                        color: isSelected ? AppColors.accentPrimary : AppColors.textSecondary,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected
+                            ? AppColors.accentPrimary
+                            : AppColors.textSecondary,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                     ),
                   ],

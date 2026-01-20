@@ -19,43 +19,50 @@ class ThoughtClearingScreen extends StatefulWidget {
   State<ThoughtClearingScreen> createState() => _ThoughtClearingScreenState();
 }
 
-class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with TickerProviderStateMixin {
+class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
+    with TickerProviderStateMixin {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<ChatMessage> _messages = [];
   final String _sessionId = DateTime.now().millisecondsSinceEpoch.toString();
-  
+
   int _sleepReadiness = 45;
   int _previousReadiness = 45;
   bool _isLoading = false;
   String? _currentCategory;
-  
+
   late AnimationController _readinessAnimController;
   late Animation<double> _readinessAnimation;
 
   @override
   void initState() {
     super.initState();
-    
+
     _readinessAnimController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
-    _readinessAnimation = Tween<double>(
-      begin: _previousReadiness.toDouble(),
-      end: _sleepReadiness.toDouble(),
-    ).animate(CurvedAnimation(
-      parent: _readinessAnimController,
-      curve: Curves.easeOutCubic,
-    ));
-    
+
+    _readinessAnimation =
+        Tween<double>(
+          begin: _previousReadiness.toDouble(),
+          end: _sleepReadiness.toDouble(),
+        ).animate(
+          CurvedAnimation(
+            parent: _readinessAnimController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
     // Initial AI greeting
-    _addMessage(ChatMessage(
-      role: 'assistant',
-      content: "What's on your mind tonight? I'm here to help you clear your thoughts so you can rest.",
-      timestamp: DateTime.now(),
-    ));
+    _addMessage(
+      ChatMessage(
+        role: 'assistant',
+        content:
+            "What's on your mind tonight? I'm here to help you clear your thoughts so you can rest.",
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 
   @override
@@ -83,38 +90,40 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
     setState(() {
       _messages.add(message);
     });
-    
+
     _scrollToBottom();
   }
 
   Future<void> _sendMessage() async {
     if (_controller.text.trim().isEmpty) return;
-    
+
     final userMessage = _controller.text.trim();
     _controller.clear();
-    
+
     // Light haptic feedback for send action
     await HapticHelper.lightImpact();
-    
+
     // Hide keyboard
     FocusScope.of(context).unfocus();
-    
+
     // Add user message
-    _addMessage(ChatMessage(
-      role: 'user',
-      content: userMessage,
-      timestamp: DateTime.now(),
-    ));
-    
+    _addMessage(
+      ChatMessage(
+        role: 'user',
+        content: userMessage,
+        timestamp: DateTime.now(),
+      ),
+    );
+
     setState(() => _isLoading = true);
-    
+
     try {
       // Get current user ID
       final userId = await UserService.getCurrentUserId();
       if (userId == null) {
         throw Exception('User not logged in');
       }
-      
+
       // Call Serverpod thought clearing endpoint
       final response = await client.thoughtClearing.processThought(
         userId,
@@ -122,20 +131,22 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
         _sessionId,
         _sleepReadiness,
       );
-      
+
       // Add AI response and update state in a single call to prevent flickering
       setState(() {
-        _messages.add(ChatMessage(
-          role: 'assistant',
-          content: response.message,
-          timestamp: DateTime.now(),
-          category: response.category,
-        ));
-        
+        _messages.add(
+          ChatMessage(
+            role: 'assistant',
+            content: response.message,
+            timestamp: DateTime.now(),
+            category: response.category,
+          ),
+        );
+
         if (response.category.isNotEmpty && response.category != 'general') {
           _currentCategory = _getCategoryEmoji(response.category);
         }
-        
+
         _previousReadiness = _sleepReadiness;
         _sleepReadiness = response.newReadiness;
         _isLoading = false;
@@ -143,30 +154,34 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
 
       // Auto-scroll to bottom
       _scrollToBottom();
-      
-      _readinessAnimation = Tween<double>(
-        begin: _previousReadiness.toDouble(),
-        end: _sleepReadiness.toDouble(),
-      ).animate(CurvedAnimation(
-        parent: _readinessAnimController,
-        curve: Curves.easeOutCubic,
-      ));
-      
+
+      _readinessAnimation =
+          Tween<double>(
+            begin: _previousReadiness.toDouble(),
+            end: _sleepReadiness.toDouble(),
+          ).animate(
+            CurvedAnimation(
+              parent: _readinessAnimController,
+              curve: Curves.easeOutCubic,
+            ),
+          );
+
       _readinessAnimController.forward(from: 0);
-      
+
       // Medium haptic for readiness increase
       await HapticHelper.mediumImpact();
-      
+
       // Show success animation if high readiness
       if (_sleepReadiness >= 75) {
         await HapticHelper.success();
         _showSuccessAnimation();
       }
-      
     } on TimeoutException {
       setState(() => _isLoading = false);
       await HapticHelper.error();
-      _showError('Request timed out. Please check your connection and try again.');
+      _showError(
+        'Request timed out. Please check your connection and try again.',
+      );
     } on SocketException {
       setState(() => _isLoading = false);
       await HapticHelper.error();
@@ -174,7 +189,7 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
     } catch (e) {
       setState(() => _isLoading = false);
       await HapticHelper.error();
-      
+
       // User-friendly error messages
       String errorMessage = 'Unable to process thought. ';
       if (e.toString().contains('User not logged in')) {
@@ -184,9 +199,9 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
       } else {
         errorMessage += 'Please try again.';
       }
-      
+
       _showError(errorMessage);
-      
+
       // Log error for debugging
       print('Thought processing error: $e');
     }
@@ -289,25 +304,28 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
         children: [
           // Back button with glass effect
           GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.glassBg,
-                borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                border: Border.all(color: AppColors.glassBorder),
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios_new,
-                color: AppColors.textPrimary,
-                size: 20,
-              ),
-            ),
-          ).animate(key: const ValueKey('chat_back_btn')).fadeIn(duration: 300.ms).scale(delay: 100.ms),
-          
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.glassBg,
+                    borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                    border: Border.all(color: AppColors.glassBorder),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back_ios_new,
+                    color: AppColors.textPrimary,
+                    size: 20,
+                  ),
+                ),
+              )
+              .animate(key: const ValueKey('chat_back_btn'))
+              .fadeIn(duration: 300.ms)
+              .scale(delay: 100.ms),
+
           const Spacer(),
-          
+
           // Title
           Column(
             children: [
@@ -327,9 +345,9 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
               ),
             ],
           ).animate(key: const ValueKey('chat_title')).fadeIn(delay: 200.ms),
-          
+
           const Spacer(),
-          
+
           const SizedBox(width: 48), // Balance the back button
         ],
       ),
@@ -338,42 +356,49 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
 
   Widget _buildChatBubble(ChatMessage message, int index) {
     final isUser = message.isUser;
-    
+
     return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: AppSpacing.md),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 14,
-        ),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.8,
-        ),
-        decoration: BoxDecoration(
-          gradient: isUser ? AppColors.gradientPrimary : null,
-          color: isUser ? null : AppColors.glassBg,
-          border: isUser ? null : Border.all(color: AppColors.glassBorder),
-          borderRadius: BorderRadius.circular(AppBorderRadius.xl).copyWith(
-            topLeft: isUser ? const Radius.circular(AppBorderRadius.xl) : const Radius.circular(4),
-            topRight: isUser ? const Radius.circular(4) : const Radius.circular(AppBorderRadius.xl),
+          alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: AppSpacing.md),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 14,
+            ),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.8,
+            ),
+            decoration: BoxDecoration(
+              gradient: isUser ? AppColors.gradientPrimary : null,
+              color: isUser ? null : AppColors.glassBg,
+              border: isUser ? null : Border.all(color: AppColors.glassBorder),
+              borderRadius: BorderRadius.circular(AppBorderRadius.xl).copyWith(
+                topLeft: isUser
+                    ? const Radius.circular(AppBorderRadius.xl)
+                    : const Radius.circular(4),
+                topRight: isUser
+                    ? const Radius.circular(4)
+                    : const Radius.circular(AppBorderRadius.xl),
+              ),
+              boxShadow: isUser ? AppShadows.buttonShadow : null,
+            ),
+            child: Text(
+              message.content,
+              style: AppTextStyles.body.copyWith(
+                color: AppColors.textPrimary,
+                height: 1.5,
+              ),
+            ),
           ),
-          boxShadow: isUser ? AppShadows.buttonShadow : null,
-        ),
-        child: Text(
-          message.content,
-          style: AppTextStyles.body.copyWith(
-            color: AppColors.textPrimary,
-            height: 1.5,
-          ),
-        ),
-      ),
-    ).animate(key: ValueKey(message.timestamp.millisecondsSinceEpoch)).fadeIn(duration: 300.ms).slideY(
-      begin: 0.3,
-      end: 0,
-      duration: 300.ms,
-      curve: Curves.easeOut,
-    );
+        )
+        .animate(key: ValueKey(message.timestamp.millisecondsSinceEpoch))
+        .fadeIn(duration: 300.ms)
+        .slideY(
+          begin: 0.3,
+          end: 0,
+          duration: 300.ms,
+          curve: Curves.easeOut,
+        );
   }
 
   Widget _buildTypingIndicator() {
@@ -403,46 +428,50 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
 
   Widget _buildDot(int index) {
     return Container(
-      width: 8,
-      height: 8,
-      decoration: const BoxDecoration(
-        color: AppColors.accentPrimary,
-        shape: BoxShape.circle,
-      ),
-    ).animate(onPlay: (controller) => controller.repeat())
-      .fadeIn(delay: (index * 200).ms, duration: 600.ms)
-      .then()
-      .fadeOut(duration: 600.ms);
+          width: 8,
+          height: 8,
+          decoration: const BoxDecoration(
+            color: AppColors.accentPrimary,
+            shape: BoxShape.circle,
+          ),
+        )
+        .animate(onPlay: (controller) => controller.repeat())
+        .fadeIn(delay: (index * 200).ms, duration: 600.ms)
+        .then()
+        .fadeOut(duration: 600.ms);
   }
 
   Widget _buildCategoryBadge() {
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.containerPadding,
-        vertical: AppSpacing.sm,
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        gradient: AppColors.gradientThought,
-        borderRadius: BorderRadius.circular(AppBorderRadius.full),
-        boxShadow: AppShadows.cardShadow,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            _currentCategory!,
-            style: AppTextStyles.bodySm.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
+          margin: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.containerPadding,
+            vertical: AppSpacing.sm,
           ),
-        ],
-      ),
-    ).animate(key: ValueKey('category_${_currentCategory}')).fadeIn(duration: 300.ms).scale(delay: 100.ms);
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            gradient: AppColors.gradientThought,
+            borderRadius: BorderRadius.circular(AppBorderRadius.full),
+            boxShadow: AppShadows.cardShadow,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _currentCategory!,
+                style: AppTextStyles.bodySm.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        )
+        .animate(key: ValueKey('category_${_currentCategory}'))
+        .fadeIn(duration: 300.ms)
+        .scale(delay: 100.ms);
   }
 
   Widget _buildReadinessIndicator() {
@@ -554,23 +583,29 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
               ),
               const SizedBox(width: AppSpacing.md),
               GestureDetector(
-                onTap: _sendMessage,
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    gradient: AppColors.gradientPrimary,
-                    borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                    boxShadow: AppShadows.buttonShadow,
+                    onTap: _sendMessage,
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.gradientPrimary,
+                        borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                        boxShadow: AppShadows.buttonShadow,
+                      ),
+                      child: const Icon(
+                        Icons.send_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                  )
+                  .animate(
+                    onPlay: (controller) => controller.repeat(reverse: true),
+                  )
+                  .shimmer(
+                    duration: 2000.ms,
+                    color: Colors.white.withOpacity(0.3),
                   ),
-                  child: const Icon(
-                    Icons.send_rounded,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-              ).animate(onPlay: (controller) => controller.repeat(reverse: true))
-                .shimmer(duration: 2000.ms, color: Colors.white.withOpacity(0.3)),
             ],
           ),
         ),

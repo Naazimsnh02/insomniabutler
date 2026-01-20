@@ -16,7 +16,7 @@ class HapticHelper {
       await HapticFeedback.lightImpact();
     }
   }
-  
+
   /// Medium impact feedback (for important actions)
   static Future<void> mediumImpact() async {
     try {
@@ -29,7 +29,7 @@ class HapticHelper {
       await HapticFeedback.mediumImpact();
     }
   }
-  
+
   /// Heavy impact feedback (for critical actions or success)
   static Future<void> heavyImpact() async {
     try {
@@ -42,12 +42,12 @@ class HapticHelper {
       await HapticFeedback.heavyImpact();
     }
   }
-  
+
   /// Selection feedback (for picker changes)
   static Future<void> selectionClick() async {
     await HapticFeedback.selectionClick();
   }
-  
+
   /// Success pattern (double vibration)
   static Future<void> success() async {
     try {
@@ -62,7 +62,7 @@ class HapticHelper {
       await HapticFeedback.heavyImpact();
     }
   }
-  
+
   /// Error pattern (triple short vibration)
   static Future<void> error() async {
     try {

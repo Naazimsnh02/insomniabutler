@@ -20,15 +20,16 @@ class JournalScreen extends StatefulWidget {
   State<JournalScreen> createState() => JournalScreenState();
 }
 
-class JournalScreenState extends State<JournalScreen> with SingleTickerProviderStateMixin {
+class JournalScreenState extends State<JournalScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int _selectedTabIndex = 0;
-  
+
   List<dynamic> _entries = [];
   Map<String, dynamic>? _stats;
   List<dynamic> _insights = [];
   bool _isLoading = true;
-  
+
   DateTime _currentMonth = DateTime.now();
   DateTime? _selectedDate;
 
@@ -50,13 +51,17 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
 
   Future<void> loadData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final userId = await UserService.getCurrentUserId();
       if (userId == null) return;
 
       // Load entries, stats, and insights
-      final entries = await client.journal.getUserEntries(userId, limit: 50, offset: 0);
+      final entries = await client.journal.getUserEntries(
+        userId,
+        limit: 50,
+        offset: 0,
+      );
       final stats = await client.journal.getJournalStats(userId);
       final insights = await client.journal.getJournalInsights(userId);
 
@@ -144,7 +149,9 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
               if (_stats != null)
                 Text(
                   '${_stats!['totalEntries']} entries • ${_stats!['currentStreak']}🔥 streak',
-                  style: AppTextStyles.bodySm.copyWith(color: AppColors.textSecondary),
+                  style: AppTextStyles.bodySm.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
             ],
           ),
@@ -155,7 +162,11 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
                   HapticHelper.lightImpact();
                   // TODO: Implement search
                 },
-                icon: const Icon(Icons.search_rounded, color: Colors.white, size: 22),
+                icon: const Icon(
+                  Icons.search_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
                 style: IconButton.styleFrom(
                   backgroundColor: AppColors.glassBgElevated,
                   padding: const EdgeInsets.all(10),
@@ -167,7 +178,11 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
                   HapticHelper.lightImpact();
                   loadData();
                 },
-                icon: const Icon(Icons.refresh_rounded, color: Colors.white, size: 22),
+                icon: const Icon(
+                  Icons.refresh_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
                 style: IconButton.styleFrom(
                   backgroundColor: AppColors.glassBgElevated,
                   padding: const EdgeInsets.all(10),
@@ -182,7 +197,9 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
 
   Widget _buildTabBar() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.containerPadding,
+      ),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: AppColors.glassBg,
@@ -258,83 +275,84 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
     final isFavorite = entry.isFavorite as bool;
 
     return GestureDetector(
-      onTap: () async {
-        await HapticHelper.lightImpact();
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => JournalDetailScreen(entryId: entry.id!),
-          ),
-        );
-        loadData(); // Refresh after returning
-      },
-      child: GlassCard(
-        margin: const EdgeInsets.only(bottom: AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          onTap: () async {
+            await HapticHelper.lightImpact();
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => JournalDetailScreen(entryId: entry.id!),
+              ),
+            );
+            loadData(); // Refresh after returning
+          },
+          child: GlassCard(
+            margin: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    if (moodEmoji != null) ...[
-                      Text(moodEmoji, style: const TextStyle(fontSize: 24)),
-                      const SizedBox(width: AppSpacing.sm),
-                    ],
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        Text(
-                          DateFormat('EEE, MMM d').format(date),
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        Text(
-                          DateFormat('h:mm a').format(date),
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textTertiary,
-                            fontSize: 10,
-                          ),
+                        if (moodEmoji != null) ...[
+                          Text(moodEmoji, style: const TextStyle(fontSize: 24)),
+                          const SizedBox(width: AppSpacing.sm),
+                        ],
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              DateFormat('EEE, MMM d').format(date),
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            Text(
+                              DateFormat('h:mm a').format(date),
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.textTertiary,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
+                    if (isFavorite)
+                      const Icon(
+                        Icons.favorite,
+                        color: AppColors.accentError,
+                        size: 16,
+                      ),
                   ],
                 ),
-                if (isFavorite)
-                  const Icon(
-                    Icons.favorite,
-                    color: AppColors.accentError,
-                    size: 16,
+                if (title != null && title.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    title,
+                    style: AppTextStyles.labelLg.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
+                ],
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  content,
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
-            if (title != null && title.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                title,
-                style: AppTextStyles.labelLg.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              content,
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textSecondary,
-                height: 1.5,
-              ),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    ).animate(key: ValueKey('entry_${entry.id}'))
+          ),
+        )
+        .animate(key: ValueKey('entry_${entry.id}'))
         .fadeIn(delay: (index * 50).ms, duration: 300.ms)
         .slideY(begin: 0.1, end: 0);
   }
@@ -364,7 +382,10 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
             onPressed: () {
               HapticHelper.lightImpact();
               setState(() {
-                _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
+                _currentMonth = DateTime(
+                  _currentMonth.year,
+                  _currentMonth.month - 1,
+                );
               });
             },
             icon: const Icon(Icons.chevron_left, color: Colors.white),
@@ -377,7 +398,10 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
             onPressed: () {
               HapticHelper.lightImpact();
               setState(() {
-                _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1);
+                _currentMonth = DateTime(
+                  _currentMonth.year,
+                  _currentMonth.month + 1,
+                );
               });
             },
             icon: const Icon(Icons.chevron_right, color: Colors.white),
@@ -388,8 +412,16 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
   }
 
   Widget _buildCalendarGrid() {
-    final firstDayOfMonth = DateTime(_currentMonth.year, _currentMonth.month, 1);
-    final lastDayOfMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
+    final firstDayOfMonth = DateTime(
+      _currentMonth.year,
+      _currentMonth.month,
+      1,
+    );
+    final lastDayOfMonth = DateTime(
+      _currentMonth.year,
+      _currentMonth.month + 1,
+      0,
+    );
     final firstWeekday = firstDayOfMonth.weekday % 7; // 0 = Sunday
     final daysInMonth = lastDayOfMonth.day;
 
@@ -400,17 +432,19 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-                .map((day) => SizedBox(
-                      width: 40,
-                      child: Text(
-                        day,
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textTertiary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                .map(
+                  (day) => SizedBox(
+                    width: 40,
+                    child: Text(
+                      day,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textTertiary,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ))
+                    ),
+                  ),
+                )
                 .toList(),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -437,10 +471,12 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
 
   Widget _buildCalendarDay(int day) {
     final date = DateTime(_currentMonth.year, _currentMonth.month, day);
-    final isToday = DateTime.now().year == date.year &&
+    final isToday =
+        DateTime.now().year == date.year &&
         DateTime.now().month == date.month &&
         DateTime.now().day == date.day;
-    final isSelected = _selectedDate != null &&
+    final isSelected =
+        _selectedDate != null &&
         _selectedDate!.year == date.year &&
         _selectedDate!.month == date.month &&
         _selectedDate!.day == date.day;
@@ -470,13 +506,13 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
           gradient: isSelected
               ? AppColors.gradientPrimary
               : isToday
-                  ? LinearGradient(
-                      colors: [
-                        AppColors.accentPrimary.withOpacity(0.3),
-                        AppColors.accentPrimary.withOpacity(0.1),
-                      ],
-                    )
-                  : null,
+              ? LinearGradient(
+                  colors: [
+                    AppColors.accentPrimary.withOpacity(0.3),
+                    AppColors.accentPrimary.withOpacity(0.1),
+                  ],
+                )
+              : null,
           borderRadius: BorderRadius.circular(AppBorderRadius.md),
           border: isToday && !isSelected
               ? Border.all(color: AppColors.accentPrimary, width: 1)
@@ -491,9 +527,11 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
                 color: isSelected
                     ? Colors.white
                     : isToday
-                        ? AppColors.accentPrimary
-                        : AppColors.textPrimary,
-                fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.normal,
+                    ? AppColors.accentPrimary
+                    : AppColors.textPrimary,
+                fontWeight: isSelected || isToday
+                    ? FontWeight.bold
+                    : FontWeight.normal,
               ),
             ),
             if (hasEntries && !isSelected)
@@ -526,11 +564,17 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
       return GlassCard(
         child: Column(
           children: [
-            const Icon(Icons.event_note, color: AppColors.textTertiary, size: 32),
+            const Icon(
+              Icons.event_note,
+              color: AppColors.textTertiary,
+              size: 32,
+            ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               'No entries for ${DateFormat('MMM d, yyyy').format(_selectedDate!)}',
-              style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.body.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -548,30 +592,35 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        ...selectedEntries.map((entry) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: _buildEntryCard(entry, selectedEntries.indexOf(entry)),
-            )),
+        ...selectedEntries.map(
+          (entry) => Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: _buildEntryCard(entry, selectedEntries.indexOf(entry)),
+          ),
+        ),
       ],
     ).animate().fadeIn();
   }
 
   String? _getDominantMood(List<dynamic> entries) {
     if (entries.isEmpty) return null;
-    final moods = entries.map((e) => e.mood as String?).whereType<String>().toList();
+    final moods = entries
+        .map((e) => e.mood as String?)
+        .whereType<String>()
+        .toList();
     if (moods.isEmpty) return null;
-    
+
     final moodCounts = <String, int>{};
     for (var mood in moods) {
       moodCounts[mood] = (moodCounts[mood] ?? 0) + 1;
     }
-    
+
     return moodCounts.entries.reduce((a, b) => a.value > b.value ? a : b).key;
   }
 
   Color _getMoodColor(String? mood) {
     if (mood == null) return AppColors.accentPrimary;
-    
+
     final moodColors = {
       'Great': const Color(0xFF4CAF50),
       'Good': const Color(0xFF8BC34A),
@@ -583,7 +632,7 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
       'Calm': const Color(0xFF00BCD4),
       'Tired': const Color(0xFF607D8B),
     };
-    
+
     return moodColors[mood] ?? AppColors.accentPrimary;
   }
 
@@ -702,7 +751,11 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
               gradient: AppColors.gradientPrimary,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+            child: const Icon(
+              Icons.auto_awesome_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -724,10 +777,11 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(
-              Icons.auto_stories_rounded,
-              size: 80,
-              color: AppColors.accentPrimary,
-            ).animate(onPlay: (c) => c.repeat(reverse: true))
+                  Icons.auto_stories_rounded,
+                  size: 80,
+                  color: AppColors.accentPrimary,
+                )
+                .animate(onPlay: (c) => c.repeat(reverse: true))
                 .shimmer(duration: 2.seconds, color: Colors.white24),
             const SizedBox(height: AppSpacing.xl),
             Text(
@@ -751,31 +805,32 @@ class JournalScreenState extends State<JournalScreen> with SingleTickerProviderS
 
   Widget _buildFAB() {
     return GestureDetector(
-      onTap: () async {
-        await HapticHelper.mediumImpact();
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const JournalEditorScreen()),
-        );
-        loadData(); // Refresh after creating entry
-      },
-      child: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          gradient: AppColors.gradientPrimary,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.accentPrimary.withOpacity(0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
+          onTap: () async {
+            await HapticHelper.mediumImpact();
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const JournalEditorScreen()),
+            );
+            loadData(); // Refresh after creating entry
+          },
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: AppColors.gradientPrimary,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accentPrimary.withOpacity(0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
-      ),
-    ).animate(onPlay: (c) => c.repeat(reverse: true))
+            child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
+          ),
+        )
+        .animate(onPlay: (c) => c.repeat(reverse: true))
         .moveY(begin: 0, end: -4, duration: 1500.ms);
   }
 

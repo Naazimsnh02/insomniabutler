@@ -31,7 +31,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     try {
       final userId = await UserService.getCurrentUserId();
       if (userId == null) throw Exception('User not logged in');
-      
+
       final sessions = await client.sleepSession.getUserSessions(userId, 50);
       setState(() {
         _sessions = sessions;
@@ -53,20 +53,27 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             children: [
               _buildTopBar(),
               Expanded(
-                child: _isLoading 
-                    ? const Center(child: CircularProgressIndicator(color: AppColors.accentPrimary))
-                    : _sessions.isEmpty 
-                        ? _buildEmptyState()
-                        : RefreshIndicator(
-                            onRefresh: _loadHistory,
-                            color: AppColors.accentPrimary,
-                            backgroundColor: AppColors.backgroundDeep,
-                            child: ListView.builder(
-                                padding: const EdgeInsets.all(AppSpacing.containerPadding),
-                                itemCount: _sessions.length,
-                                itemBuilder: (context, index) => _buildSessionCard(_sessions[index]),
-                              ),
+                child: _isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.accentPrimary,
+                        ),
+                      )
+                    : _sessions.isEmpty
+                    ? _buildEmptyState()
+                    : RefreshIndicator(
+                        onRefresh: _loadHistory,
+                        color: AppColors.accentPrimary,
+                        backgroundColor: AppColors.backgroundDeep,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(
+                            AppSpacing.containerPadding,
                           ),
+                          itemCount: _sessions.length,
+                          itemBuilder: (context, index) =>
+                              _buildSessionCard(_sessions[index]),
+                        ),
+                      ),
               ),
             ],
           ),
@@ -75,8 +82,8 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.push(
-            context, 
-            MaterialPageRoute(builder: (_) => const ManualLogScreen())
+            context,
+            MaterialPageRoute(builder: (_) => const ManualLogScreen()),
           );
           if (result == true) _loadHistory();
         },
@@ -93,7 +100,11 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
             style: IconButton.styleFrom(backgroundColor: AppColors.glassBg),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -108,17 +119,28 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.nightlight_outlined, size: 64, color: AppColors.textTertiary.withOpacity(0.3)),
+          Icon(
+            Icons.nightlight_outlined,
+            size: 64,
+            color: AppColors.textTertiary.withOpacity(0.3),
+          ),
           const SizedBox(height: AppSpacing.md),
-          Text('No sessions logged yet', style: AppTextStyles.bodyLg.copyWith(color: AppColors.textSecondary)),
+          Text(
+            'No sessions logged yet',
+            style: AppTextStyles.bodyLg.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildSessionCard(SleepSession session) {
-    final dateStr = DateFormat('EEE, MMM d').format(session.sessionDate.toLocal());
-    
+    final dateStr = DateFormat(
+      'EEE, MMM d',
+    ).format(session.sessionDate.toLocal());
+
     // Safety checks for wakeTime
     final wakeTime = session.wakeTime ?? DateTime.now();
     final duration = wakeTime.difference(session.bedTime);
@@ -139,10 +161,12 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             'wakeTime': wakeTime.toLocal(),
             'sleepQuality': quality,
           };
-          
+
           final result = await Navigator.push(
-            context, 
-            MaterialPageRoute(builder: (_) => ManualLogScreen(initialData: editData))
+            context,
+            MaterialPageRoute(
+              builder: (_) => ManualLogScreen(initialData: editData),
+            ),
           );
           if (result == true) _loadHistory();
         },
@@ -167,7 +191,12 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(dateStr, style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    dateStr,
+                    style: AppTextStyles.labelLg.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   Text(
                     '${DateFormat.jm().format(session.bedTime.toLocal())} - ${DateFormat.jm().format(wakeTime.toLocal())}',
                     style: AppTextStyles.caption,
@@ -178,12 +207,21 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text('${hours}h ${minutes}m', style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  '${hours}h ${minutes}m',
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 Text('Duration', style: AppTextStyles.caption),
               ],
             ),
             const SizedBox(width: AppSpacing.md),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary, size: 20),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+              size: 20,
+            ),
           ],
         ),
       ),

@@ -5,21 +5,21 @@ import '../services/gemini_service.dart';
 /// Core thought clearing endpoint - processes user thoughts through AI
 class ThoughtClearingEndpoint extends Endpoint {
   GeminiService? _geminiService;
-  
+
   /// Get or create Gemini service instance
   GeminiService _getGeminiService(Session session) {
     if (_geminiService != null) return _geminiService!;
-    
+
     // Get API key from passwords
-    final apiKey = session.passwords['geminiApiKey'] as String?;
+    final apiKey = session.passwords['geminiApiKey'];
     if (apiKey == null) {
       throw Exception('Gemini API key not found in passwords.yaml');
     }
-    
+
     _geminiService = GeminiService(apiKey);
     return _geminiService!;
   }
-  
+
   /// Process a user's thought through AI and return categorized response
   Future<ThoughtResponse> processThought(
     Session session,
@@ -30,20 +30,20 @@ class ThoughtClearingEndpoint extends Endpoint {
   ) async {
     // Build CBT-I system prompt
     final systemPrompt = _buildSystemPrompt(currentReadiness);
-    
+
     // Get AI response
     final gemini = _getGeminiService(session);
     final aiResponse = await gemini.sendMessage(
       systemPrompt: systemPrompt,
       userMessage: userMessage,
     );
-    
+
     // Extract category from response
     final category = _extractCategory(userMessage, aiResponse);
-    
+
     // Calculate readiness increase
     final readinessIncrease = _calculateReadinessIncrease(category);
-    
+
     // Save user message
     await ChatMessage.db.insertRow(
       session,
@@ -55,7 +55,7 @@ class ThoughtClearingEndpoint extends Endpoint {
         timestamp: DateTime.now(),
       ),
     );
-    
+
     // Save AI response
     await ChatMessage.db.insertRow(
       session,
@@ -67,7 +67,7 @@ class ThoughtClearingEndpoint extends Endpoint {
         timestamp: DateTime.now(),
       ),
     );
-    
+
     // Log thought
     await ThoughtLog.db.insertRow(
       session,
@@ -80,14 +80,14 @@ class ThoughtClearingEndpoint extends Endpoint {
         readinessIncrease: readinessIncrease,
       ),
     );
-    
+
     return ThoughtResponse(
       message: aiResponse,
       category: category,
       newReadiness: (currentReadiness + readinessIncrease).clamp(0, 100),
     );
   }
-  
+
   /// Get conversation history for a session
   Future<List<ChatMessage>> getSessionHistory(
     Session session,
@@ -99,7 +99,7 @@ class ThoughtClearingEndpoint extends Endpoint {
       orderBy: (t) => t.timestamp,
     );
   }
-  
+
   /// Build CBT-I based system prompt
   String _buildSystemPrompt(int currentReadiness) {
     return '''
@@ -121,52 +121,52 @@ Current sleep readiness: $currentReadiness%
 Respond in a caring, conversational tone. Keep responses under 100 words.
 ''';
   }
-  
+
   /// Extract thought category from user message and AI response
   String _extractCategory(String userMessage, String aiResponse) {
     // Combine both for better categorization
     final combined = '${userMessage.toLowerCase()} ${aiResponse.toLowerCase()}';
-    
+
     // Priority-based categorization
-    if (combined.contains('work') || 
-        combined.contains('job') || 
+    if (combined.contains('work') ||
+        combined.contains('job') ||
         combined.contains('presentation') ||
         combined.contains('meeting') ||
         combined.contains('deadline')) {
       return 'work';
     }
-    
-    if (combined.contains('relationship') || 
+
+    if (combined.contains('relationship') ||
         combined.contains('social') ||
         combined.contains('friend') ||
         combined.contains('family') ||
         combined.contains('argument')) {
       return 'social';
     }
-    
-    if (combined.contains('health') || 
+
+    if (combined.contains('health') ||
         combined.contains('anxiety') ||
         combined.contains('worry') ||
         combined.contains('stress')) {
       return 'health';
     }
-    
-    if (combined.contains('future') || 
+
+    if (combined.contains('future') ||
         combined.contains('tomorrow') ||
         combined.contains('plan') ||
         combined.contains('schedule')) {
       return 'planning';
     }
-    
+
     if (combined.contains('money') ||
         combined.contains('financial') ||
         combined.contains('budget')) {
       return 'financial';
     }
-    
+
     return 'general';
   }
-  
+
   /// Calculate sleep readiness increase based on category
   int _calculateReadinessIncrease(String category) {
     switch (category) {

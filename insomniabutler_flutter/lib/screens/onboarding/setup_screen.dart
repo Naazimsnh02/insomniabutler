@@ -87,10 +87,13 @@ class _SetupScreenState extends State<SetupScreen> {
                 children: [
                   const SizedBox(height: AppSpacing.xxl),
                   Text(
-                    'Almost there',
-                    style: AppTextStyles.h2,
-                    textAlign: TextAlign.center,
-                  ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, end: 0),
+                        'Almost there',
+                        style: AppTextStyles.h2,
+                        textAlign: TextAlign.center,
+                      )
+                      .animate()
+                      .fadeIn(duration: 400.ms)
+                      .slideY(begin: -0.2, end: 0),
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     'Personalize your dashboard for the best results.',
@@ -108,7 +111,9 @@ class _SetupScreenState extends State<SetupScreen> {
                         children: [
                           Text(
                             'Your sleep goal:',
-                            style: AppTextStyles.labelLg.copyWith(color: AppColors.textSecondary),
+                            style: AppTextStyles.labelLg.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
                           ).animate().fadeIn(delay: 300.ms),
                           const SizedBox(height: AppSpacing.md),
                           ..._goals.asMap().entries.map((entry) {
@@ -120,7 +125,9 @@ class _SetupScreenState extends State<SetupScreen> {
                           const SizedBox(height: AppSpacing.xl),
                           Text(
                             'Usual bedtime:',
-                            style: AppTextStyles.labelLg.copyWith(color: AppColors.textSecondary),
+                            style: AppTextStyles.labelLg.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
                           ).animate().fadeIn(delay: 800.ms),
                           const SizedBox(height: AppSpacing.md),
                           _buildBedtimeSelector()
@@ -135,13 +142,16 @@ class _SetupScreenState extends State<SetupScreen> {
                   const SizedBox(height: AppSpacing.lg),
                   // CTA Button
                   SizedBox(
-                    width: double.infinity,
-                    child: PrimaryButton(
-                      text: 'Start sleeping better',
-                      onPressed: widget.onComplete,
-                      gradient: AppColors.gradientSuccess,
-                    ),
-                  ).animate().fadeIn(delay: 1100.ms).scale(curve: Curves.easeOutBack),
+                        width: double.infinity,
+                        child: PrimaryButton(
+                          text: 'Start sleeping better',
+                          onPressed: widget.onComplete,
+                          gradient: AppColors.gradientSuccess,
+                        ),
+                      )
+                      .animate()
+                      .fadeIn(delay: 1100.ms)
+                      .scale(curve: Curves.easeOutBack),
                   const SizedBox(height: 100), // Space for indicators
                 ],
               ),
@@ -160,13 +170,18 @@ class _SetupScreenState extends State<SetupScreen> {
         onTap: () => _toggleGoal(goal['text']!),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: 16,
+          ),
           decoration: BoxDecoration(
             gradient: isSelected ? AppColors.gradientPrimary : null,
             color: isSelected ? null : AppColors.glassBgElevated,
             borderRadius: BorderRadius.circular(AppBorderRadius.lg),
             border: Border.all(
-              color: isSelected ? AppColors.accentPrimary : AppColors.glassBorder,
+              color: isSelected
+                  ? AppColors.accentPrimary
+                  : AppColors.glassBorder,
               width: isSelected ? 2 : 1,
             ),
             boxShadow: isSelected
@@ -175,7 +190,7 @@ class _SetupScreenState extends State<SetupScreen> {
                       color: AppColors.accentPrimary.withOpacity(0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
-                    )
+                    ),
                   ]
                 : [],
           ),
@@ -271,4 +286,3 @@ class _SetupScreenState extends State<SetupScreen> {
     );
   }
 }
-
