@@ -485,6 +485,19 @@ class EndpointSleepSession extends _i2.EndpointRef {
         'deleteSession',
         {'sessionId': sessionId},
       );
+
+  /// Update mood for the user's latest session
+  _i3.Future<_i7.SleepSession?> updateMoodForLatestSession(
+    int userId,
+    String mood,
+  ) => caller.callServerEndpoint<_i7.SleepSession?>(
+    'sleepSession',
+    'updateMoodForLatestSession',
+    {
+      'userId': userId,
+      'mood': mood,
+    },
+  );
 }
 
 /// Core thought clearing endpoint - processes user thoughts through AI

@@ -171,4 +171,23 @@ class SleepSessionEndpoint extends Endpoint {
     await SleepSession.db.deleteRow(session, sleepSession);
     return true;
   }
+
+  /// Update mood for the user's latest session
+  Future<SleepSession?> updateMoodForLatestSession(
+    Session session,
+    int userId,
+    String mood,
+  ) async {
+    final latest = await SleepSession.db.findFirstRow(
+      session,
+      where: (t) => t.userId.equals(userId),
+      orderBy: (t) => t.sessionDate,
+      orderDescending: true,
+    );
+
+    if (latest == null) return null;
+
+    final updated = latest.copyWith(morningMood: mood);
+    return await SleepSession.db.updateRow(session, updated);
+  }
 }

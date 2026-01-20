@@ -59,8 +59,11 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
     _loadUserData();
     _loadInsights();
     
-    // Listen to timer changes
+    // Listen to timer ticks and status changes
     _timerService.onTick.listen((_) {
+      if (mounted) setState(() {});
+    });
+    _timerService.onStatusChange.listen((_) {
       if (mounted) setState(() {});
     });
   }
@@ -656,20 +659,27 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: _moods.map((mood) {
+            final isAddedMood = mood['label'] == 'Add';
             final isSelected = _selectedMood == mood['label'];
             return GestureDetector(
-              onTap: () {
+              onTap: () async {
                 HapticHelper.lightImpact();
+                if (isAddedMood) {
+                  // In professional apps, this would open a custom mood selector or note screen
+                  return;
+                }
+
                 setState(() => _selectedMood = mood['label']);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Mood logged: ${mood['label']} ${mood['emoji']}'),
-                    backgroundColor: AppColors.accentPrimary.withOpacity(0.9),
-                    behavior: SnackBarBehavior.floating,
-                    duration: const Duration(seconds: 1),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                );
+
+                // Save to backend
+                try {
+                  final userId = await UserService.getCurrentUserId();
+                  if (userId != null) {
+                    await client.sleepSession.updateMoodForLatestSession(userId, mood['label']!);
+                  }
+                } catch (e) {
+                  debugPrint('Error saving mood: $e');
+                }
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),

@@ -746,6 +746,31 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['sessionId'],
                   ),
         ),
+        'updateMoodForLatestSession': _i1.MethodConnector(
+          name: 'updateMoodForLatestSession',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'mood': _i1.ParameterDescription(
+              name: 'mood',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+                  .updateMoodForLatestSession(
+                    session,
+                    params['userId'],
+                    params['mood'],
+                  ),
+        ),
       },
     );
     connectors['thoughtClearing'] = _i1.EndpointConnector(

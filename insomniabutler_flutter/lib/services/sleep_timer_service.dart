@@ -15,19 +15,24 @@ class SleepTimerService {
 
   final _updateController = StreamController<Duration>.broadcast();
   Stream<Duration> get onTick => _updateController.stream;
+  
+  final _statusController = StreamController<bool>.broadcast();
+  Stream<bool> get onStatusChange => _statusController.stream;
+  
   Timer? _timer;
 
   void start() {
     if (_isRunning) return;
     _startTime = DateTime.now();
     _isRunning = true;
+    _statusController.add(true);
     _startTimer();
   }
 
   void stop() {
     _timer?.cancel();
     _isRunning = false;
-    // We don't clear _startTime here yet because we need it for logging
+    _statusController.add(false);
   }
 
   void reset() {

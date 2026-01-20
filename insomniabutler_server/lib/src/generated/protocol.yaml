@@ -30,6 +30,7 @@ sleepSession:
   - logManualSession:
   - updateSession:
   - deleteSession:
+  - updateMoodForLatestSession:
 thoughtClearing:
   - processThought:
   - getSessionHistory:
