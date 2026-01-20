@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../services/user_service.dart';
@@ -54,6 +55,7 @@ class _AccountScreenState extends State<AccountScreen> {
       // Load user data
       final user = await UserService.getCurrentUser();
       final userName = await UserService.getCachedUserName();
+      final userId = await UserService.getCurrentUserId();
       
       // Load app settings
       final bedtimeNotif = await AccountSettingsService.getBedtimeNotifications();
@@ -66,13 +68,29 @@ class _AccountScreenState extends State<AccountScreen> {
       // Load app version
       final packageInfo = await PackageInfo.fromPlatform();
       
-      // Load user stats (placeholder for now, will be implemented with backend)
-      // TODO: Implement getUserStats endpoint
+      // Load user stats from backend
+      int totalSessions = 0;
+      int totalJournalEntries = 0;
+      int currentStreak = 0;
+      
+      if (userId != null) {
+        try {
+          final stats = await client.auth.getUserStats(userId);
+          totalSessions = stats['totalSleepSessions'] ?? 0;
+          totalJournalEntries = stats['totalJournalEntries'] ?? 0;
+          currentStreak = stats['currentStreak'] ?? 0;
+        } catch (e) {
+          debugPrint('Error loading user stats: $e');
+        }
+      }
       
       setState(() {
         _userName = user?.name ?? userName;
         _userEmail = user?.email ?? '';
         _accountCreatedAt = user?.createdAt;
+        _totalSessions = totalSessions;
+        _totalJournalEntries = totalJournalEntries;
+        _currentStreak = currentStreak;
         _bedtimeNotifications = bedtimeNotif;
         _insightsNotifications = insightsNotif;
         _journalNotifications = journalNotif;
@@ -471,46 +489,24 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
           const Divider(color: AppColors.glassBorder, height: 1),
           _buildSettingRow(
-            icon: Icons.help_outline_rounded,
-            title: 'Help & FAQ',
-            subtitle: 'Get answers to common questions',
-            trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary),
-            onTap: () {
-              HapticHelper.lightImpact();
-              // TODO: Navigate to help screen
-            },
-          ),
-          const Divider(color: AppColors.glassBorder, height: 1),
-          _buildSettingRow(
             icon: Icons.email_outlined,
             title: 'Contact Support',
-            subtitle: 'Get help from our team',
-            trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary),
-            onTap: () {
-              HapticHelper.lightImpact();
-              // TODO: Open email or support form
-            },
-          ),
-          const Divider(color: AppColors.glassBorder, height: 1),
-          _buildSettingRow(
-            icon: Icons.star_outline_rounded,
-            title: 'Rate Insomnia Butler',
-            subtitle: 'Share your feedback',
+            subtitle: 'naazimsnh02@gmail.com',
             trailing: const Icon(Icons.open_in_new_rounded, color: AppColors.textTertiary, size: 18),
             onTap: () {
               HapticHelper.lightImpact();
-              // TODO: Open app store rating
+              _launchEmail();
             },
           ),
           const Divider(color: AppColors.glassBorder, height: 1),
           _buildSettingRow(
-            icon: Icons.share_rounded,
-            title: 'Share with Friends',
-            subtitle: 'Help others sleep better',
+            icon: Icons.article_outlined,
+            title: 'About Insomnia Butler',
+            subtitle: 'Learn more about the app',
             trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary),
             onTap: () {
               HapticHelper.lightImpact();
-              // TODO: Open share dialog
+              _showAboutDialog();
             },
           ),
         ],
@@ -646,17 +642,58 @@ class _AccountScreenState extends State<AccountScreen> {
 
   // Dialog methods
   void _showSleepGoalDialog() {
-    // TODO: Implement sleep goal selection dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Sleep goal setting coming soon')),
+    final goals = ['6 hours', '7 hours', '8 hours', '9 hours', '10 hours'];
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.backgroundDeep,
+        title: const Text('Sleep Goal', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: goals.map((goal) => ListTile(
+            title: Text(goal, style: const TextStyle(color: AppColors.textPrimary)),
+            onTap: () async {
+              await UserService.updateSleepPreferences(sleepGoal: goal);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Sleep goal set to $goal')),
+              );
+            },
+          )).toList(),
+        ),
+      ),
     );
   }
 
-  void _showBedtimeDialog() {
-    // TODO: Implement bedtime selection dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Bedtime setting coming soon')),
+  void _showBedtimeDialog() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 23, minute: 0),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: AppColors.accentPrimary,
+              surface: AppColors.backgroundDeep,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
+    
+    if (picked != null) {
+      final now = DateTime.now();
+      final bedtime = DateTime(now.year, now.month, now.day, picked.hour, picked.minute);
+      await UserService.updateSleepPreferences(bedtimePreference: bedtime);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Bedtime set to ${picked.format(context)}')),
+        );
+      }
+    }
   }
 
   void _showExportDialog() {
@@ -751,13 +788,149 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
           TextButton(
             onPressed: () async {
-              // TODO: Implement account deletion
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Account deletion coming soon')),
+              
+              // Show loading indicator
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(
+                  child: CircularProgressIndicator(color: AppColors.accentPrimary),
+                ),
               );
+              
+              // Delete account
+              final success = await UserService.deleteAccount();
+              
+              if (mounted) {
+                Navigator.pop(context); // Close loading dialog
+                
+                if (success) {
+                  // Navigate to onboarding
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => OnboardingScreen(
+                      onComplete: () {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => NewHomeScreen()),
+                          (route) => false,
+                        );
+                      },
+                    )),
+                    (route) => false,
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Failed to delete account. Please try again.'),
+                      backgroundColor: AppColors.accentError,
+                    ),
+                  );
+                }
+              }
             },
             child: const Text('Delete', style: TextStyle(color: AppColors.accentError)),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Future<void> _launchEmail() async {
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: 'naazimsnh02@gmail.com',
+      query: 'subject=Insomnia Butler Support',
+    );
+    
+    try {
+      if (await canLaunchUrl(emailUri)) {
+        await launchUrl(emailUri);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open email app')),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error launching email: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open email app')),
+        );
+      }
+    }
+  }
+  
+  void _showAboutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.backgroundDeep,
+        title: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                gradient: AppColors.gradientPrimary,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.nightlight_round, color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: 12),
+            const Text('Insomnia Butler', style: TextStyle(color: Colors.white)),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Version $_appVersion',
+                style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Insomnia Butler is your personal sleep companion, designed to help you achieve better sleep through:',
+                style: TextStyle(color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 12),
+              _buildAboutFeature('🧠', 'AI-powered thought clearing'),
+              _buildAboutFeature('📊', 'Sleep tracking and analytics'),
+              _buildAboutFeature('📔', 'Sleep journal with insights'),
+              _buildAboutFeature('🎯', 'Personalized sleep goals'),
+              const SizedBox(height: 16),
+              const Text(
+                'Built with ❤️ to help you sleep better',
+                style: TextStyle(color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close', style: TextStyle(color: AppColors.accentPrimary)),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildAboutFeature(String emoji, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 16)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(color: AppColors.textPrimary),
+            ),
           ),
         ],
       ),
