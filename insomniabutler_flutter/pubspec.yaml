@@ -98,9 +98,11 @@ dependency_overrides:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/logo_new.png"
+  image_path: "assets/logo/butler_logo.png"
   min_sdk_android: 21
   remove_alpha_ios: true
+  adaptive_icon_background: "#080D20"
+  adaptive_icon_foreground: "assets/logo/butler_logo.png"
 
 flutter_native_splash:
   color: "#080D20"
