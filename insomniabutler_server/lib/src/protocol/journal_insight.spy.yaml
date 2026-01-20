@@ -1,0 +1,6 @@
+class: JournalInsight
+fields:
+  insightType: String
+  message: String
+  confidence: double
+  relatedEntryIds: String?

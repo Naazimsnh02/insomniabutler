@@ -14,6 +14,7 @@ import 'sleep_tracking/sleep_timer_screen.dart';
 import 'sleep_tracking/manual_log_screen.dart';
 import 'sleep_tracking/sleep_history_screen.dart';
 import '../services/sleep_timer_service.dart';
+import 'journal/journal_screen.dart';
 
 /// Home Dashboard - Main app screen
 /// Redesigned with premium high-fidelity UI inspired by modern sleep trackers
@@ -1025,7 +1026,18 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
   Widget _buildNavItem(IconData icon, String label, int index) {
     final isActive = _selectedNavIndex == index;
     return GestureDetector(
-      onTap: () => setState(() => _selectedNavIndex = index),
+      onTap: () {
+        HapticHelper.lightImpact();
+        setState(() => _selectedNavIndex = index);
+        
+        // Navigate to journal screen when journal tab is tapped
+        if (index == 2) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const JournalScreen()),
+          );
+        }
+      },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

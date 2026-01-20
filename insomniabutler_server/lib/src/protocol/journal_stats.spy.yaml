@@ -1,0 +1,8 @@
+class: JournalStats
+fields:
+  totalEntries: int
+  currentStreak: int
+  longestStreak: int
+  thisWeekEntries: int
+  favoriteCount: int
+  moodDistribution: String

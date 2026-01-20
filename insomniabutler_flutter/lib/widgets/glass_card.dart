@@ -7,6 +7,7 @@ import '../core/theme.dart';
 class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets? padding;
+  final EdgeInsets? margin;
   final double? borderRadius;
   final bool elevated;
   final Gradient? gradient;
@@ -16,6 +17,7 @@ class GlassCard extends StatelessWidget {
     Key? key,
     required this.child,
     this.padding,
+    this.margin,
     this.borderRadius,
     this.elevated = false,
     this.gradient,
@@ -32,6 +34,7 @@ class GlassCard extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
           child: Container(
             padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
+            margin: margin,
             decoration: BoxDecoration(
               gradient: gradient ??
                   LinearGradient(

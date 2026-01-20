@@ -15,13 +15,14 @@ import '../auth/email_idp_endpoint.dart' as _i2;
 import '../auth/jwt_refresh_endpoint.dart' as _i3;
 import '../endpoints/auth_endpoint.dart' as _i4;
 import '../endpoints/insights_endpoint.dart' as _i5;
-import '../endpoints/sleep_session_endpoint.dart' as _i6;
-import '../endpoints/thought_clearing_endpoint.dart' as _i7;
-import '../greetings/greeting_endpoint.dart' as _i8;
+import '../endpoints/journal_endpoint.dart' as _i6;
+import '../endpoints/sleep_session_endpoint.dart' as _i7;
+import '../endpoints/thought_clearing_endpoint.dart' as _i8;
+import '../greetings/greeting_endpoint.dart' as _i9;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i9;
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i10;
+import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+    as _i11;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -51,19 +52,25 @@ class Endpoints extends _i1.EndpointDispatch {
           'insights',
           null,
         ),
-      'sleepSession': _i6.SleepSessionEndpoint()
+      'journal': _i6.JournalEndpoint()
+        ..initialize(
+          server,
+          'journal',
+          null,
+        ),
+      'sleepSession': _i7.SleepSessionEndpoint()
         ..initialize(
           server,
           'sleepSession',
           null,
         ),
-      'thoughtClearing': _i7.ThoughtClearingEndpoint()
+      'thoughtClearing': _i8.ThoughtClearingEndpoint()
         ..initialize(
           server,
           'thoughtClearing',
           null,
         ),
-      'greeting': _i8.GreetingEndpoint()
+      'greeting': _i9.GreetingEndpoint()
         ..initialize(
           server,
           'greeting',
@@ -474,6 +481,359 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
+    connectors['journal'] = _i1.EndpointConnector(
+      name: 'journal',
+      endpoint: endpoints['journal']!,
+      methodConnectors: {
+        'createEntry': _i1.MethodConnector(
+          name: 'createEntry',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'content': _i1.ParameterDescription(
+              name: 'content',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'title': _i1.ParameterDescription(
+              name: 'title',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'mood': _i1.ParameterDescription(
+              name: 'mood',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'sleepSessionId': _i1.ParameterDescription(
+              name: 'sleepSessionId',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'tags': _i1.ParameterDescription(
+              name: 'tags',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'isFavorite': _i1.ParameterDescription(
+              name: 'isFavorite',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+            'entryDate': _i1.ParameterDescription(
+              name: 'entryDate',
+              type: _i1.getType<DateTime?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['journal'] as _i6.JournalEndpoint).createEntry(
+                    session,
+                    params['userId'],
+                    params['content'],
+                    title: params['title'],
+                    mood: params['mood'],
+                    sleepSessionId: params['sleepSessionId'],
+                    tags: params['tags'],
+                    isFavorite: params['isFavorite'],
+                    entryDate: params['entryDate'],
+                  ),
+        ),
+        'updateEntry': _i1.MethodConnector(
+          name: 'updateEntry',
+          params: {
+            'entryId': _i1.ParameterDescription(
+              name: 'entryId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'title': _i1.ParameterDescription(
+              name: 'title',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'content': _i1.ParameterDescription(
+              name: 'content',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'mood': _i1.ParameterDescription(
+              name: 'mood',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'tags': _i1.ParameterDescription(
+              name: 'tags',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'isFavorite': _i1.ParameterDescription(
+              name: 'isFavorite',
+              type: _i1.getType<bool?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['journal'] as _i6.JournalEndpoint).updateEntry(
+                    session,
+                    params['entryId'],
+                    params['userId'],
+                    title: params['title'],
+                    content: params['content'],
+                    mood: params['mood'],
+                    tags: params['tags'],
+                    isFavorite: params['isFavorite'],
+                  ),
+        ),
+        'deleteEntry': _i1.MethodConnector(
+          name: 'deleteEntry',
+          params: {
+            'entryId': _i1.ParameterDescription(
+              name: 'entryId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['journal'] as _i6.JournalEndpoint).deleteEntry(
+                    session,
+                    params['entryId'],
+                    params['userId'],
+                  ),
+        ),
+        'getEntry': _i1.MethodConnector(
+          name: 'getEntry',
+          params: {
+            'entryId': _i1.ParameterDescription(
+              name: 'entryId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['journal'] as _i6.JournalEndpoint).getEntry(
+                session,
+                params['entryId'],
+                params['userId'],
+              ),
+        ),
+        'getUserEntries': _i1.MethodConnector(
+          name: 'getUserEntries',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'limit': _i1.ParameterDescription(
+              name: 'limit',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'offset': _i1.ParameterDescription(
+              name: 'offset',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'startDate': _i1.ParameterDescription(
+              name: 'startDate',
+              type: _i1.getType<DateTime?>(),
+              nullable: true,
+            ),
+            'endDate': _i1.ParameterDescription(
+              name: 'endDate',
+              type: _i1.getType<DateTime?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['journal'] as _i6.JournalEndpoint).getUserEntries(
+                    session,
+                    params['userId'],
+                    limit: params['limit'],
+                    offset: params['offset'],
+                    startDate: params['startDate'],
+                    endDate: params['endDate'],
+                  ),
+        ),
+        'searchEntries': _i1.MethodConnector(
+          name: 'searchEntries',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'query': _i1.ParameterDescription(
+              name: 'query',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'mood': _i1.ParameterDescription(
+              name: 'mood',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'tag': _i1.ParameterDescription(
+              name: 'tag',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['journal'] as _i6.JournalEndpoint).searchEntries(
+                    session,
+                    params['userId'],
+                    params['query'],
+                    mood: params['mood'],
+                    tag: params['tag'],
+                  ),
+        ),
+        'toggleFavorite': _i1.MethodConnector(
+          name: 'toggleFavorite',
+          params: {
+            'entryId': _i1.ParameterDescription(
+              name: 'entryId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['journal'] as _i6.JournalEndpoint).toggleFavorite(
+                    session,
+                    params['entryId'],
+                    params['userId'],
+                  ),
+        ),
+        'getDailyPrompts': _i1.MethodConnector(
+          name: 'getDailyPrompts',
+          params: {
+            'category': _i1.ParameterDescription(
+              name: 'category',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['journal'] as _i6.JournalEndpoint).getDailyPrompts(
+                    session,
+                    params['category'],
+                  ),
+        ),
+        'getAllPrompts': _i1.MethodConnector(
+          name: 'getAllPrompts',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['journal'] as _i6.JournalEndpoint)
+                  .getAllPrompts(session),
+        ),
+        'getJournalStats': _i1.MethodConnector(
+          name: 'getJournalStats',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['journal'] as _i6.JournalEndpoint).getJournalStats(
+                    session,
+                    params['userId'],
+                  ),
+        ),
+        'getJournalInsights': _i1.MethodConnector(
+          name: 'getJournalInsights',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['journal'] as _i6.JournalEndpoint)
+                  .getJournalInsights(
+                    session,
+                    params['userId'],
+                  ),
+        ),
+        'seedPrompts': _i1.MethodConnector(
+          name: 'seedPrompts',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['journal'] as _i6.JournalEndpoint)
+                  .seedPrompts(session),
+        ),
+      },
+    );
     connectors['sleepSession'] = _i1.EndpointConnector(
       name: 'sleepSession',
       endpoint: endpoints['sleepSession']!,
@@ -491,7 +851,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+              ) async => (endpoints['sleepSession'] as _i7.SleepSessionEndpoint)
                   .startSession(
                     session,
                     params['userId'],
@@ -525,7 +885,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+              ) async => (endpoints['sleepSession'] as _i7.SleepSessionEndpoint)
                   .endSession(
                     session,
                     params['sessionId'],
@@ -552,7 +912,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+              ) async => (endpoints['sleepSession'] as _i7.SleepSessionEndpoint)
                   .markButlerUsed(
                     session,
                     params['sessionId'],
@@ -577,7 +937,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+              ) async => (endpoints['sleepSession'] as _i7.SleepSessionEndpoint)
                   .getUserSessions(
                     session,
                     params['userId'],
@@ -597,7 +957,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+              ) async => (endpoints['sleepSession'] as _i7.SleepSessionEndpoint)
                   .getActiveSession(
                     session,
                     params['userId'],
@@ -616,7 +976,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+              ) async => (endpoints['sleepSession'] as _i7.SleepSessionEndpoint)
                   .getLastNightSession(
                     session,
                     params['userId'],
@@ -640,7 +1000,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+              ) async => (endpoints['sleepSession'] as _i7.SleepSessionEndpoint)
                   .updateSleepLatency(
                     session,
                     params['sessionId'],
@@ -675,7 +1035,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+              ) async => (endpoints['sleepSession'] as _i7.SleepSessionEndpoint)
                   .logManualSession(
                     session,
                     params['userId'],
@@ -717,7 +1077,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+              ) async => (endpoints['sleepSession'] as _i7.SleepSessionEndpoint)
                   .updateSession(
                     session,
                     params['sessionId'],
@@ -740,7 +1100,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+              ) async => (endpoints['sleepSession'] as _i7.SleepSessionEndpoint)
                   .deleteSession(
                     session,
                     params['sessionId'],
@@ -764,7 +1124,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['sleepSession'] as _i6.SleepSessionEndpoint)
+              ) async => (endpoints['sleepSession'] as _i7.SleepSessionEndpoint)
                   .updateMoodForLatestSession(
                     session,
                     params['userId'],
@@ -806,7 +1166,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['thoughtClearing'] as _i7.ThoughtClearingEndpoint)
+                  (endpoints['thoughtClearing'] as _i8.ThoughtClearingEndpoint)
                       .processThought(
                         session,
                         params['userId'],
@@ -829,7 +1189,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['thoughtClearing'] as _i7.ThoughtClearingEndpoint)
+                  (endpoints['thoughtClearing'] as _i8.ThoughtClearingEndpoint)
                       .getSessionHistory(
                         session,
                         params['sessionId'],
@@ -854,16 +1214,16 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['greeting'] as _i8.GreetingEndpoint).hello(
+              ) async => (endpoints['greeting'] as _i9.GreetingEndpoint).hello(
                 session,
                 params['name'],
               ),
         ),
       },
     );
-    modules['serverpod_auth_idp'] = _i9.Endpoints()
+    modules['serverpod_auth_idp'] = _i10.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i10.Endpoints()
+    modules['serverpod_auth_core'] = _i11.Endpoints()
       ..initializeEndpoints(server);
   }
 }

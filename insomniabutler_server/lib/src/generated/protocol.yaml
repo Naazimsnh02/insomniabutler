@@ -19,6 +19,19 @@ insights:
   - getThoughtCategoryBreakdown:
   - getSleepTrend:
   - getButlerEffectivenessScore:
+journal:
+  - createEntry:
+  - updateEntry:
+  - deleteEntry:
+  - getEntry:
+  - getUserEntries:
+  - searchEntries:
+  - toggleFavorite:
+  - getDailyPrompts:
+  - getAllPrompts:
+  - getJournalStats:
+  - getJournalInsights:
+  - seedPrompts:
 sleepSession:
   - startSession:
   - endSession:

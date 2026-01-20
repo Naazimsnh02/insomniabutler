@@ -38,7 +38,7 @@ class PrimaryButton extends StatelessWidget {
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.max,
               children: [
                 if (isLoading)
                   const SizedBox(
@@ -104,7 +104,7 @@ class GlassButton extends StatelessWidget {
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.max,
               children: [
                 if (icon != null) ...[
                   Icon(icon, color: AppColors.textPrimary, size: 20),

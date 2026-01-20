@@ -6,6 +6,7 @@ import 'package:serverpod_auth_idp_server/providers/email.dart';
 
 import 'src/generated/endpoints.dart';
 import 'src/generated/protocol.dart';
+import 'src/endpoints/journal_endpoint.dart';
 import 'src/web/routes/app_config_route.dart';
 import 'src/web/routes/root.dart';
 
@@ -75,6 +76,17 @@ void run(List<String> args) async {
 
   // Start the server.
   await pod.start();
+
+  // Seed journal prompts
+  final session = await pod.createSession();
+  try {
+    await JournalEndpoint().seedPrompts(session);
+    session.log('Journal prompts seeded successfully');
+  } catch (e) {
+    session.log('Error seeding journal prompts: $e', level: LogLevel.error);
+  } finally {
+    await session.close();
+  }
 }
 
 void _sendRegistrationCode(

@@ -19,12 +19,17 @@ import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
 import 'package:insomniabutler_client/src/protocol/user.dart' as _i5;
 import 'package:insomniabutler_client/src/protocol/user_insights.dart' as _i6;
 import 'package:insomniabutler_client/src/protocol/sleep_session.dart' as _i7;
+import 'package:insomniabutler_client/src/protocol/journal_entry.dart' as _i8;
+import 'package:insomniabutler_client/src/protocol/journal_prompt.dart' as _i9;
+import 'package:insomniabutler_client/src/protocol/journal_stats.dart' as _i10;
+import 'package:insomniabutler_client/src/protocol/journal_insight.dart'
+    as _i11;
 import 'package:insomniabutler_client/src/protocol/thought_response.dart'
-    as _i8;
-import 'package:insomniabutler_client/src/protocol/chat_message.dart' as _i9;
+    as _i12;
+import 'package:insomniabutler_client/src/protocol/chat_message.dart' as _i13;
 import 'package:insomniabutler_client/src/protocol/greetings/greeting.dart'
-    as _i10;
-import 'protocol.dart' as _i11;
+    as _i14;
+import 'protocol.dart' as _i15;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -354,6 +359,176 @@ class EndpointInsights extends _i2.EndpointRef {
       );
 }
 
+/// {@category Endpoint}
+class EndpointJournal extends _i2.EndpointRef {
+  EndpointJournal(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'journal';
+
+  /// Create a new journal entry
+  _i3.Future<_i8.JournalEntry> createEntry(
+    int userId,
+    String content, {
+    String? title,
+    String? mood,
+    int? sleepSessionId,
+    String? tags,
+    required bool isFavorite,
+    DateTime? entryDate,
+  }) => caller.callServerEndpoint<_i8.JournalEntry>(
+    'journal',
+    'createEntry',
+    {
+      'userId': userId,
+      'content': content,
+      'title': title,
+      'mood': mood,
+      'sleepSessionId': sleepSessionId,
+      'tags': tags,
+      'isFavorite': isFavorite,
+      'entryDate': entryDate,
+    },
+  );
+
+  /// Update an existing journal entry
+  _i3.Future<_i8.JournalEntry?> updateEntry(
+    int entryId,
+    int userId, {
+    String? title,
+    String? content,
+    String? mood,
+    String? tags,
+    bool? isFavorite,
+  }) => caller.callServerEndpoint<_i8.JournalEntry?>(
+    'journal',
+    'updateEntry',
+    {
+      'entryId': entryId,
+      'userId': userId,
+      'title': title,
+      'content': content,
+      'mood': mood,
+      'tags': tags,
+      'isFavorite': isFavorite,
+    },
+  );
+
+  /// Delete a journal entry
+  _i3.Future<bool> deleteEntry(
+    int entryId,
+    int userId,
+  ) => caller.callServerEndpoint<bool>(
+    'journal',
+    'deleteEntry',
+    {
+      'entryId': entryId,
+      'userId': userId,
+    },
+  );
+
+  /// Get a single journal entry
+  _i3.Future<_i8.JournalEntry?> getEntry(
+    int entryId,
+    int userId,
+  ) => caller.callServerEndpoint<_i8.JournalEntry?>(
+    'journal',
+    'getEntry',
+    {
+      'entryId': entryId,
+      'userId': userId,
+    },
+  );
+
+  /// Get user's journal entries with pagination
+  _i3.Future<List<_i8.JournalEntry>> getUserEntries(
+    int userId, {
+    required int limit,
+    required int offset,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) => caller.callServerEndpoint<List<_i8.JournalEntry>>(
+    'journal',
+    'getUserEntries',
+    {
+      'userId': userId,
+      'limit': limit,
+      'offset': offset,
+      'startDate': startDate,
+      'endDate': endDate,
+    },
+  );
+
+  /// Search journal entries
+  _i3.Future<List<_i8.JournalEntry>> searchEntries(
+    int userId,
+    String query, {
+    String? mood,
+    String? tag,
+  }) => caller.callServerEndpoint<List<_i8.JournalEntry>>(
+    'journal',
+    'searchEntries',
+    {
+      'userId': userId,
+      'query': query,
+      'mood': mood,
+      'tag': tag,
+    },
+  );
+
+  /// Toggle favorite status
+  _i3.Future<_i8.JournalEntry?> toggleFavorite(
+    int entryId,
+    int userId,
+  ) => caller.callServerEndpoint<_i8.JournalEntry?>(
+    'journal',
+    'toggleFavorite',
+    {
+      'entryId': entryId,
+      'userId': userId,
+    },
+  );
+
+  /// Get daily prompts
+  _i3.Future<List<_i9.JournalPrompt>> getDailyPrompts(String category) =>
+      caller.callServerEndpoint<List<_i9.JournalPrompt>>(
+        'journal',
+        'getDailyPrompts',
+        {'category': category},
+      );
+
+  /// Get all active prompts
+  _i3.Future<List<_i9.JournalPrompt>> getAllPrompts() =>
+      caller.callServerEndpoint<List<_i9.JournalPrompt>>(
+        'journal',
+        'getAllPrompts',
+        {},
+      );
+
+  /// Get journal statistics
+  _i3.Future<_i10.JournalStats> getJournalStats(int userId) =>
+      caller.callServerEndpoint<_i10.JournalStats>(
+        'journal',
+        'getJournalStats',
+        {'userId': userId},
+      );
+
+  /// Get AI-powered insights
+  _i3.Future<List<_i11.JournalInsight>> getJournalInsights(int userId) =>
+      caller.callServerEndpoint<List<_i11.JournalInsight>>(
+        'journal',
+        'getJournalInsights',
+        {'userId': userId},
+      );
+
+  /// Seed initial prompts (call once during setup)
+  _i3.Future<void> seedPrompts() => caller.callServerEndpoint<void>(
+    'journal',
+    'seedPrompts',
+    {},
+  );
+}
+
 /// Sleep session management endpoint
 /// {@category Endpoint}
 class EndpointSleepSession extends _i2.EndpointRef {
@@ -509,12 +684,12 @@ class EndpointThoughtClearing extends _i2.EndpointRef {
   String get name => 'thoughtClearing';
 
   /// Process a user's thought through AI and return categorized response
-  _i3.Future<_i8.ThoughtResponse> processThought(
+  _i3.Future<_i12.ThoughtResponse> processThought(
     int userId,
     String userMessage,
     String sessionId,
     int currentReadiness,
-  ) => caller.callServerEndpoint<_i8.ThoughtResponse>(
+  ) => caller.callServerEndpoint<_i12.ThoughtResponse>(
     'thoughtClearing',
     'processThought',
     {
@@ -526,8 +701,8 @@ class EndpointThoughtClearing extends _i2.EndpointRef {
   );
 
   /// Get conversation history for a session
-  _i3.Future<List<_i9.ChatMessage>> getSessionHistory(String sessionId) =>
-      caller.callServerEndpoint<List<_i9.ChatMessage>>(
+  _i3.Future<List<_i13.ChatMessage>> getSessionHistory(String sessionId) =>
+      caller.callServerEndpoint<List<_i13.ChatMessage>>(
         'thoughtClearing',
         'getSessionHistory',
         {'sessionId': sessionId},
@@ -544,8 +719,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i10.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i10.Greeting>(
+  _i3.Future<_i14.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i14.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -583,7 +758,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i11.Protocol(),
+         _i15.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -596,6 +771,7 @@ class Client extends _i2.ServerpodClientShared {
     jwtRefresh = EndpointJwtRefresh(this);
     auth = EndpointAuth(this);
     insights = EndpointInsights(this);
+    journal = EndpointJournal(this);
     sleepSession = EndpointSleepSession(this);
     thoughtClearing = EndpointThoughtClearing(this);
     greeting = EndpointGreeting(this);
@@ -609,6 +785,8 @@ class Client extends _i2.ServerpodClientShared {
   late final EndpointAuth auth;
 
   late final EndpointInsights insights;
+
+  late final EndpointJournal journal;
 
   late final EndpointSleepSession sleepSession;
 
@@ -624,6 +802,7 @@ class Client extends _i2.ServerpodClientShared {
     'jwtRefresh': jwtRefresh,
     'auth': auth,
     'insights': insights,
+    'journal': journal,
     'sleepSession': sleepSession,
     'thoughtClearing': thoughtClearing,
     'greeting': greeting,

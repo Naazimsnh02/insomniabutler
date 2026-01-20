@@ -1,0 +1,8 @@
+class: JournalPrompt
+table: journal_prompts
+fields:
+  category: String
+  promptText: String
+  isActive: bool, default=true
+  isSystemPrompt: bool, default=true
+  createdAt: DateTime
