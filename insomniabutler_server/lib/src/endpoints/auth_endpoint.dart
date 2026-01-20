@@ -60,4 +60,46 @@ class AuthEndpoint extends Endpoint {
     
     return await User.db.updateRow(session, updated);
   }
+  
+  /// Update user profile (name)
+  Future<User?> updateUserProfile(
+    Session session,
+    int userId,
+    String name,
+  ) async {
+    var user = await User.db.findById(session, userId);
+    
+    if (user == null) return null;
+    
+    var updated = user.copyWith(name: name);
+    
+    return await User.db.updateRow(session, updated);
+  }
+  
+  /// Delete user and all associated data
+  Future<bool> deleteUser(Session session, int userId) async {
+    try {
+      var user = await User.db.findById(session, userId);
+      if (user == null) return false;
+      
+      // Delete user (cascade delete will handle related data if configured)
+      await User.db.deleteRow(session, user);
+      return true;
+    } catch (e) {
+      session.log('Error deleting user: $e');
+      return false;
+    }
+  }
+  
+  /// Get user statistics
+  /// Returns total sleep sessions, journal entries, and current streak
+  Future<Map<String, int>> getUserStats(Session session, int userId) async {
+    // TODO: Implement actual queries once we have the data
+    // For now, return placeholder data
+    return {
+      'totalSleepSessions': 0,
+      'totalJournalEntries': 0,
+      'currentStreak': 0,
+    };
+  }
 }

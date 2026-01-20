@@ -37,6 +37,7 @@ dependencies:
   serverpod_flutter: 3.2.2
   shared_preferences: ^2.3.4
   vibration: ^3.1.5
+  package_info_plus: ^8.1.2
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4

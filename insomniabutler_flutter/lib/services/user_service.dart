@@ -79,4 +79,64 @@ class UserService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_userNameKey) ?? 'User';
   }
+  
+  /// Get cached user email (no network call)
+  static Future<String> getCachedUserEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userEmailKey) ?? '';
+  }
+  
+  /// Update user profile (name)
+  static Future<User?> updateUserProfile(String name) async {
+    final userId = await getCurrentUserId();
+    if (userId == null) return null;
+    
+    try {
+      final updatedUser = await client.auth.updateUserProfile(userId, name);
+      if (updatedUser != null) {
+        _currentUser = updatedUser;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_userNameKey, updatedUser.name);
+      }
+      return updatedUser;
+    } catch (e) {
+      debugPrint('Error updating user profile: $e');
+      return null;
+    }
+  }
+  
+  /// Update sleep preferences
+  static Future<User?> updateSleepPreferences({
+    String? sleepGoal,
+    DateTime? bedtimePreference,
+  }) async {
+    final userId = await getCurrentUserId();
+    if (userId == null) return null;
+    
+    try {
+      return await client.auth.updatePreferences(
+        userId,
+        sleepGoal,
+        bedtimePreference,
+      );
+    } catch (e) {
+      debugPrint('Error updating sleep preferences: $e');
+      return null;
+    }
+  }
+  
+  /// Delete user account and all associated data
+  static Future<bool> deleteAccount() async {
+    final userId = await getCurrentUserId();
+    if (userId == null) return false;
+    
+    try {
+      await client.auth.deleteUser(userId);
+      await clearCurrentUser();
+      return true;
+    } catch (e) {
+      debugPrint('Error deleting account: $e');
+      return false;
+    }
+  }
 }

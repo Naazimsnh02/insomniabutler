@@ -366,6 +366,67 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['bedtimePreference'],
                   ),
         ),
+        'updateUserProfile': _i1.MethodConnector(
+          name: 'updateUserProfile',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'name': _i1.ParameterDescription(
+              name: 'name',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['auth'] as _i4.AuthEndpoint).updateUserProfile(
+                    session,
+                    params['userId'],
+                    params['name'],
+                  ),
+        ),
+        'deleteUser': _i1.MethodConnector(
+          name: 'deleteUser',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['auth'] as _i4.AuthEndpoint).deleteUser(
+                session,
+                params['userId'],
+              ),
+        ),
+        'getUserStats': _i1.MethodConnector(
+          name: 'getUserStats',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['auth'] as _i4.AuthEndpoint).getUserStats(
+                session,
+                params['userId'],
+              ),
+        ),
       },
     );
     connectors['insights'] = _i1.EndpointConnector(

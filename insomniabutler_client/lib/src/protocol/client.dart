@@ -298,6 +298,35 @@ class EndpointAuth extends _i2.EndpointRef {
       'bedtimePreference': bedtimePreference,
     },
   );
+
+  /// Update user profile (name)
+  _i3.Future<_i5.User?> updateUserProfile(
+    int userId,
+    String name,
+  ) => caller.callServerEndpoint<_i5.User?>(
+    'auth',
+    'updateUserProfile',
+    {
+      'userId': userId,
+      'name': name,
+    },
+  );
+
+  /// Delete user and all associated data
+  _i3.Future<bool> deleteUser(int userId) => caller.callServerEndpoint<bool>(
+    'auth',
+    'deleteUser',
+    {'userId': userId},
+  );
+
+  /// Get user statistics
+  /// Returns total sleep sessions, journal entries, and current streak
+  _i3.Future<Map<String, int>> getUserStats(int userId) =>
+      caller.callServerEndpoint<Map<String, int>>(
+        'auth',
+        'getUserStats',
+        {'userId': userId},
+      );
 }
 
 /// Analytics and insights endpoint for sleep intelligence

@@ -13,6 +13,9 @@ auth:
   - login:
   - getUserById:
   - updatePreferences:
+  - updateUserProfile:
+  - deleteUser:
+  - getUserStats:
 insights:
   - getUserInsights:
   - getWeeklyInsights:
