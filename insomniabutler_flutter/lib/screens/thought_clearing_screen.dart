@@ -66,11 +66,7 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
     super.dispose();
   }
 
-  void _addMessage(ChatMessage message) {
-    setState(() {
-      _messages.add(message);
-    });
-    
+  void _scrollToBottom() {
     // Auto-scroll to bottom with smooth animation
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
@@ -81,6 +77,14 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
         );
       }
     });
+  }
+
+  void _addMessage(ChatMessage message) {
+    setState(() {
+      _messages.add(message);
+    });
+    
+    _scrollToBottom();
   }
 
   Future<void> _sendMessage() async {
@@ -119,27 +123,26 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
         _sleepReadiness,
       );
       
-      // Add AI response
-      _addMessage(ChatMessage(
-        role: 'assistant',
-        content: response.message,
-        timestamp: DateTime.now(),
-        category: response.category,
-      ));
-      
-      // Update category if detected
-      if (response.category.isNotEmpty && response.category != 'general') {
-        setState(() {
-          _currentCategory = _getCategoryEmoji(response.category);
-        });
-      }
-      
-      // Update readiness with animation
+      // Add AI response and update state in a single call to prevent flickering
       setState(() {
+        _messages.add(ChatMessage(
+          role: 'assistant',
+          content: response.message,
+          timestamp: DateTime.now(),
+          category: response.category,
+        ));
+        
+        if (response.category.isNotEmpty && response.category != 'general') {
+          _currentCategory = _getCategoryEmoji(response.category);
+        }
+        
         _previousReadiness = _sleepReadiness;
         _sleepReadiness = response.newReadiness;
         _isLoading = false;
       });
+
+      // Auto-scroll to bottom
+      _scrollToBottom();
       
       _readinessAnimation = Tween<double>(
         begin: _previousReadiness.toDouble(),
@@ -301,7 +304,7 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
                 size: 20,
               ),
             ),
-          ).animate().fadeIn(duration: 300.ms).scale(delay: 100.ms),
+          ).animate(key: const ValueKey('chat_back_btn')).fadeIn(duration: 300.ms).scale(delay: 100.ms),
           
           const Spacer(),
           
@@ -323,7 +326,7 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
                 ),
               ),
             ],
-          ).animate().fadeIn(delay: 200.ms),
+          ).animate(key: const ValueKey('chat_title')).fadeIn(delay: 200.ms),
           
           const Spacer(),
           
@@ -365,7 +368,7 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
           ),
         ),
       ),
-    ).animate().fadeIn(duration: 300.ms).slideY(
+    ).animate(key: ValueKey(message.timestamp.millisecondsSinceEpoch)).fadeIn(duration: 300.ms).slideY(
       begin: 0.3,
       end: 0,
       duration: 300.ms,
@@ -395,7 +398,7 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
           ],
         ),
       ),
-    ).animate(onPlay: (controller) => controller.repeat()).fadeIn();
+    ).animate().fadeIn();
   }
 
   Widget _buildDot(int index) {
@@ -439,7 +442,7 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen> with Tick
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 300.ms).scale(delay: 100.ms);
+    ).animate(key: ValueKey('category_${_currentCategory}')).fadeIn(duration: 300.ms).scale(delay: 100.ms);
   }
 
   Widget _buildReadinessIndicator() {

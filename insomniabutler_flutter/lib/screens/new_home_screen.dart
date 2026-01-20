@@ -40,6 +40,13 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
   int _streakDays = 5;
   bool _isLoadingInsights = true;
 
+  // Last night's sleep data
+  Duration? _lastNightDuration;
+  int? _lastNightQuality;
+  int _lastNightInterruptions = 0;
+  double? _sleepEfficiency;
+  bool _hasLastNightData = false;
+
   // Real data state
   TimeOfDay _bedtime = const TimeOfDay(hour: 23, minute: 0);
   TimeOfDay _alarm = const TimeOfDay(hour: 7, minute: 0);
@@ -108,10 +115,30 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
           }
         }
       }
+
+      // Get last night's session
+      final lastNight = await client.sleepSession.getLastNightSession(userId);
+      if (lastNight != null && lastNight.wakeTime != null) {
+        final duration = lastNight.wakeTime!.difference(lastNight.bedTime);
+        final timeInBed = duration;
+        
+        // Calculate sleep efficiency (assuming minimal interruptions for now)
+        // In a real app, this would come from accelerometer data
+        final efficiency = (duration.inMinutes / timeInBed.inMinutes * 100).clamp(0, 100);
+        
+        setState(() {
+          _lastNightDuration = duration;
+          _lastNightQuality = lastNight.sleepQuality;
+          _sleepEfficiency = efficiency.toDouble();
+          _hasLastNightData = true;
+          // Estimate interruptions based on efficiency (demo logic)
+          _lastNightInterruptions = efficiency > 90 ? 0 : efficiency > 80 ? 1 : 2;
+        });
+      }
       
       setState(() {
         if (insights.latencyImprovement > 0) _latencyImprovement = insights.latencyImprovement;
-        if (insights.avgLatencyWithButler > 0) _avgSleep = (insights.avgLatencyWithButler / 60).clamp(0, 12);
+        if (insights.avgLatencyWithButler > 0) _avgSleep = (insights.avgLatencyWithButler / 60).clamp(0, 12).toDouble();
         if (streak > 0) _streakDays = streak;
         _isLoadingInsights = false;
       });
@@ -238,6 +265,10 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       const SizedBox(height: AppSpacing.lg),
+                      if (_hasLastNightData) ...[
+                        _buildLastNightSummary(),
+                        const SizedBox(height: AppSpacing.xl),
+                      ],
                       _buildDailyAffirmation(),
                       const SizedBox(height: AppSpacing.xl),
                       _buildSleepGauge(),
@@ -439,6 +470,171 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
         ],
       ),
     ).animate().fadeIn().slideX(begin: 0.1, end: 0);
+  }
+
+  Widget _buildLastNightSummary() {
+    if (_lastNightDuration == null) return const SizedBox.shrink();
+
+    final hours = _lastNightDuration!.inHours;
+    final minutes = _lastNightDuration!.inMinutes.remainder(60);
+    final quality = _lastNightQuality ?? 3;
+    
+    // Quality-based colors
+    Color qualityColor = AppColors.accentPrimary;
+    String qualityText = 'Good';
+    if (quality >= 4) {
+      qualityColor = AppColors.accentSuccess;
+      qualityText = 'Excellent';
+    } else if (quality <= 2) {
+      qualityColor = AppColors.accentError;
+      qualityText = 'Poor';
+    }
+
+    return GlassCard(
+      gradient: LinearGradient(
+        colors: [
+          qualityColor.withOpacity(0.1),
+          AppColors.glassBgElevated.withOpacity(0.5),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Last Night',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        '${hours}h ${minutes}m',
+                        style: AppTextStyles.h2.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: qualityColor,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: qualityColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: qualityColor.withOpacity(0.3)),
+                        ),
+                        child: Text(
+                          qualityText,
+                          style: AppTextStyles.caption.copyWith(
+                            color: qualityColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [qualityColor.withOpacity(0.3), qualityColor.withOpacity(0.1)],
+                  ),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: qualityColor.withOpacity(0.5), width: 2),
+                ),
+                child: Icon(
+                  Icons.bedtime_rounded,
+                  color: qualityColor,
+                  size: 32,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Expanded(
+                child: _buildSummaryMetric(
+                  icon: Icons.star_rounded,
+                  value: '$quality/5',
+                  label: 'Quality',
+                  color: qualityColor,
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 40,
+                color: AppColors.glassBorder,
+              ),
+              Expanded(
+                child: _buildSummaryMetric(
+                  icon: Icons.notifications_off_rounded,
+                  value: '$_lastNightInterruptions',
+                  label: 'Interruptions',
+                  color: _lastNightInterruptions == 0 
+                      ? AppColors.accentSuccess 
+                      : AppColors.accentAmber,
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 40,
+                color: AppColors.glassBorder,
+              ),
+              Expanded(
+                child: _buildSummaryMetric(
+                  icon: Icons.trending_up_rounded,
+                  value: '${_sleepEfficiency?.toStringAsFixed(0) ?? '--'}%',
+                  label: 'Efficiency',
+                  color: AppColors.accentSkyBlue,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.1, end: 0);
+  }
+
+  Widget _buildSummaryMetric({
+    required IconData icon,
+    required String value,
+    required String label,
+    required Color color,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 20),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: AppTextStyles.h4.copyWith(
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        Text(
+          label,
+          style: AppTextStyles.caption.copyWith(
+            fontSize: 10,
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildSleepGauge() {
@@ -714,9 +910,11 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
             children: [
               _buildSimpleStat('⚡', '${_latencyImprovement}%', 'Faster Sleep', color: AppColors.accentPrimary),
               const VerticalDivider(color: AppColors.glassBorder, width: 40),
-              _buildSimpleStat('🔥', '${_streakDays}d', 'Sleep Streak', color: AppColors.accentAmber),
-              const VerticalDivider(color: AppColors.glassBorder, width: 40),
-              _buildSimpleStat('💤', '${_avgSleep.toStringAsFixed(1)}h', 'Avg. Rest', color: AppColors.accentSkyBlue),
+              if (_sleepEfficiency != null) ...[
+                _buildSimpleStat('✨', '${_sleepEfficiency!.toStringAsFixed(0)}%', 'Efficiency', color: AppColors.accentSuccess),
+                const VerticalDivider(color: AppColors.glassBorder, width: 40),
+              ],
+              _buildSimpleStat('�', '${_streakDays}d', 'Streak', color: AppColors.accentAmber),
             ],
           ),
         ),
