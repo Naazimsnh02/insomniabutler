@@ -13,13 +13,14 @@ import 'journal_detail_screen.dart';
 /// Journal Screen - Main hub for journaling
 /// Features: Timeline, Calendar, Insights tabs with glassmorphic design
 class JournalScreen extends StatefulWidget {
-  const JournalScreen({Key? key}) : super(key: key);
+  final bool isTab;
+  const JournalScreen({Key? key, this.isTab = false}) : super(key: key);
 
   @override
-  State<JournalScreen> createState() => _JournalScreenState();
+  State<JournalScreen> createState() => JournalScreenState();
 }
 
-class _JournalScreenState extends State<JournalScreen> with SingleTickerProviderStateMixin {
+class JournalScreenState extends State<JournalScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int _selectedTabIndex = 0;
   
@@ -38,7 +39,7 @@ class _JournalScreenState extends State<JournalScreen> with SingleTickerProvider
     _tabController.addListener(() {
       setState(() => _selectedTabIndex = _tabController.index);
     });
-    _loadData();
+    loadData();
   }
 
   @override
@@ -47,7 +48,7 @@ class _JournalScreenState extends State<JournalScreen> with SingleTickerProvider
     super.dispose();
   }
 
-  Future<void> _loadData() async {
+  Future<void> loadData() async {
     setState(() => _isLoading = true);
     
     try {
@@ -79,6 +80,25 @@ class _JournalScreenState extends State<JournalScreen> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isTab) {
+      return Column(
+        children: [
+          _buildHeader(),
+          _buildTabBar(),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildTimelineTab(),
+                _buildCalendarTab(),
+                _buildInsightsTab(),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.backgroundDeep,
       body: Container(
@@ -145,7 +165,7 @@ class _JournalScreenState extends State<JournalScreen> with SingleTickerProvider
               IconButton(
                 onPressed: () {
                   HapticHelper.lightImpact();
-                  _loadData();
+                  loadData();
                 },
                 icon: const Icon(Icons.refresh_rounded, color: Colors.white, size: 22),
                 style: IconButton.styleFrom(
@@ -215,7 +235,7 @@ class _JournalScreenState extends State<JournalScreen> with SingleTickerProvider
     }
 
     return RefreshIndicator(
-      onRefresh: _loadData,
+      onRefresh: loadData,
       color: AppColors.accentPrimary,
       backgroundColor: AppColors.glassBgElevated,
       child: ListView.builder(
@@ -232,7 +252,7 @@ class _JournalScreenState extends State<JournalScreen> with SingleTickerProvider
   Widget _buildEntryCard(dynamic entry, int index) {
     final mood = entry.mood as String?;
     final moodEmoji = _getMoodEmoji(mood);
-    final date = entry.entryDate as DateTime;
+    final date = (entry.entryDate as DateTime).toLocal();
     final title = entry.title as String?;
     final content = entry.content as String;
     final isFavorite = entry.isFavorite as bool;
@@ -246,7 +266,7 @@ class _JournalScreenState extends State<JournalScreen> with SingleTickerProvider
             builder: (_) => JournalDetailScreen(entryId: entry.id!),
           ),
         );
-        _loadData(); // Refresh after returning
+        loadData(); // Refresh after returning
       },
       child: GlassCard(
         margin: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -427,7 +447,7 @@ class _JournalScreenState extends State<JournalScreen> with SingleTickerProvider
 
     // Find entries for this day
     final dayEntries = _entries.where((entry) {
-      final entryDate = entry.entryDate as DateTime;
+      final entryDate = (entry.entryDate as DateTime).toLocal();
       return entryDate.year == date.year &&
           entryDate.month == date.month &&
           entryDate.day == date.day;
@@ -496,7 +516,7 @@ class _JournalScreenState extends State<JournalScreen> with SingleTickerProvider
 
   Widget _buildSelectedDateEntries() {
     final selectedEntries = _entries.where((entry) {
-      final entryDate = entry.entryDate as DateTime;
+      final entryDate = (entry.entryDate as DateTime).toLocal();
       return entryDate.year == _selectedDate!.year &&
           entryDate.month == _selectedDate!.month &&
           entryDate.day == _selectedDate!.day;
@@ -737,7 +757,7 @@ class _JournalScreenState extends State<JournalScreen> with SingleTickerProvider
           context,
           MaterialPageRoute(builder: (_) => const JournalEditorScreen()),
         );
-        _loadData(); // Refresh after creating entry
+        loadData(); // Refresh after creating entry
       },
       child: Container(
         width: 60,

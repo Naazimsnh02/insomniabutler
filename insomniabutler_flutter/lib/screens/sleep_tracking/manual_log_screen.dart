@@ -29,9 +29,9 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
     super.initState();
     if (widget.initialData != null) {
       final d = widget.initialData!;
-      _date = d['sessionDate'];
-      _bedtime = TimeOfDay.fromDateTime(d['bedTime']);
-      _waketime = TimeOfDay.fromDateTime(d['wakeTime']);
+      _date = d['sessionDate'] is DateTime ? (d['sessionDate'] as DateTime).toLocal() : d['sessionDate'];
+      _bedtime = TimeOfDay.fromDateTime((d['bedTime'] as DateTime).toLocal());
+      _waketime = TimeOfDay.fromDateTime((d['wakeTime'] as DateTime).toLocal());
       _quality = d['sleepQuality'] ?? 3;
     } else {
       _date = DateTime.now();
@@ -284,16 +284,16 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
       if (isEdit) {
         await client.sleepSession.updateSession(
           widget.initialData!['id'],
-          bedDateTime,
-          wakeDateTime,
+          bedDateTime.toUtc(),
+          wakeDateTime.toUtc(),
           _quality,
           null, // sleepLatencyMinutes
         );
       } else {
         await client.sleepSession.logManualSession(
           userId,
-          bedDateTime,
-          wakeDateTime,
+          bedDateTime.toUtc(),
+          wakeDateTime.toUtc(),
           _quality,
         );
       }

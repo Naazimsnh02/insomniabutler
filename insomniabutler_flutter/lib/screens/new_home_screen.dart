@@ -15,6 +15,7 @@ import 'sleep_tracking/manual_log_screen.dart';
 import 'sleep_tracking/sleep_history_screen.dart';
 import '../services/sleep_timer_service.dart';
 import 'journal/journal_screen.dart';
+import 'journal/journal_editor_screen.dart';
 
 /// Home Dashboard - Main app screen
 /// Redesigned with premium high-fidelity UI inspired by modern sleep trackers
@@ -27,6 +28,7 @@ class NewHomeScreen extends StatefulWidget {
 
 class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProviderStateMixin {
   final _timerService = SleepTimerService();
+  final GlobalKey<JournalScreenState> _journalKey = GlobalKey();
   int _selectedNavIndex = 0;
   DateTime _selectedDate = DateTime.now();
   String? _selectedMood;
@@ -108,9 +110,9 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
       for (var session in sessions.reversed) {
         if (session.usedButler) {
           if (lastDate == null || 
-              lastDate.difference(session.sessionDate).inDays == 1) {
+              lastDate.difference(session.sessionDate.toLocal()).inDays == 1) {
             streak++;
-            lastDate = session.sessionDate;
+            lastDate = session.sessionDate.toLocal();
           } else {
             break;
           }
@@ -256,41 +258,7 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
 
           // Main Content
           SafeArea(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                _buildTopBar(),
-                _buildCalendarStrip(),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      const SizedBox(height: AppSpacing.lg),
-                      if (_hasLastNightData) ...[
-                        _buildLastNightSummary(),
-                        const SizedBox(height: AppSpacing.xl),
-                      ],
-                      _buildDailyAffirmation(),
-                      const SizedBox(height: AppSpacing.xl),
-                      _buildSleepGauge(),
-                      const SizedBox(height: AppSpacing.xl),
-                       _buildControlPanel(),
-                      const SizedBox(height: AppSpacing.xl),
-                      _buildStartTrackingButton(),
-                      const SizedBox(height: AppSpacing.xl),
-                      if (_timerService.isRunning) ...[
-                        _buildActiveTimerCard(),
-                        const SizedBox(height: AppSpacing.xl),
-                      ],
-                      _buildMoodTracker(),
-                      const SizedBox(height: AppSpacing.xl),
-                      _buildImpactSection(),
-                      const SizedBox(height: 140), // Space for fab & nav
-                    ]),
-                  ),
-                ),
-              ],
-            ),
+            child: _buildBody(),
           ),
 
           // Bottom UI Components
@@ -300,8 +268,81 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
             bottom: 0,
             child: _buildBottomNavArea(),
           ),
+
+          // Journal Add Button (Floating above nav)
+          if (_selectedNavIndex == 2)
+            Positioned(
+              right: 20,
+              bottom: 100,
+              child: _buildJournalFAB(),
+            ),
         ],
       ),
+    );
+  }
+
+  Widget _buildBody() {
+    switch (_selectedNavIndex) {
+      case 0:
+        return _buildHomeTab();
+      case 2:
+        return JournalScreen(isTab: true, key: _journalKey);
+      default:
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                _selectedNavIndex == 1 ? Icons.music_note_rounded : Icons.person_outline_rounded,
+                size: 64,
+                color: AppColors.textTertiary,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '${_selectedNavIndex == 1 ? 'Sounds' : 'Account'} coming soon',
+                style: AppTextStyles.h3.copyWith(color: AppColors.textTertiary),
+              ),
+            ],
+          ),
+        );
+    }
+  }
+
+  Widget _buildHomeTab() {
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        _buildTopBar(),
+        _buildCalendarStrip(),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              const SizedBox(height: AppSpacing.lg),
+              if (_hasLastNightData) ...[
+                _buildLastNightSummary(),
+                const SizedBox(height: AppSpacing.xl),
+              ],
+              _buildDailyAffirmation(),
+              const SizedBox(height: AppSpacing.xl),
+              _buildSleepGauge(),
+              const SizedBox(height: AppSpacing.xl),
+              _buildControlPanel(),
+              const SizedBox(height: AppSpacing.xl),
+              _buildStartTrackingButton(),
+              const SizedBox(height: AppSpacing.xl),
+              if (_timerService.isRunning) ...[
+                _buildActiveTimerCard(),
+                const SizedBox(height: AppSpacing.xl),
+              ],
+              _buildMoodTracker(),
+              const SizedBox(height: AppSpacing.xl),
+              _buildImpactSection(),
+              const SizedBox(height: 140), // Space for fab & nav
+            ]),
+          ),
+        ),
+      ],
     );
   }
 
@@ -989,7 +1030,7 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
               ),
             ),
           ),
-          // Floating Action Button
+          // Floating Action Button (Thought Clearing)
           Positioned(
             bottom: 40,
             child: GestureDetector(
@@ -1018,8 +1059,39 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
               ),
             ),
           ).animate(onPlay: (c) => c.repeat(reverse: true)).moveY(begin: 0, end: -4, duration: 1500.ms),
+
         ],
       ),
+    );
+  }
+
+  Widget _buildJournalFAB() {
+    return GestureDetector(
+      onTap: () async {
+        await HapticHelper.mediumImpact();
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => JournalEditorScreen()),
+        );
+        _journalKey.currentState?.loadData();
+      },
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          gradient: AppColors.gradientCalm,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accentSkyBlue.withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
+      ).animate(onPlay: (c) => c.repeat(reverse: true))
+        .scale(begin: const Offset(1, 1), end: const Offset(1.1, 1.1), duration: 2.seconds),
     );
   }
 
@@ -1029,14 +1101,6 @@ class _NewHomeScreenState extends State<NewHomeScreen> with SingleTickerProvider
       onTap: () {
         HapticHelper.lightImpact();
         setState(() => _selectedNavIndex = index);
-        
-        // Navigate to journal screen when journal tab is tapped
-        if (index == 2) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const JournalScreen()),
-          );
-        }
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,

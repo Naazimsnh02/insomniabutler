@@ -132,7 +132,7 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
 
     final mood = _entry.mood as String?;
     final moodEmoji = _getMoodEmoji(mood);
-    final date = _entry.entryDate as DateTime;
+    final date = (_entry.entryDate as DateTime).toLocal();
     final title = _entry.title as String?;
     final content = _entry.content as String;
     final isFavorite = _entry.isFavorite as bool;

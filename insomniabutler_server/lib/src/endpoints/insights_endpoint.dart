@@ -131,13 +131,13 @@ class InsightsEndpoint extends Endpoint {
     int userId,
     int days,
   ) async {
-    final startDate = DateTime.now().subtract(Duration(days: days));
+    final startDate = DateTime.now().toUtc().subtract(Duration(days: days));
     
     return await SleepSession.db.find(
       session,
       where: (t) => 
         t.userId.equals(userId) &
-        t.sessionDate.between(startDate, DateTime.now()),
+        t.sessionDate.between(startDate, DateTime.now().toUtc()),
       orderBy: (t) => t.sessionDate,
     );
   }

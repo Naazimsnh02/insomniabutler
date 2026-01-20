@@ -117,7 +117,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
   }
 
   Widget _buildSessionCard(SleepSession session) {
-    final dateStr = DateFormat('EEE, MMM d').format(session.sessionDate);
+    final dateStr = DateFormat('EEE, MMM d').format(session.sessionDate.toLocal());
     
     // Safety checks for wakeTime
     final wakeTime = session.wakeTime ?? DateTime.now();
@@ -134,9 +134,9 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           // Prepare data for editing
           final editData = {
             'id': session.id,
-            'sessionDate': session.sessionDate,
-            'bedTime': session.bedTime,
-            'wakeTime': wakeTime,
+            'sessionDate': session.sessionDate.toLocal(),
+            'bedTime': session.bedTime.toLocal(),
+            'wakeTime': wakeTime.toLocal(),
             'sleepQuality': quality,
           };
           
@@ -169,7 +169,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                 children: [
                   Text(dateStr, style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.bold)),
                   Text(
-                    '${DateFormat.jm().format(session.bedTime)} - ${DateFormat.jm().format(wakeTime)}',
+                    '${DateFormat.jm().format(session.bedTime.toLocal())} - ${DateFormat.jm().format(wakeTime.toLocal())}',
                     style: AppTextStyles.caption,
                   ),
                 ],

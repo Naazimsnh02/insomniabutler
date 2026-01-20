@@ -15,7 +15,7 @@ class JournalEndpoint extends Endpoint {
     bool isFavorite = false,
     DateTime? entryDate,
   }) async {
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc();
     final entry = JournalEntry(
       userId: userId,
       title: title,
@@ -54,7 +54,7 @@ class JournalEndpoint extends Endpoint {
     entry.mood = mood ?? entry.mood;
     entry.tags = tags ?? entry.tags;
     entry.isFavorite = isFavorite ?? entry.isFavorite;
-    entry.updatedAt = DateTime.now();
+    entry.updatedAt = DateTime.now().toUtc();
 
     await JournalEntry.db.updateRow(session, entry);
     return entry;
@@ -102,7 +102,7 @@ class JournalEndpoint extends Endpoint {
     if (startDate != null) {
       query = JournalEntry.db.find(
         session,
-        where: (t) => t.userId.equals(userId) & t.entryDate.between(startDate, endDate ?? DateTime.now()),
+        where: (t) => t.userId.equals(userId) & t.entryDate.between(startDate, endDate ?? DateTime.now().toUtc()),
         orderBy: (t) => t.entryDate,
         orderDescending: true,
         limit: limit,
@@ -150,7 +150,7 @@ class JournalEndpoint extends Endpoint {
     }
 
     entry.isFavorite = !entry.isFavorite;
-    entry.updatedAt = DateTime.now();
+    entry.updatedAt = DateTime.now().toUtc();
 
     await JournalEntry.db.updateRow(session, entry);
     return entry;
@@ -218,7 +218,7 @@ class JournalEndpoint extends Endpoint {
     if (tempStreak > longestStreak) longestStreak = tempStreak;
 
     // This week's entries
-    final weekAgo = DateTime.now().subtract(const Duration(days: 7));
+    final weekAgo = DateTime.now().toUtc().subtract(const Duration(days: 7));
     final thisWeekEntries = allEntries.where((e) => e.entryDate.isAfter(weekAgo)).length;
 
     // Mood distribution
@@ -257,7 +257,7 @@ class JournalEndpoint extends Endpoint {
     }
 
     // Insight 1: Journaling frequency
-    final weekAgo = DateTime.now().subtract(const Duration(days: 7));
+    final weekAgo = DateTime.now().toUtc().subtract(const Duration(days: 7));
     final thisWeekCount = recentEntries.where((e) => e.entryDate.isAfter(weekAgo)).length;
     
     if (thisWeekCount >= 5) {
@@ -339,28 +339,28 @@ class JournalEndpoint extends Endpoint {
         promptText: 'What went well today?',
         isActive: true,
         isSystemPrompt: true,
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().toUtc(),
       ),
       JournalPrompt(
         category: 'evening',
         promptText: 'What are you grateful for today?',
         isActive: true,
         isSystemPrompt: true,
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().toUtc(),
       ),
       JournalPrompt(
         category: 'evening',
         promptText: 'What\'s on your mind right now?',
         isActive: true,
         isSystemPrompt: true,
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().toUtc(),
       ),
       JournalPrompt(
         category: 'evening',
         promptText: 'What can wait until tomorrow?',
         isActive: true,
         isSystemPrompt: true,
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().toUtc(),
       ),
       
       // Morning prompts
@@ -369,21 +369,21 @@ class JournalEndpoint extends Endpoint {
         promptText: 'How do you feel this morning?',
         isActive: true,
         isSystemPrompt: true,
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().toUtc(),
       ),
       JournalPrompt(
         category: 'morning',
         promptText: 'Did your worries from last night come true?',
         isActive: true,
         isSystemPrompt: true,
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().toUtc(),
       ),
       JournalPrompt(
         category: 'morning',
         promptText: 'What are you looking forward to today?',
         isActive: true,
         isSystemPrompt: true,
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().toUtc(),
       ),
       
       // Weekly prompts
@@ -392,21 +392,21 @@ class JournalEndpoint extends Endpoint {
         promptText: 'What patterns do you notice in your sleep this week?',
         isActive: true,
         isSystemPrompt: true,
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().toUtc(),
       ),
       JournalPrompt(
         category: 'weekly',
         promptText: 'What helped you sleep best this week?',
         isActive: true,
         isSystemPrompt: true,
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().toUtc(),
       ),
       JournalPrompt(
         category: 'weekly',
         promptText: 'What would you like to improve about your sleep?',
         isActive: true,
         isSystemPrompt: true,
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().toUtc(),
       ),
     ];
 

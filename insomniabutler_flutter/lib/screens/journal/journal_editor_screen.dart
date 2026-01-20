@@ -76,7 +76,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
           _titleController.text = entry.title ?? '';
           _contentController.text = entry.content;
           _selectedMood = entry.mood;
-          _selectedDate = entry.entryDate;
+          _selectedDate = entry.entryDate.toLocal();
           _showPrompts = false;
           _isLoading = false;
         });
@@ -125,7 +125,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
           title: _titleController.text.trim().isEmpty ? null : _titleController.text.trim(),
           mood: _selectedMood,
           isFavorite: false,
-          entryDate: _selectedDate,
+          entryDate: _selectedDate.toUtc(),
         );
       } else {
         // Update existing entry

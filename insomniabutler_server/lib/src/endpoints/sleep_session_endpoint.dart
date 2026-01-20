@@ -7,10 +7,10 @@ class SleepSessionEndpoint extends Endpoint {
   Future<SleepSession> startSession(Session session, int userId) async {
     final sleepSession = SleepSession(
       userId: userId,
-      bedTime: DateTime.now(),
+      bedTime: DateTime.now().toUtc(),
       usedButler: false,
       thoughtsProcessed: 0,
-      sessionDate: DateTime.now(),
+      sessionDate: DateTime.now().toUtc(),
     );
     
     return await SleepSession.db.insertRow(session, sleepSession);
@@ -30,7 +30,7 @@ class SleepSessionEndpoint extends Endpoint {
       throw Exception('Session not found');
     }
     
-    final wakeTime = DateTime.now();
+    final wakeTime = DateTime.now().toUtc();
     
     final updated = sleepSession.copyWith(
       wakeTime: wakeTime,
@@ -91,7 +91,7 @@ class SleepSessionEndpoint extends Endpoint {
   
   /// Get last night's session
   Future<SleepSession?> getLastNightSession(Session session, int userId) async {
-    final yesterday = DateTime.now().subtract(Duration(days: 1));
+    final yesterday = DateTime.now().toUtc().subtract(Duration(days: 1));
     final sessions = await SleepSession.db.find(
       session,
       where: (t) => t.userId.equals(userId),
