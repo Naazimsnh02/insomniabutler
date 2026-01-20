@@ -106,9 +106,9 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#080D20"
-  image: "assets/images/splash_branding.png"
+  image: "assets/logo/butler_logo.png"
   android_12:
-    image: "assets/images/splash_branding.png"
+    image: "assets/logo/butler_logo.png"
     color: "#080D20"
   fullscreen: true
   android_gravity: center
