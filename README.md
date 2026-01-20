@@ -80,9 +80,16 @@ Optional feature to nudge you away from doom-scrolling and toward sleep readines
 | **Backend** | Serverpod 3.0 (Dart) |
 | **AI Engine** | Google Gemini 2.5 Flash |
 | **Database** | PostgreSQL |
-| **Infrastructure** | Docker / Serverpod Cloud |
+| **Infrastructure** | AWS Fargate (App) + AWS RDS (DB) |
 
----
+### ☁️ AWS Resources Used
+- **Application Load Balancer (ALB)**: Provides a **static DNS endpoint** for the app.
+- **ECS on Fargate**: Runs the Serverpod container serverless.
+- **RDS PostgreSQL**: Managed database production instance (v18.1).
+- **ECR**: Hosts the private Docker container image.
+- **CloudWatch**: Centralized logging for the server application.
+- **VPC Security Groups**: Restricts access (Public -> ALB -> App -> DB).
+
 
 ## ⚙️ Getting Started
 
@@ -115,6 +122,37 @@ Optional feature to nudge you away from doom-scrolling and toward sleep readines
     dart bin/main.dart --apply-migrations
     ```
 
+### ☁️ AWS Deployment
+
+For a full production deployment to AWS (ECS Fargate + RDS PostgreSQL):
+
+1.  **Configure AWS CLI:**
+    Ensure you have run `aws configure`.
+
+2.  **Fix Windows CLI Pager (One-time):**
+    ```powershell
+    aws configure set cli_pager ""
+    ```
+
+3.  **Run Full Deployment (Automated):**
+    ```powershell
+    .\deploy-aws-full.ps1 -GeminiApiKey "YOUR_GEMINI_API_KEY"
+    ```
+    *This script builds, pushes, creates the ALB, launches the service, and **automatically syncs** the new DNS to your Flutter client.*
+
+4.  **Static Connection:**
+    The Flutter app is configured to automatically discover the server URL from `assets/config.json`. You do **not** need to manually update IPs in `lib/main.dart` anymore.
+
+5.  **Monitor Logs:**
+    ```powershell
+    aws logs tail /ecs/insomniabutler --follow
+    ```
+
+6.  **Cleanup (Delete all resources):**
+    ```powershell
+    .\cleanup-all.ps1
+    ```
+
 5.  **Run the App:**
     ```bash
     cd ../insomniabutler_flutter
@@ -128,5 +166,3 @@ Optional feature to nudge you away from doom-scrolling and toward sleep readines
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-
-**Now go build something that helps people sleep. The world needs more rest. 💤**

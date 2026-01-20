@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import '../services/gemini_service.dart';
@@ -10,10 +12,14 @@ class ThoughtClearingEndpoint extends Endpoint {
   GeminiService _getGeminiService(Session session) {
     if (_geminiService != null) return _geminiService!;
 
-    // Get API key from passwords
-    final apiKey = session.passwords['geminiApiKey'];
-    if (apiKey == null) {
-      throw Exception('Gemini API key not found in passwords.yaml');
+    // Get API key from passwords or environment
+    var apiKey = session.passwords['geminiApiKey'];
+    if (apiKey == null || apiKey.isEmpty) {
+      apiKey = Platform.environment['GEMINI_API_KEY'];
+    }
+
+    if (apiKey == null || apiKey.isEmpty) {
+      throw Exception('Gemini API key not found in passwords.yaml or environment variables');
     }
 
     _geminiService = GeminiService(apiKey);

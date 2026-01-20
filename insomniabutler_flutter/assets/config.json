@@ -1,3 +1,3 @@
 {
-    "apiUrl": "http://192.168.0.225:8080"
+    "apiUrl":  "http://insomniabutler-alb-984929215.us-east-1.elb.amazonaws.com:80"
 }

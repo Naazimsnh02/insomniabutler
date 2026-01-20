@@ -5,6 +5,7 @@ import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
+import 'dart:convert';
 
 import 'screens/home_screen.dart';
 import 'screens/new_home_screen.dart';
@@ -19,6 +20,26 @@ import 'core/theme.dart';
 /// In a larger app, you may want to use the dependency injection of your choice
 /// instead of using a global client object. This is just a simple example.
 late final Client client;
+
+Future<String> getServerUrl() async {
+  // 1. Check for dart-define (useful for CI/CD)
+  const envUrl = String.fromEnvironment('SERVER_URL');
+  if (envUrl.isNotEmpty) return envUrl;
+
+  try {
+    // 2. Try loading from assets/config.json
+    final configString = await rootBundle.loadString('assets/config.json');
+    final config = jsonDecode(configString);
+    if (config['apiUrl'] != null) {
+      return config['apiUrl'];
+    }
+  } catch (e) {
+    debugPrint('Could not load config.json: $e');
+  }
+
+  // 3. Fallback to localhost
+  return 'http://localhost:8080/';
+}
 
 late String serverUrl;
 
@@ -36,16 +57,8 @@ void main() async {
     ),
   );
 
-  // When you are running the app on a physical device, you need to set the
-  // server URL to the IP address of your computer. You can find the IP
-  // address by running `ipconfig` on Windows or `ifconfig` on Mac/Linux.
-  //
-  // You can set the variable when running or building your app like this:
-  // E.g. `flutter run --dart-define=SERVER_URL=https://api.example.com/`.
-  //
-  // Otherwise, the server URL is fetched from the assets/config.json file or
-  // defaults to http://$localhost:8080/ if not found.
-  final serverUrl = await getServerUrl();
+  // Automatically discover the server URL
+  serverUrl = await getServerUrl();
 
   client = Client(serverUrl)
     ..connectivityMonitor = FlutterConnectivityMonitor()

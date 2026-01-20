@@ -26,6 +26,9 @@ desktop.ini
 secrets.yaml
 config/passwords.yaml
 config/firebase_service_account_key.json
+ecs-trust-policy.json
+aws-deployment-state.json
+task-def-final.json
 
 # Tooling
 .dart_tool/
