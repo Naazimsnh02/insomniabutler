@@ -1,7 +1,7 @@
 # Production configuration
 apiServer:
   port: 8080
-  publicHost: insomniabutler-alb-984929215.us-east-1.elb.amazonaws.com
+  publicHost: insomniabutler-alb-560111551.us-east-1.elb.amazonaws.com
   publicPort: 80
   publicScheme: http
 database:
@@ -9,7 +9,7 @@ database:
   port: 5432
   name: insomniabutler
   user: postgres
-  password: IHbiBtopMCFejyVmKPx3
+  password: t8mrMDEgfzbOQGI4qi20
   requireSsl: true
 redis:
   enabled: false

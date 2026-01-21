@@ -99,18 +99,18 @@ dependency_overrides:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/logo/butler_logo.png"
+  image_path: "assets/logo/final_logo.png"
   min_sdk_android: 21
   remove_alpha_ios: true
-  adaptive_icon_background: "#080D20"
-  adaptive_icon_foreground: "assets/logo/butler_logo.png"
+  adaptive_icon_background: "#0d1558"
+  adaptive_icon_foreground: "assets/logo/final_logo.png"
 
 flutter_native_splash:
-  color: "#080D20"
-  image: "assets/logo/butler_logo.png"
+  color: "#0d1558"
+  image: "assets/logo/final_logo.png"
   android_12:
-    image: "assets/logo/butler_logo.png"
-    color: "#080D20"
+    image: "assets/logo/final_logo.png"
+    color: "#0d1558"
   fullscreen: true
   android_gravity: center
   ios_content_mode: center
