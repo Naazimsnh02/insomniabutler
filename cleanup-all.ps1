@@ -42,8 +42,8 @@ if ($LASTEXITCODE -eq 0 -and $projectAlbArn -ne "None") {
 
 $tgArn = (aws elbv2 describe-target-groups --names "insomniabutler-tg" --region $region --query "TargetGroups[0].TargetGroupArn" --output text 2>$null).Trim()
 if ($LASTEXITCODE -eq 0 -and $tgArn -ne "None") {
-     Write-Host "Deleting Target Group..."
-     aws elbv2 delete-target-group --target-group-arn $tgArn --region $region
+    Write-Host "Deleting Target Group..."
+    aws elbv2 delete-target-group --target-group-arn $tgArn --region $region
 }
 
 Start-Sleep -Seconds 5
@@ -82,7 +82,7 @@ foreach ($role in $roles) {
 }
 
 Write-Host "--- Security Groups ---" -ForegroundColor Yellow
-$sgList = aws ec2 describe-security-groups --filters "Name=group-name,Values=insomniabutler-sg,insomniabutler-rds-sg" --query "SecurityGroups[].GroupId" --output text
+$sgList = aws ec2 describe-security-groups --filters "Name=group-name,Values=insomniabutler-sg,insomniabutler-rds-sg,insomniabutler-alb-sg" --query "SecurityGroups[].GroupId" --output text
 if ($sgList -and $sgList -ne "None") {
     foreach ($sg in $sgList -split '\s+') {
         if ($sg) { 

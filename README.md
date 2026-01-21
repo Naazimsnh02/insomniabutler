@@ -134,30 +134,37 @@ For a full production deployment to AWS (ECS Fargate + RDS PostgreSQL):
     aws configure set cli_pager ""
     ```
 
-3.  **Run Full Deployment (Automated):**
+3.  **Run Full Infrastructure Deployment:**
     ```powershell
     .\deploy-aws-full.ps1 -GeminiApiKey "YOUR_GEMINI_API_KEY"
     ```
-    *This script builds, pushes, creates the ALB, launches the service, and **automatically syncs** the new DNS to your Flutter client.*
+    *This builds, pushes, and creates all AWS resources (ALB, ECS, RDS).*
 
-4.  **Static Connection:**
-    The Flutter app is configured to automatically discover the server URL from `assets/config.json`. You do **not** need to manually update IPs in `lib/main.dart` anymore.
+4.  **Run Database Migrations & Sync Client:**
+    ```powershell
+    .\run-migrations.ps1
+    ```
+    *This script:
+    - Automatically captures the new ALB DNS.
+    - Updates `insomniabutler_flutter/assets/config.json`.
+    - Applies Serverpod migrations to your RDS instance.*
 
-5.  **Monitor Logs:**
+5.  **Monitor Logs (Optional):**
     ```powershell
     aws logs tail /ecs/insomniabutler --follow
     ```
 
-6.  **Cleanup (Delete all resources):**
-    ```powershell
-    .\cleanup-all.ps1
-    ```
-
-5.  **Run the App:**
+6.  **Run the Flutter App:**
     ```bash
-    cd ../insomniabutler_flutter
+    cd insomniabutler_flutter
     flutter run
     ```
+
+### 🧹 Cleanup
+To delete all AWS resources and avoid costs:
+```powershell
+.\cleanup-all.ps1
+```
 
 ---
 

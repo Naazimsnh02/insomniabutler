@@ -5,43 +5,15 @@ import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
-import 'dart:convert';
 
 import 'screens/home_screen.dart';
 import 'screens/new_home_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'core/theme.dart';
 
-/// Sets up a global client object that can be used to talk to the server from
-/// anywhere in our app. The client is generated from your server code
-/// and is set up to connect to a Serverpod running on a local server on
-/// the default port. You will need to modify this to connect to staging or
-/// production servers.
-/// In a larger app, you may want to use the dependency injection of your choice
-/// instead of using a global client object. This is just a simple example.
+import 'dart:convert'; // Added for json.decode
+
 late final Client client;
-
-Future<String> getServerUrl() async {
-  // 1. Check for dart-define (useful for CI/CD)
-  const envUrl = String.fromEnvironment('SERVER_URL');
-  if (envUrl.isNotEmpty) return envUrl;
-
-  try {
-    // 2. Try loading from assets/config.json
-    final configString = await rootBundle.loadString('assets/config.json');
-    final config = jsonDecode(configString);
-    if (config['apiUrl'] != null) {
-      return config['apiUrl'];
-    }
-  } catch (e) {
-    debugPrint('Could not load config.json: $e');
-  }
-
-  // 3. Fallback to localhost
-  return 'http://localhost:8080/';
-}
-
-late String serverUrl;
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -57,8 +29,24 @@ void main() async {
     ),
   );
 
-  // Automatically discover the server URL
-  serverUrl = await getServerUrl();
+  // Default server URL (fallback to AWS production)
+  String serverUrl = 'http://insomniabutler-alb-475922987.us-east-1.elb.amazonaws.com/';
+
+  // Try to load from assets/config.json
+  try {
+    final configString = await rootBundle.loadString('assets/config.json');
+    final config = json.decode(configString);
+    if (config['apiUrl'] != null) {
+      serverUrl = config['apiUrl'];
+      // Ensure it ends with /
+      if (!serverUrl.endsWith('/')) {
+        serverUrl += '/';
+      }
+    }
+    print('Connecting to server: $serverUrl');
+  } catch (e) {
+    print('Failed to load config, using default: $e');
+  }
 
   client = Client(serverUrl)
     ..connectivityMonitor = FlutterConnectivityMonitor()

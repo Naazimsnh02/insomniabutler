@@ -46,6 +46,19 @@ apiServer:
   publicHost: $publicHost
   publicPort: $publicPort
   publicScheme: http
+
+insightsServer:
+  port: 8081
+  publicHost: $publicHost
+  publicPort: 8081
+  publicScheme: http
+
+webServer:
+  port: 8082
+  publicHost: $publicHost
+  publicPort: 8082
+  publicScheme: http
+
 database:
   host: $rdsEndpoint
   port: 5432
@@ -53,6 +66,7 @@ database:
   user: postgres
   password: $($state.dbPassword)
   requireSsl: true
+
 redis:
   enabled: false
 "@
@@ -71,18 +85,23 @@ $sgId = (aws rds describe-db-instances --db-instance-identifier "insomniabutler-
 
 try {
     aws ec2 authorize-security-group-ingress --group-id $sgId --protocol tcp --port 5432 --cidr "$myIp/32" --region $state.region 2>$null
-} catch {}
+}
+catch {}
 
 Write-Host "Running migrations..." -ForegroundColor Cyan
 Set-Location "insomniabutler_server"
 try {
     # Ensure dependencies are fetched
     dart pub get
+    # Pass Gemini Key as env var just in case server initialization needs it
+    $env:GEMINI_API_KEY = $state.geminiApiKey
     dart bin/main.dart --mode production --apply-migrations
     Write-Host "Migrations successful!" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host "Migration failed: $_" -ForegroundColor Red
-} finally {
+}
+finally {
     Set-Location ".."
     aws ec2 revoke-security-group-ingress --group-id $sgId --protocol tcp --port 5432 --cidr "$myIp/32" --region $state.region 2>$null
 }
