@@ -176,20 +176,14 @@ class _SetupScreenState extends State<SetupScreen> {
           ),
           decoration: BoxDecoration(
             gradient: isSelected ? AppColors.gradientPrimary : null,
-            color: isSelected ? null : AppColors.glassBgElevated,
-            borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-            border: Border.all(
-              color: isSelected
-                  ? AppColors.accentPrimary
-                  : AppColors.glassBorder,
-              width: isSelected ? 2 : 1,
-            ),
+            color: isSelected ? null : AppColors.surfaceElevated,
+            borderRadius: BorderRadius.circular(16),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
                       color: AppColors.accentPrimary.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
                     ),
                   ]
                 : [],
@@ -212,9 +206,9 @@ class _SetupScreenState extends State<SetupScreen> {
               ),
               if (isSelected)
                 const Icon(
-                  Icons.check_circle,
+                  Icons.check_circle_rounded,
                   color: Colors.white,
-                  size: 20,
+                  size: 24,
                 ).animate().scale(),
             ],
           ),
@@ -229,36 +223,15 @@ class _SetupScreenState extends State<SetupScreen> {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: AppColors.glassBg,
-          borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-          border: Border.all(color: AppColors.glassBorder),
+          color: AppColors.surfaceElevated,
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
           children: [
             Expanded(
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.accentPrimary.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.bedtime_rounded,
-                      color: AppColors.accentPrimary,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Text(
-                      'Bedtime reminder',
-                      style: AppTextStyles.body,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
+              child: Text(
+                'Bedtime',
+                style: AppTextStyles.body,
               ),
             ),
             const SizedBox(width: AppSpacing.sm),

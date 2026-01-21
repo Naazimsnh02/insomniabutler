@@ -706,7 +706,7 @@ class _AccountScreenState extends State<AccountScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.backgroundDeep,
+        backgroundColor: AppColors.bgPrimary,
         title: const Text('Sleep Goal', style: TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -741,7 +741,7 @@ class _AccountScreenState extends State<AccountScreen> {
           data: ThemeData.dark().copyWith(
             colorScheme: const ColorScheme.dark(
               primary: AppColors.accentPrimary,
-              surface: AppColors.backgroundDeep,
+              surface: AppColors.bgPrimary,
             ),
           ),
           child: child!,
@@ -779,7 +779,7 @@ class _AccountScreenState extends State<AccountScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.backgroundDeep,
+        backgroundColor: AppColors.bgPrimary,
         title: const Text(
           'Clear Cache?',
           style: TextStyle(color: Colors.white),
@@ -818,7 +818,7 @@ class _AccountScreenState extends State<AccountScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.backgroundDeep,
+        backgroundColor: AppColors.bgPrimary,
         title: const Text('Logout?', style: TextStyle(color: Colors.white)),
         content: const Text(
           'Are you sure you want to logout?',
@@ -864,7 +864,7 @@ class _AccountScreenState extends State<AccountScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.backgroundDeep,
+        backgroundColor: AppColors.bgPrimary,
         title: const Text(
           'Delete Account?',
           style: TextStyle(color: AppColors.accentError),
@@ -970,7 +970,7 @@ class _AccountScreenState extends State<AccountScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.backgroundDeep,
+        backgroundColor: AppColors.bgPrimary,
         title: Row(
           children: [
             Container(

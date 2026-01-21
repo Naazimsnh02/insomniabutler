@@ -171,9 +171,9 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: AppColors.backgroundDeep,
+        backgroundColor: AppColors.bgPrimary,
         body: Container(
-          decoration: const BoxDecoration(gradient: AppColors.bgPrimary),
+          decoration: const BoxDecoration(gradient: AppColors.bgMainGradient),
           child: const Center(
             child: CircularProgressIndicator(color: AppColors.accentPrimary),
           ),
@@ -182,9 +182,9 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundDeep,
+      backgroundColor: AppColors.bgPrimary,
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgPrimary),
+        decoration: const BoxDecoration(gradient: AppColors.bgMainGradient),
         child: Column(
           children: [
             SafeArea(
@@ -388,7 +388,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
                       colorScheme: const ColorScheme.dark(
                         primary: AppColors.accentPrimary,
                         onSurface: AppColors.textPrimary,
-                        surface: AppColors.backgroundDeep,
+                        surface: AppColors.bgPrimary,
                       ),
                     ),
                     child: child!,
@@ -512,7 +512,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
         vertical: AppSpacing.lg,
       ),
       decoration: BoxDecoration(
-        color: AppColors.backgroundDeep.withOpacity(0.8),
+        color: AppColors.bgPrimary.withOpacity(0.8),
         border: const Border(
           top: BorderSide(color: AppColors.glassBorder),
         ),

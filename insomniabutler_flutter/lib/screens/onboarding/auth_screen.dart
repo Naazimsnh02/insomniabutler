@@ -90,11 +90,7 @@ class _AuthScreenState extends State<AuthScreen> {
             Positioned.fill(
               child: Container(
                 decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF080D20), Color(0xFF0F172A)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
+                  gradient: AppColors.bgMainGradient,
                 ),
               ),
             ),
@@ -142,10 +138,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               hint: 'Your name',
                               icon: Icons.person_outline_rounded,
                               textCapitalization: TextCapitalization.words,
-                            )
-                            .animate()
-                            .fadeIn(delay: 300.ms)
-                            .slideX(begin: 0.1, end: 0),
+                            ),
                         const SizedBox(height: AppSpacing.lg),
                       ],
 
@@ -155,10 +148,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             hint: 'name@example.com',
                             icon: Icons.email_outlined,
                             keyboardType: TextInputType.emailAddress,
-                          )
-                          .animate()
-                          .fadeIn(delay: 400.ms)
-                          .slideX(begin: 0.1, end: 0),
+                          ),
 
                       const SizedBox(height: AppSpacing.lg),
 
@@ -168,10 +158,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             hint: '••••••••',
                             icon: Icons.lock_outline_rounded,
                             obscureText: true,
-                          )
-                          .animate()
-                          .fadeIn(delay: 500.ms)
-                          .slideX(begin: 0.1, end: 0),
+                          ),
 
                       if (!_isRegistering)
                         Align(
@@ -186,7 +173,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                             ),
                           ),
-                        ).animate().fadeIn(delay: 600.ms),
+                        ),
 
                       const SizedBox(height: AppSpacing.xl),
 
@@ -202,58 +189,6 @@ class _AuthScreenState extends State<AuthScreen> {
                           .animate()
                           .fadeIn(delay: 700.ms)
                           .scale(curve: Curves.easeOutBack),
-
-                      const SizedBox(height: AppSpacing.xxl),
-
-                      // Divider
-                      Row(
-                        children: [
-                          const Expanded(
-                            child: Divider(
-                              color: AppColors.glassBorder,
-                              thickness: 0.5,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md,
-                            ),
-                            child: Text(
-                              'OR',
-                              style: AppTextStyles.caption.copyWith(
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                          ),
-                          const Expanded(
-                            child: Divider(
-                              color: AppColors.glassBorder,
-                              thickness: 0.5,
-                            ),
-                          ),
-                        ],
-                      ).animate().fadeIn(delay: 800.ms),
-
-                      const SizedBox(height: AppSpacing.xl),
-
-                      // Social Buttons
-                      Row(
-                            children: [
-                              Expanded(
-                                child: _buildSocialButton('Apple', Icons.apple),
-                              ),
-                              const SizedBox(width: AppSpacing.md),
-                              Expanded(
-                                child: _buildSocialButton(
-                                  'Google',
-                                  Icons.g_mobiledata_rounded,
-                                ),
-                              ),
-                            ],
-                          )
-                          .animate()
-                          .fadeIn(delay: 900.ms)
-                          .slideY(begin: 0.2, end: 0),
 
                       const SizedBox(height: AppSpacing.xxxl),
 
@@ -326,9 +261,12 @@ class _AuthScreenState extends State<AuthScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           decoration: BoxDecoration(
-            color: AppColors.glassBgElevated,
-            borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-            border: Border.all(color: AppColors.glassBorder),
+            color: AppColors.surfaceElevated,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(
+              color: AppColors.accentPrimary.withOpacity(0.2),
+              width: 1.5,
+            ),
           ),
           child: TextFormField(
             controller: controller,

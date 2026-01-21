@@ -23,14 +23,14 @@ class PrimaryButton extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: gradient ?? AppColors.gradientPrimary,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        borderRadius: BorderRadius.circular(AppBorderRadius.full),
         boxShadow: AppShadows.buttonShadow,
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: isLoading ? null : onPressed,
-          borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+          borderRadius: BorderRadius.circular(AppBorderRadius.full),
           child: Container(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.xl,
@@ -89,14 +89,14 @@ class GlassButton extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.glassBg,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        borderRadius: BorderRadius.circular(AppBorderRadius.full),
         border: Border.all(color: AppColors.glassBorder),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onPressed,
-          borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+          borderRadius: BorderRadius.circular(AppBorderRadius.full),
           child: Container(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.xl,

@@ -50,7 +50,7 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.bgPrimary),
+        decoration: const BoxDecoration(gradient: AppColors.bgMainGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -254,11 +254,11 @@ class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: const BoxDecoration(
-        color: AppColors.backgroundDeep,
+        color: AppColors.bgPrimary,
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppBorderRadius.xxl),
         ),
-        gradient: AppColors.bgSecondary,
+        gradient: AppColors.bgMainGradient,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

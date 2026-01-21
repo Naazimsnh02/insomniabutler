@@ -105,10 +105,10 @@ class JournalScreenState extends State<JournalScreen>
     }
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundDeep,
+      backgroundColor: AppColors.bgPrimary,
       body: Container(
         decoration: const BoxDecoration(
-          gradient: AppColors.bgPrimary,
+          gradient: AppColors.bgMainGradient,
         ),
         child: SafeArea(
           child: Column(
@@ -202,15 +202,14 @@ class JournalScreenState extends State<JournalScreen>
       ),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.glassBg,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-        border: Border.all(color: AppColors.glassBorder),
+        color: AppColors.surfaceElevated,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
           gradient: AppColors.gradientPrimary,
-          borderRadius: BorderRadius.circular(AppBorderRadius.md),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
               color: AppColors.accentPrimary.withOpacity(0.3),

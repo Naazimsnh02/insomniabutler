@@ -193,7 +193,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
             colorScheme: const ColorScheme.dark(
               primary: AppColors.accentPrimary,
               onSurface: AppColors.textPrimary,
-              surface: AppColors.backgroundDeep,
+              surface: AppColors.bgPrimary,
             ),
           ),
           child: child!,
@@ -257,14 +257,14 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDeep,
+      backgroundColor: AppColors.bgPrimary,
       body: Stack(
         children: [
           // Background Gradient
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
-                gradient: AppColors.bgPrimary,
+                gradient: AppColors.bgMainGradient,
               ),
             ),
           ),
@@ -947,9 +947,8 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.glassBgElevated,
-          borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-          border: Border.all(color: AppColors.glassBorder),
+          color: AppColors.surfaceElevated,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1022,13 +1021,8 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                 decoration: BoxDecoration(
                   color: isSelected
                       ? AppColors.accentPrimary
-                      : AppColors.glassBgElevated,
+                      : AppColors.surfaceElevated,
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isSelected
-                        ? AppColors.accentPrimary
-                        : AppColors.glassBorder,
-                  ),
                 ),
                 child: Text(
                   mood['emoji']!,
@@ -1048,7 +1042,12 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       children: [
         Text('Sleep Insights', style: AppTextStyles.labelLg),
         const SizedBox(height: AppSpacing.md),
-        GlassCard(
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceElevated,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+          ),
           child: Row(
             children: [
               _buildSimpleStat(
@@ -1057,7 +1056,12 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                 'Faster Sleep',
                 color: AppColors.accentPrimary,
               ),
-              const VerticalDivider(color: AppColors.glassBorder, width: 40),
+              Container(
+                width: 1,
+                height: 40,
+                color: Colors.white.withOpacity(0.05),
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+              ),
               if (_sleepEfficiency != null) ...[
                 _buildSimpleStat(
                   '✨',
@@ -1065,7 +1069,12 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                   'Efficiency',
                   color: AppColors.accentSuccess,
                 ),
-                const VerticalDivider(color: AppColors.glassBorder, width: 40),
+                Container(
+                width: 1,
+                height: 40,
+                color: Colors.white.withOpacity(0.05),
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+              ),
               ],
               _buildSimpleStat(
                 '�',
@@ -1112,9 +1121,9 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            AppColors.backgroundDeep.withOpacity(0),
-            AppColors.backgroundDeep.withOpacity(0.9),
-            AppColors.backgroundDeep,
+            AppColors.bgPrimary.withOpacity(0),
+            AppColors.bgPrimary.withOpacity(0.9),
+            AppColors.bgPrimary,
           ],
         ),
       ),
@@ -1264,67 +1273,79 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   }
 
   Widget _buildActiveTimerCard() {
-    return GlassCard(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const SleepTimerScreen()),
-        );
-      },
-      gradient: LinearGradient(
-        colors: AppColors.gradientSuccess.colors
-            .map((c) => c.withAlpha(25))
-            .toList(),
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceElevated,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
-      child: Row(
-        children: [
-          Stack(
-            alignment: Alignment.center,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SleepTimerScreen()),
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: AppColors.gradientSuccess.colors
+                  .map((c) => c.withAlpha(25))
+                  .toList(),
+            ),
+          ),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
             children: [
-              Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: AppColors.accentSuccess.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                    ),
-                  )
-                  .animate(onPlay: (c) => c.repeat(reverse: true))
-                  .scale(
-                    duration: 2.seconds,
-                    begin: const Offset(1, 1),
-                    end: const Offset(1.2, 1.2),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: AppColors.accentSuccess.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                      )
+                      .animate(onPlay: (c) => c.repeat(reverse: true))
+                      .scale(
+                        duration: 2.seconds,
+                        begin: const Offset(1, 1),
+                        end: const Offset(1.2, 1.2),
+                      ),
+                  const Icon(
+                    Icons.nightlight_round,
+                    color: AppColors.accentSuccess,
                   ),
+                ],
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sleep Tracking Active',
+                      style: AppTextStyles.labelLg.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'Tap to view your silent timer',
+                      style: AppTextStyles.caption,
+                    ),
+                  ],
+                ),
+              ),
               const Icon(
-                Icons.nightlight_round,
-                color: AppColors.accentSuccess,
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: AppColors.textTertiary,
               ),
             ],
           ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Sleep Tracking Active',
-                  style: AppTextStyles.labelLg.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  'Tap to view your silent timer',
-                  style: AppTextStyles.caption,
-                ),
-              ],
-            ),
-          ),
-          const Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 14,
-            color: AppColors.textTertiary,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -1399,11 +1420,11 @@ class _TrackingSelectorSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: const BoxDecoration(
-        color: AppColors.backgroundDeep,
+        color: AppColors.bgPrimary,
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppBorderRadius.xxl),
         ),
-        gradient: AppColors.bgSecondary,
+        gradient: AppColors.bgMainGradient,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1482,40 +1503,47 @@ class _TrackingSelectorSheet extends StatelessWidget {
     Gradient? gradient,
     VoidCallback onTap,
   ) {
-    return GlassCard(
+    return GestureDetector(
       onTap: onTap,
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              gradient: gradient,
-              color: gradient == null ? AppColors.glassBgElevated : null,
-              shape: BoxShape.circle,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceElevated,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: gradient,
+                color: gradient == null ? AppColors.surfaceElevated : null,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Colors.white, size: 24),
             ),
-            child: Icon(icon, color: Colors.white, size: 24),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.labelLg.copyWith(
-                    fontWeight: FontWeight.bold,
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.labelLg.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                Text(subtitle, style: AppTextStyles.caption),
-              ],
+                  Text(subtitle, style: AppTextStyles.caption),
+                ],
+              ),
             ),
-          ),
-          const Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 14,
-            color: AppColors.textTertiary,
-          ),
-        ],
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: AppColors.textTertiary,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -112,17 +112,14 @@ class _DemoScreenState extends State<DemoScreen> {
       behavior: HitTestBehavior.opaque,
       child: Scaffold(
         backgroundColor: Colors.transparent,
+        resizeToAvoidBottomInset: false,
         body: Stack(
           children: [
             // Deep Night Background
             Positioned.fill(
               child: Container(
                 decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF080D20), Color(0xFF0F172A)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
+                  gradient: AppColors.bgMainGradient,
                 ),
               ),
             ),
@@ -183,13 +180,13 @@ class _DemoScreenState extends State<DemoScreen> {
         margin: const EdgeInsets.only(bottom: 20, left: 40),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.accentCopper.withOpacity(0.15),
+          color: AppColors.accentPrimary.withOpacity(0.15),
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             bottomLeft: Radius.circular(20),
             bottomRight: Radius.circular(20),
           ),
-          border: Border.all(color: AppColors.accentCopper.withOpacity(0.3)),
+          border: Border.all(color: AppColors.accentPrimary.withOpacity(0.3)),
         ),
         child: Text(text, style: AppTextStyles.body),
       ),
@@ -206,13 +203,16 @@ class _DemoScreenState extends State<DemoScreen> {
             margin: const EdgeInsets.only(bottom: 24, right: 40),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.glassBgElevated,
+              color: AppColors.aiBubbleColor,
               borderRadius: const BorderRadius.only(
                 topRight: Radius.circular(20),
                 bottomLeft: Radius.circular(20),
                 bottomRight: Radius.circular(20),
               ),
-              border: Border.all(color: AppColors.glassBorder),
+              border: Border.all(
+                color: AppColors.surfaceElevated,
+                width: 1.5,
+              ),
             ),
             child: Text(
               msg['text'],
@@ -266,8 +266,9 @@ class _DemoScreenState extends State<DemoScreen> {
             margin: const EdgeInsets.only(bottom: 24),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.glassBg,
+              color: AppColors.aiBubbleColor,
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.glassBorder.withOpacity(0.2)),
             ),
             child: Text("...", style: AppTextStyles.labelLg),
           ),
@@ -282,38 +283,71 @@ class _DemoScreenState extends State<DemoScreen> {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
+            horizontal: AppSpacing.md,
             vertical: 20,
           ),
-          decoration: BoxDecoration(
-            color: AppColors.glassBg,
-            border: const Border(top: BorderSide(color: AppColors.glassBorder)),
+          decoration: const BoxDecoration(
+            color: Colors.transparent,
+            border: Border(
+              top: BorderSide(
+                color: Color(0x1AFFFFFF),
+                width: 0.5,
+              ),
+            ),
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  style: AppTextStyles.body,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: InputDecoration(
-                    hintText: "E.g. Work deadline tomorrow...",
-                    hintStyle: AppTextStyles.bodySm.copyWith(
-                      color: AppColors.textTertiary,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: 8,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceElevated,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(
+                color: AppColors.glassBorder.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    style: AppTextStyles.body,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      hintText: "Type your thoughts...",
+                      hintStyle: AppTextStyles.bodySm.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 8,
+                      ),
                     ),
-                    border: InputBorder.none,
+                    onSubmitted: (_) => _handleSend(),
                   ),
-                  onSubmitted: (_) => _handleSend(),
                 ),
-              ),
-              IconButton(
-                onPressed: _handleSend,
-                icon: const Icon(
-                  Icons.send_rounded,
-                  color: AppColors.accentCopper,
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.gradientPrimary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: _handleSend,
+                    icon: const Icon(
+                      Icons.arrow_upward_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -351,9 +385,8 @@ class _DemoScreenState extends State<DemoScreen> {
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
           gradient: primary ? AppColors.gradientPrimary : null,
-          color: primary ? null : AppColors.glassBg,
-          borderRadius: BorderRadius.circular(12),
-          border: primary ? null : Border.all(color: AppColors.glassBorder),
+          color: primary ? null : AppColors.surfaceElevated,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         child: Text(
           text,
@@ -410,11 +443,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF080D20), Color(0xFF0F172A)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
+                gradient: AppColors.bgMainGradient,
               ),
             ),
           ),
@@ -487,11 +516,8 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                   Container(
                         padding: const EdgeInsets.all(AppSpacing.lg),
                         decoration: BoxDecoration(
-                          color: AppColors.glassBg,
-                          borderRadius: BorderRadius.circular(
-                            AppBorderRadius.lg,
-                          ),
-                          border: Border.all(color: AppColors.glassBorder),
+                          color: AppColors.surfaceElevated,
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
                         ),
                         child: Row(
                           children: [
@@ -567,9 +593,8 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.glassBgElevated,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-        border: Border.all(color: AppColors.glassBorder),
+        color: AppColors.surfaceElevated,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: Row(
         children: [

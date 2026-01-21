@@ -72,7 +72,7 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.backgroundDeep,
+        backgroundColor: AppColors.bgPrimary,
         title: Text('Delete Entry?', style: AppTextStyles.h3),
         content: Text(
           'This action cannot be undone.',
@@ -134,9 +134,9 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
   Widget build(BuildContext context) {
     if (_isLoading || _entry == null) {
       return Scaffold(
-        backgroundColor: AppColors.backgroundDeep,
+        backgroundColor: AppColors.bgPrimary,
         body: Container(
-          decoration: const BoxDecoration(gradient: AppColors.bgPrimary),
+          decoration: const BoxDecoration(gradient: AppColors.bgMainGradient),
           child: const Center(
             child: CircularProgressIndicator(color: AppColors.accentPrimary),
           ),
@@ -152,9 +152,9 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
     final isFavorite = _entry.isFavorite as bool;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundDeep,
+      backgroundColor: AppColors.bgPrimary,
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgPrimary),
+        decoration: const BoxDecoration(gradient: AppColors.bgMainGradient),
         child: Column(
           children: [
             SafeArea(
@@ -334,7 +334,7 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
         vertical: AppSpacing.lg,
       ),
       decoration: BoxDecoration(
-        color: AppColors.backgroundDeep.withOpacity(0.8),
+        color: AppColors.bgPrimary.withOpacity(0.8),
         border: const Border(
           top: BorderSide(color: AppColors.glassBorder),
         ),

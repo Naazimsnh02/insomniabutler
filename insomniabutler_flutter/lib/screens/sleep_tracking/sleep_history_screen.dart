@@ -47,7 +47,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgPrimary),
+        decoration: const BoxDecoration(gradient: AppColors.bgMainGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -64,7 +64,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                     : RefreshIndicator(
                         onRefresh: _loadHistory,
                         color: AppColors.accentPrimary,
-                        backgroundColor: AppColors.backgroundDeep,
+                        backgroundColor: AppColors.bgPrimary,
                         child: ListView.builder(
                           padding: const EdgeInsets.all(
                             AppSpacing.containerPadding,

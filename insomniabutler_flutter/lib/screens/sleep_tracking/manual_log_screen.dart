@@ -75,7 +75,7 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
         colorScheme: const ColorScheme.dark(
           primary: AppColors.accentPrimary,
           onSurface: AppColors.textPrimary,
-          surface: AppColors.backgroundDeep,
+          surface: AppColors.bgPrimary,
         ),
       ),
       child: child,
@@ -95,7 +95,7 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgPrimary),
+        decoration: const BoxDecoration(gradient: AppColors.bgMainGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -387,7 +387,7 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surfaceBlueBlack,
+        backgroundColor: AppColors.surfaceBase,
         title: const Text('Delete Session?'),
         content: const Text('This action cannot be undone.'),
         actions: [

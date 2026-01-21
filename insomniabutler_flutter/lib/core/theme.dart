@@ -1,136 +1,142 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 
-/// Comprehensive Design System for Insomnia Butler
-/// Deep Blue + Warm Copper Glassmorphic UI
-/// Optimized for late-night, 2 AM usage
+/// Insomnia Butler Design System
+/// Reference-matched night UI (Ink Blue + Soft Violet + Warm Amber)
 
 class AppColors {
-  // --- Backgrounds ---
-  static const Color backgroundDeep = Color(0xFF0B1C2D); // Deep Ink Blue
-  static const Color surfaceBlueBlack = Color(0xFF10263A); // Secondary Surface
+  // ─────────────────────────────────────────────
+  // Core Backgrounds
+  // ─────────────────────────────────────────────
 
-  // --- Background Gradients (Subtle Night Blues) ---
-  static const bgPrimary = LinearGradient(
-    colors: [Color(0xFF0B1C2D), Color(0xFF081421)],
+  static const Color bgPrimary = Color(0xFF04060B); // Ink Black
+  static const Color bgSecondary = Color(0xFF0B0E1A); // Deep Night Blue
+  static const Color bgTertiary = Color(0xFF110D1F); // Midnight Violet
+
+  static const LinearGradient bgMainGradient = LinearGradient(
+    colors: [bgPrimary, bgTertiary],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
 
-  static const bgSecondary = LinearGradient(
-    colors: [Color(0xFF10263A), Color(0xFF0B1C2D)],
+  // ─────────────────────────────────────────────
+  // Surfaces / Cards
+  // ─────────────────────────────────────────────
+
+  static const Color surfaceBase = Color(0xFF1E2235);
+  static const Color surfaceElevated = Color(0xFF282D42);
+  static const Color surfaceSelected = Color(0xFF323954);
+
+  // ─────────────────────────────────────────────
+  // Accents
+  // ─────────────────────────────────────────────
+
+  /// Primary selection / focus accent (used sparingly)
+  static const Color accentPrimary = Color(0xFF8B6CFF);
+  static const Color accentPrimarySoft = Color(0xFF9F8CFF);
+
+  /// Cool blue accent (icons, progress, highlights)
+  static const Color accentSecondary = Color(0xFF5FA8FF);
+  static const Color accentSecondarySoft = Color(0xFF7BB9FF);
+
+  /// Cool Cyan accent (SUCCESS substitute)
+  static const Color accentCyan = Color(0xFF00E5FF);
+  static const Color accentCyanSoft = Color(0xFF7AEEFF);
+
+  /// Lavender / Soft Violet (AMBER substitute)
+  static const Color accentLavender = Color(0xFFB6A1FF);
+  static const Color accentLavenderSoft = Color(0xFFCDC0FF);
+
+  // ─────────────────────────────────────────────
+  // Semantic Colors (Strictly Night Theme)
+  // ─────────────────────────────────────────────
+
+  static const Color success = accentPrimary;
+  static const Color warning = accentLavender;
+  static const Color error = Color(0xFFFF5F5F);
+
+  // ─────────────────────────────────────────────
+  // Text Colors
+  // ─────────────────────────────────────────────
+
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xFFB8BEDD);
+  static const Color textTertiary = Color(0xFF8A90B2);
+  static const Color textDisabled = Color(0xFF5E6488);
+
+  // ─────────────────────────────────────────────
+  // Glassmorphism
+  // ─────────────────────────────────────────────
+
+  static const Color glassBackground = Color(0x33FFFFFF); // 20% white tint
+  static const Color glassBorder = Colors.transparent; // Borderless design
+  static const Color aiBubbleColor = Color(0xFF1B1F33); // Distinct navy for AI
+
+  // ─────────────────────────────────────────────
+  // Dividers & Hairlines
+  // ─────────────────────────────────────────────
+
+  static const Color divider = Color(0xFF2A3048);
+
+  // ─────────────────────────────────────────────
+  // Gradients
+  // ─────────────────────────────────────────────
+
+  static const LinearGradient gradientPrimary = LinearGradient(
+    colors: [accentPrimary, Color(0xFF6F8CFF)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  static const bgCard = LinearGradient(
-    colors: [Color(0xCC10263A), Color(0x990B1C2D)], // Translucent blue-black
+  static const LinearGradient gradientCool = gradientPrimary;
+
+  static const LinearGradient gradientLavender = LinearGradient(
+    colors: [accentPrimary, accentLavender],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  // --- Accent Colors ---
-  static const accentCopper = Color(0xFFC38E5C); // Primary Accent
-  static const accentAmber = Color(0xFFD9A76F); // Warm Lamp Glow
-  static const accentSkyBlue = Color(0xFF5FA8D3); // Secondary Accent
-
-  static const accentSuccess = Color(0xFF4A7C59); // Muted Calm Green
-  static const accentWarning = Color(0xFFB8860B); // Muted Dark Gold/Amber
-  static const accentError = Color(0xFF9B4444); // Softened Red
-
-  // --- Glass Effects (Translucent blue-black, reduced brightness) ---
-  static const glassBg = Color(0x1A10263A); // rgba(16, 38, 58, 0.1)
-  static const glassBgElevated = Color(0x2610263A); // rgba(16, 38, 58, 0.15)
-  static const glassBorder = Color(
-    0x265FA8D3,
-  ); // Subtle Sky Blue border (15% opacity)
-
-  // --- Text Colors (Warm Off-Whites & Desaturated Calm Tones) ---
-  static const textPrimary = Color(0xFFF5F5F0); // Warm off-white
-  static const textSecondary = Color(0xFF94A3B8); // Desaturated Blue-Grey
-  static const textTertiary = Color(0xFF64748B); // Slate Blue-Grey
-  static const textDisabled = Color(0xFF334155); // Dark Slate
-
-  // --- Hero & UI Gradients ---
-  static const gradientPrimary = LinearGradient(
-    colors: [accentCopper, accentAmber],
+  // --- Compatibility Mappings for Existing Codebase ---
+  static const Color backgroundDeep = bgPrimary;
+  static const Color surfaceBlueBlack = bgSecondary;
+  static const LinearGradient bgPrimaryGradient = bgMainGradient;
+  
+  static const Color accentCopper = accentLavender;
+  static const Color accentAmber = accentLavender;
+  static const Color accentSkyBlue = accentSecondary;
+  static const Color accentWarm = accentLavender;
+  
+  static const Color accentSuccess = success;
+  static const Color accentWarning = warning;
+  static const Color accentError = error;
+  
+  static const Color glassBg = glassBackground;
+  static const Color glassBgElevated = Color(0x261F2538);
+  
+  static const LinearGradient bgCard = LinearGradient(
+    colors: [Color(0xCC1A1F2E), Color(0x9910162A)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  static const gradientHero = LinearGradient(
-    colors: [Color(0xFF0B1C2D), Color(0xFF1E3A8A)], // Deep Night Blue to Navy
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  static const gradientThought = LinearGradient(
-    colors: [accentCopper, Color(0xFF8E5C3C)], // Copper to Deep Bronze
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  static const gradientCalm = LinearGradient(
-    colors: [accentSkyBlue, Color(0xFF2E5B75)], // Sky Blue to Deep Teal
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  static const gradientSuccess = LinearGradient(
-    colors: [accentSuccess, Color(0xFF2D4C38)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  // --- Shimmer Effect (Blue-toned) ---
-  static const gradientShimmer = LinearGradient(
-    colors: [
-      Color(0x005FA8D3),
-      Color(0x1A5FA8D3),
-      Color(0x005FA8D3),
-    ],
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
-  );
-
-  // --- Legacy Mappings (for backward compatibility) ---
-  static const accentPrimary = accentCopper;
-  static const accentSecondary = accentSkyBlue;
-  static const accentTertiary = accentSkyBlue; // Map to secondary accent
-  static const sleepReadyLow = accentError;
-  static const sleepReadyMid = accentWarning;
-  static const sleepReadyHigh = accentSuccess;
+  static const LinearGradient gradientCalm = gradientCool;
+  static const LinearGradient gradientSuccess = gradientCool;
+  static const LinearGradient gradientThought = gradientPrimary;
+  static const LinearGradient gradientWarm = gradientLavender;
+  
+  static const Color sleepReadyLow = error;
+  static const Color sleepReadyMid = accentLavender;
+  static const Color sleepReadyHigh = accentPrimary;
 }
 
+/// ─────────────────────────────────────────────
+/// Typography
+/// ─────────────────────────────────────────────
+
 class AppTextStyles {
-  static const displayXl = TextStyle(
-    fontSize: 56,
-    fontWeight: FontWeight.w700,
-    letterSpacing: -1.12,
-    height: 1.14,
-    color: AppColors.textPrimary,
-  );
-
-  static const displayLg = TextStyle(
-    fontSize: 48,
-    fontWeight: FontWeight.w700,
-    letterSpacing: -0.96,
-    height: 1.17,
-    color: AppColors.textPrimary,
-  );
-
-  static const displayMd = TextStyle(
-    fontSize: 40,
-    fontWeight: FontWeight.w600,
-    letterSpacing: -0.40,
-    height: 1.20,
-    color: AppColors.textPrimary,
-  );
-
   static const h1 = TextStyle(
     fontSize: 32,
     fontWeight: FontWeight.w600,
-    letterSpacing: -0.32,
     height: 1.25,
     color: AppColors.textPrimary,
   );
@@ -138,67 +144,53 @@ class AppTextStyles {
   static const h2 = TextStyle(
     fontSize: 28,
     fontWeight: FontWeight.w600,
-    letterSpacing: -0.28,
-    height: 1.29,
+    height: 1.3,
     color: AppColors.textPrimary,
   );
 
   static const h3 = TextStyle(
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: FontWeight.w600,
-    height: 1.33,
-    color: AppColors.textPrimary,
-  );
-
-  static const h4 = TextStyle(
-    fontSize: 20,
-    fontWeight: FontWeight.w600,
-    height: 1.40,
-    color: AppColors.textPrimary,
-  );
-
-  static const bodyLg = TextStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.w400,
-    height: 1.56,
+    height: 1.35,
     color: AppColors.textPrimary,
   );
 
   static const body = TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.w400,
     height: 1.5,
-    color: AppColors.textPrimary,
+    color: AppColors.textSecondary,
   );
 
   static const bodySm = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.w400,
-    height: 1.43,
-    color: AppColors.textPrimary,
-  );
-
-  static const labelLg = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    height: 1.43,
-    color: AppColors.textPrimary,
+    height: 1.45,
+    color: AppColors.textTertiary,
   );
 
   static const label = TextStyle(
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: FontWeight.w500,
-    height: 1.33,
     color: AppColors.textPrimary,
   );
 
   static const caption = TextStyle(
     fontSize: 11,
-    fontWeight: FontWeight.w500,
-    height: 1.45,
-    color: AppColors.textSecondary,
+    height: 1.4,
+    color: AppColors.textTertiary,
   );
+
+  // --- Compatibility Mappings ---
+  static const TextStyle displayMd = h1;
+  static const TextStyle displayLg = h1;
+  static const TextStyle displayXl = h1;
+  static const TextStyle bodyLg = body;
+  static const TextStyle labelLg = label;
+  static const TextStyle h4 = h3; 
 }
+
+/// ─────────────────────────────────────────────
+/// Spacing
+/// ─────────────────────────────────────────────
 
 class AppSpacing {
   static const double xs = 4;
@@ -208,43 +200,103 @@ class AppSpacing {
   static const double xl = 32;
   static const double xxl = 48;
   static const double xxxl = 64;
-
+  
+  // Custom mappings for existing code
   static const double containerPadding = 20;
-  static const double sectionSpacing = 32;
-  static const double cardGap = 16;
 }
 
-class AppBorderRadius {
+/// ─────────────────────────────────────────────
+/// Radius
+/// ─────────────────────────────────────────────
+
+class AppRadius {
   static const double sm = 8;
   static const double md = 12;
   static const double lg = 16;
-  static const double xl = 20;
-  static const double xxl = 24;
-  static const double full = 9999;
+  static const double xl = 32;
+  static const double pill = 999;
 }
 
+// --- Compatibility Class ---
+class AppBorderRadius {
+  static const double sm = AppRadius.sm;
+  static const double md = AppRadius.md;
+  static const double lg = AppRadius.lg;
+  static const double xl = AppRadius.xl;
+  static const double xxl = AppRadius.pill;
+  static const double full = AppRadius.pill;
+}
+
+/// ─────────────────────────────────────────────
+/// Shadows & Glows
+/// ─────────────────────────────────────────────
+
 class AppShadows {
-  static const glassShadow = [
+  static const List<BoxShadow> card = [
     BoxShadow(
-      color: Color(0x66040C14), // Deep Navy Shadow
+      color: Color(0x66000000),
+      blurRadius: 24,
+      offset: Offset(0, 6),
+    ),
+  ];
+
+  static const List<BoxShadow> selectionGlow = [
+    BoxShadow(
+      color: Color(0x408B6CFF), // subtle violet glow
       blurRadius: 32,
       offset: Offset(0, 8),
     ),
   ];
 
-  static const cardShadow = [
+  static const List<BoxShadow> cyanGlow = [
     BoxShadow(
-      color: Color(0x40040C14), // Deep Navy Shadow
-      blurRadius: 24,
-      offset: Offset(0, 4),
+      color: Color(0x4000E5FF),
+      blurRadius: 32,
+      offset: Offset(0, 8),
     ),
   ];
 
-  static const buttonShadow = [
-    BoxShadow(
-      color: Color(0x33C38E5C), // Subtle copper glow (20% opacity)
-      blurRadius: 24,
-      offset: Offset(0, 4),
-    ),
-  ];
+  // --- Compatibility Mappings ---
+  static const List<BoxShadow> cardShadow = card;
+  static const List<BoxShadow> glassShadow = card;
+  static const List<BoxShadow> buttonShadow = selectionGlow;
+  static const List<BoxShadow> warmGlow = cyanGlow;
+}
+
+class AppTheme {
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: AppColors.bgPrimary,
+      primaryColor: AppColors.accentPrimary,
+      colorScheme: ColorScheme.dark(
+        primary: AppColors.accentPrimary,
+        secondary: AppColors.accentSecondary,
+        surface: AppColors.surfaceBase,
+        background: AppColors.bgPrimary,
+        error: AppColors.error,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onSurface: AppColors.textPrimary,
+        onBackground: AppColors.textPrimary,
+      ),
+      textTheme: TextTheme(
+        headlineLarge: AppTextStyles.h1,
+        headlineMedium: AppTextStyles.h2,
+        headlineSmall: AppTextStyles.h3,
+        bodyLarge: AppTextStyles.body,
+        bodyMedium: AppTextStyles.bodySm,
+        labelLarge: AppTextStyles.label,
+      ),
+      dividerColor: AppColors.divider,
+      cardTheme: const CardThemeData(
+        color: AppColors.surfaceBase,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
+        ),
+      ),
+    );
+  }
 }

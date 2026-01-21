@@ -262,7 +262,7 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: AppColors.bgPrimary,
+          gradient: AppColors.bgMainGradient,
         ),
         child: SafeArea(
           child: Column(
@@ -370,8 +370,8 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
             ),
             decoration: BoxDecoration(
               gradient: isUser ? AppColors.gradientPrimary : null,
-              color: isUser ? null : AppColors.glassBg,
-              border: isUser ? null : Border.all(color: AppColors.glassBorder),
+              color: isUser ? null : AppColors.aiBubbleColor,
+              border: isUser ? null : Border.all(color: AppColors.glassBorder.withOpacity(0.2)),
               borderRadius: BorderRadius.circular(AppBorderRadius.xl).copyWith(
                 topLeft: isUser
                     ? const Radius.circular(AppBorderRadius.xl)
@@ -408,8 +408,8 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
         margin: const EdgeInsets.only(bottom: AppSpacing.md),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.glassBg,
-          border: Border.all(color: AppColors.glassBorder),
+          color: AppColors.aiBubbleColor,
+          border: Border.all(color: AppColors.glassBorder.withOpacity(0.2)),
           borderRadius: BorderRadius.circular(AppBorderRadius.xl),
         ),
         child: Row(
@@ -539,9 +539,16 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
     return Container(
       padding: const EdgeInsets.all(AppSpacing.containerPadding),
       decoration: BoxDecoration(
-        color: AppColors.glassBg.withOpacity(0.5),
-        border: const Border(
-          top: BorderSide(color: AppColors.glassBorder),
+        color: AppColors.surfaceBase,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+        border: Border(
+          top: BorderSide(color: AppColors.glassBorder.withOpacity(0.3)),
         ),
       ),
       child: ClipRRect(

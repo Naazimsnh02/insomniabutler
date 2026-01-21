@@ -79,12 +79,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Insomnia Butler',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0A0E27),
-        primaryColor: AppColors.accentPrimary,
-        fontFamily: 'Manrope',
-      ),
+      theme: AppTheme.darkTheme,
       home: const AppInitializer(),
     );
   }
@@ -133,7 +128,7 @@ class _AppInitializerState extends State<AppInitializer> {
     if (_isLoading) {
       return Container(
         decoration: const BoxDecoration(
-          gradient: AppColors.bgPrimary,
+          gradient: AppColors.bgMainGradient,
         ),
         child: const Center(
           child: CircularProgressIndicator(
