@@ -12,14 +12,14 @@ import '../utils/haptic_helper.dart';
 
 /// Thought Clearing Chat UI - CORE FEATURE
 /// Premium glassmorphic chat interface for processing anxious thoughts
-class ThoughtClearingScreen extends StatefulWidget {
-  const ThoughtClearingScreen({Key? key}) : super(key: key);
+class InsomniaButlerScreen extends StatefulWidget {
+  const InsomniaButlerScreen({Key? key}) : super(key: key);
 
   @override
-  State<ThoughtClearingScreen> createState() => _ThoughtClearingScreenState();
+  State<InsomniaButlerScreen> createState() => _InsomniaButlerScreenState();
 }
 
-class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
+class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
     with TickerProviderStateMixin {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -174,34 +174,13 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
       // Show success animation if high readiness
       if (_sleepReadiness >= 75) {
         await HapticHelper.success();
-        _showSuccessAnimation();
       }
     } on TimeoutException {
       setState(() => _isLoading = false);
-      await HapticHelper.error();
-      _showError(
-        'Request timed out. Please check your connection and try again.',
-      );
     } on SocketException {
       setState(() => _isLoading = false);
-      await HapticHelper.error();
-      _showError('No internet connection. Please check your network.');
     } catch (e) {
       setState(() => _isLoading = false);
-      await HapticHelper.error();
-
-      // User-friendly error messages
-      String errorMessage = 'Unable to process thought. ';
-      if (e.toString().contains('User not logged in')) {
-        errorMessage += 'Please log in again.';
-      } else if (e.toString().contains('Gemini')) {
-        errorMessage += 'AI service temporarily unavailable.';
-      } else {
-        errorMessage += 'Please try again.';
-      }
-
-      _showError(errorMessage);
-
       // Log error for debugging
       print('Thought processing error: $e');
     }
@@ -224,32 +203,6 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
     }
   }
 
-  void _showSuccessAnimation() {
-    // Show success feedback
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: const [
-            Icon(Icons.check_circle, color: AppColors.accentSuccess),
-            SizedBox(width: 12),
-            Text('Great progress! You\'re ready for sleep 💤'),
-          ],
-        ),
-        backgroundColor: AppColors.glassBgElevated,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.accentError,
-      ),
-    );
-  }
 
   Color _getReadinessColor(int readiness) {
     if (readiness < 50) return AppColors.sleepReadyLow;
@@ -268,6 +221,8 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
           child: Column(
             children: [
               _buildHeader(),
+              _buildInsightsPanel(),
+              const SizedBox(height: 8),
               Expanded(
                 child: GestureDetector(
                   onTap: () => FocusScope.of(context).unfocus(),
@@ -287,8 +242,6 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
                   ),
                 ),
               ),
-              if (_currentCategory != null) _buildCategoryBadge(),
-              _buildReadinessIndicator(),
               _buildInputField(),
             ],
           ),
@@ -303,26 +256,12 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
       child: Row(
         children: [
           // Back button with glass effect
-          GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.glassBg,
-                    borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                    border: Border.all(color: AppColors.glassBorder),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back_ios_new,
-                    color: AppColors.textPrimary,
-                    size: 20,
-                  ),
-                ),
-              )
-              .animate(key: const ValueKey('chat_back_btn'))
-              .fadeIn(duration: 300.ms)
-              .scale(delay: 100.ms),
+          _buildIconButton(
+            icon: Icons.arrow_back_ios_new_rounded,
+            onTap: () => Navigator.pop(context),
+          ).animate(key: const ValueKey('chat_back_btn'))
+            .fadeIn(duration: 300.ms)
+            .scale(delay: 100.ms),
 
           const Spacer(),
 
@@ -330,7 +269,7 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
           Column(
             children: [
               Text(
-                'Thought Clearing',
+                'Insomnia Butler',
                 style: AppTextStyles.bodyLg.copyWith(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
@@ -369,18 +308,26 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
               maxWidth: MediaQuery.of(context).size.width * 0.8,
             ),
             decoration: BoxDecoration(
-              gradient: isUser ? AppColors.gradientPrimary : null,
-              color: isUser ? null : AppColors.aiBubbleColor,
-              border: isUser ? null : Border.all(color: AppColors.glassBorder.withOpacity(0.2)),
-              borderRadius: BorderRadius.circular(AppBorderRadius.xl).copyWith(
-                topLeft: isUser
-                    ? const Radius.circular(AppBorderRadius.xl)
-                    : const Radius.circular(4),
-                topRight: isUser
-                    ? const Radius.circular(4)
-                    : const Radius.circular(AppBorderRadius.xl),
+              color: isUser 
+                  ? AppColors.accentPrimary.withOpacity(0.15) 
+                  : AppColors.bgSecondary.withOpacity(0.4),
+              border: Border.all(
+                color: isUser 
+                    ? AppColors.accentPrimary.withOpacity(0.3) 
+                    : Colors.white.withOpacity(0.15),
+                width: isUser ? 1.2 : 1.0,
               ),
-              boxShadow: isUser ? AppShadows.buttonShadow : null,
+              borderRadius: BorderRadius.circular(20).copyWith(
+                bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(20),
+                bottomLeft: isUser ? const Radius.circular(20) : const Radius.circular(4),
+              ),
+              boxShadow: isUser ? [
+                BoxShadow(
+                  color: AppColors.accentPrimary.withOpacity(0.1),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                )
+              ] : null,
             ),
             child: Text(
               message.content,
@@ -408,9 +355,11 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
         margin: const EdgeInsets.only(bottom: AppSpacing.md),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.aiBubbleColor,
-          border: Border.all(color: AppColors.glassBorder.withOpacity(0.2)),
-          borderRadius: BorderRadius.circular(AppBorderRadius.xl),
+          color: AppColors.bgSecondary.withOpacity(0.4),
+          border: Border.all(color: Colors.white.withOpacity(0.1)),
+          borderRadius: BorderRadius.circular(20).copyWith(
+            bottomLeft: const Radius.circular(4),
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -441,180 +390,170 @@ class _ThoughtClearingScreenState extends State<ThoughtClearingScreen>
         .fadeOut(duration: 600.ms);
   }
 
-  Widget _buildCategoryBadge() {
-    return Container(
-          margin: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.containerPadding,
-            vertical: AppSpacing.sm,
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          decoration: BoxDecoration(
-            gradient: AppColors.gradientThought,
-            borderRadius: BorderRadius.circular(AppBorderRadius.full),
-            boxShadow: AppShadows.cardShadow,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+  Widget _buildInsightsPanel() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.containerPadding,
+        vertical: AppSpacing.xs,
+      ),
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        borderRadius: 16,
+        color: AppColors.bgSecondary.withOpacity(0.2),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.15),
+          width: 1.2,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.insights_rounded,
+              size: 14,
+              color: AppColors.textTertiary.withOpacity(0.7),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Insights',
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textTertiary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (_currentCategory != null) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text('·', style: TextStyle(color: Colors.white.withOpacity(0.3))),
+              ),
               Text(
                 _currentCategory!,
-                style: AppTextStyles.bodySm.copyWith(
-                  color: Colors.white,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
-          ),
-        )
-        .animate(key: ValueKey('category_${_currentCategory}'))
-        .fadeIn(duration: 300.ms)
-        .scale(delay: 100.ms);
-  }
-
-  Widget _buildReadinessIndicator() {
-    return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.containerPadding,
-        vertical: AppSpacing.sm,
-      ),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.glassBg,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-        border: Border.all(color: AppColors.glassBorder),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Sleep Readiness',
-                style: AppTextStyles.bodySm.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              AnimatedBuilder(
-                animation: _readinessAnimation,
-                builder: (context, child) {
-                  final currentValue = _readinessAnimation.value.round();
-                  return Text(
-                    '$currentValue%',
-                    style: AppTextStyles.h3.copyWith(
-                      color: _getReadinessColor(currentValue),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppBorderRadius.full),
-            child: AnimatedBuilder(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text('·', style: TextStyle(color: Colors.white.withOpacity(0.3))),
+            ),
+            AnimatedBuilder(
               animation: _readinessAnimation,
               builder: (context, child) {
-                final currentValue = _readinessAnimation.value;
-                return LinearProgressIndicator(
-                  value: currentValue / 100,
-                  minHeight: 8,
-                  backgroundColor: AppColors.glassBg,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    _getReadinessColor(currentValue.round()),
-                  ),
+                final currentValue = _readinessAnimation.value.round();
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '🌙',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$currentValue%',
+                      style: AppTextStyles.caption.copyWith(
+                        color: _getReadinessColor(currentValue),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    );
+    ).animate().fadeIn(delay: 300.ms).slideY(begin: -0.2, end: 0);
   }
 
   Widget _buildInputField() {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.containerPadding),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceBase,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-        border: Border(
-          top: BorderSide(color: AppColors.glassBorder.withOpacity(0.3)),
-        ),
+      padding: EdgeInsets.only(
+        left: AppSpacing.md,
+        right: AppSpacing.md,
+        top: AppSpacing.md,
+        bottom: MediaQuery.of(context).padding.bottom + AppSpacing.md,
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.containerPadding,
+      decoration: const BoxDecoration(
+        color: Colors.transparent,
+      ),
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        borderRadius: 28,
+        color: AppColors.bgSecondary.withOpacity(0.5),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1.5,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                style: AppTextStyles.body.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Type your thoughts...',
+                  hintStyle: AppTextStyles.body.copyWith(
+                    color: AppColors.textTertiary.withOpacity(0.5),
                   ),
-                  decoration: BoxDecoration(
-                    color: AppColors.glassBg,
-                    borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-                    border: Border.all(color: AppColors.glassBorder),
-                  ),
-                  child: TextField(
-                    controller: _controller,
-                    style: AppTextStyles.body.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Type your thoughts...',
-                      hintStyle: AppTextStyles.body.copyWith(
-                        color: AppColors.textTertiary,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: AppSpacing.md,
-                      ),
-                    ),
-                    maxLines: null,
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (_) => _sendMessage(),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
                   ),
                 ),
+                maxLines: null,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => _sendMessage(),
               ),
-              const SizedBox(width: AppSpacing.md),
-              GestureDetector(
-                    onTap: _sendMessage,
-                    child: Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        gradient: AppColors.gradientPrimary,
-                        borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                        boxShadow: AppShadows.buttonShadow,
-                      ),
-                      child: const Icon(
-                        Icons.send_rounded,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                  )
-                  .animate(
-                    onPlay: (controller) => controller.repeat(reverse: true),
-                  )
-                  .shimmer(
-                    duration: 2000.ms,
-                    color: Colors.white.withOpacity(0.3),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                gradient: AppColors.gradientPrimary,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.accentPrimary.withOpacity(0.3),
+                    blurRadius: 10,
+                    spreadRadius: 1,
                   ),
-            ],
-          ),
+                ],
+              ),
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: _sendMessage,
+                icon: const Icon(
+                  Icons.arrow_upward_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIconButton({required IconData icon, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: GlassCard(
+        padding: const EdgeInsets.all(12),
+        borderRadius: 12,
+        color: AppColors.bgSecondary.withOpacity(0.4),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.15),
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+          size: 20,
         ),
       ),
     );

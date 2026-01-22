@@ -97,19 +97,43 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.containerPadding),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
-            style: IconButton.styleFrom(backgroundColor: AppColors.glassBg),
+          _buildIconButton(
+            icon: Icons.arrow_back_ios_new_rounded,
+            onTap: () => Navigator.pop(context),
           ),
-          const SizedBox(width: AppSpacing.md),
-          Text('Sleep Sessions', style: AppTextStyles.h4),
+          Text(
+            'Sleep History',
+            style: AppTextStyles.h3.copyWith(
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+            ),
+          ),
+          _buildIconButton(
+            icon: Icons.refresh_rounded,
+            onTap: _loadHistory,
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildIconButton({required IconData icon, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: GlassCard(
+        padding: const EdgeInsets.all(12),
+        borderRadius: 12,
+        color: AppColors.bgSecondary.withOpacity(0.4),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.15),
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+          size: 20,
+        ),
       ),
     );
   }
@@ -170,19 +194,32 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           );
           if (result == true) _loadHistory();
         },
+        padding: const EdgeInsets.all(20),
+        borderRadius: 20,
+        color: AppColors.bgSecondary.withOpacity(0.3),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.1),
+        ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
-                color: _getQualityColor(quality).withOpacity(0.1),
+                color: _getQualityColor(quality).withOpacity(0.15),
                 shape: BoxShape.circle,
+                border: Border.all(
+                  color: _getQualityColor(quality).withOpacity(0.4),
+                  width: 1.5,
+                ),
               ),
-              child: Text(
-                '$quality',
-                style: AppTextStyles.h4.copyWith(
-                  color: _getQualityColor(quality),
-                  fontWeight: FontWeight.bold,
+              child: Center(
+                child: Text(
+                  '$quality',
+                  style: AppTextStyles.h4.copyWith(
+                    color: _getQualityColor(quality),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -197,9 +234,12 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     '${DateFormat.jm().format(session.bedTime.toLocal())} - ${DateFormat.jm().format(wakeTime.toLocal())}',
-                    style: AppTextStyles.caption,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
                   ),
                 ],
               ),
@@ -211,9 +251,13 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                   '${hours}h ${minutes}m',
                   style: AppTextStyles.body.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: AppColors.accentPrimary,
                   ),
                 ),
-                Text('Duration', style: AppTextStyles.caption),
+                Text(
+                  'Sleep', 
+                  style: AppTextStyles.caption.copyWith(fontSize: 10),
+                ),
               ],
             ),
             const SizedBox(width: AppSpacing.md),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/glass_card.dart';
 
 /// Onboarding Screen 6: Setup/Personalization
 class SetupScreen extends StatefulWidget {
@@ -61,19 +62,15 @@ class _SetupScreenState extends State<SetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF080D20), // Fallback
-      child: Stack(
+    return Scaffold(
+      backgroundColor: AppColors.bgPrimary,
+      body: Stack(
         children: [
           // Deep Night Background
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF080D20), Color(0xFF0F172A)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
+                gradient: AppColors.bgMainGradient,
               ),
             ),
           ),
@@ -166,33 +163,46 @@ class _SetupScreenState extends State<SetupScreen> {
     final isSelected = _selectedGoals.contains(goal['text']);
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: GestureDetector(
-        onTap: () => _toggleGoal(goal['text']!),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.accentPrimary.withOpacity(0.15),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : [],
+        ),
+        child: GlassCard(
+          onTap: () => _toggleGoal(goal['text']!),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
-            vertical: 16,
+            vertical: 20,
           ),
-          decoration: BoxDecoration(
-            gradient: isSelected ? AppColors.gradientPrimary : null,
-            color: isSelected ? null : AppColors.surfaceElevated,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: AppColors.accentPrimary.withOpacity(0.3),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ]
-                : [],
+          borderRadius: 16,
+          color: isSelected 
+              ? AppColors.accentPrimary.withOpacity(0.12) 
+              : AppColors.bgSecondary.withOpacity(0.3),
+          border: Border.all(
+            color: isSelected ? AppColors.accentPrimary.withOpacity(0.4) : Colors.white.withOpacity(0.1),
+            width: isSelected ? 1.5 : 1.0,
           ),
           child: Row(
             children: [
-              Text(
-                goal['emoji']!,
-                style: const TextStyle(fontSize: 24),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.05),
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  goal['emoji']!,
+                  style: const TextStyle(fontSize: 20),
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -208,7 +218,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 const Icon(
                   Icons.check_circle_rounded,
                   color: Colors.white,
-                  size: 24,
+                  size: 22,
                 ).animate().scale(),
             ],
           ),
@@ -218,43 +228,45 @@ class _SetupScreenState extends State<SetupScreen> {
   }
 
   Widget _buildBedtimeSelector() {
-    return GestureDetector(
+    return GlassCard(
       onTap: _selectBedtime,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceElevated,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Bedtime',
-                style: AppTextStyles.body,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderRadius: 16,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+        width: 1.0,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Bedtime',
+              style: AppTextStyles.body.copyWith(
+                fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(width: AppSpacing.sm),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _bedtime.format(context),
-                  style: AppTextStyles.h4.copyWith(
-                    color: AppColors.accentPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _bedtime.format(context),
+                style: AppTextStyles.h4.copyWith(
+                  color: AppColors.accentPrimary,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  color: AppColors.textTertiary,
-                  size: 14,
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              const Icon(
+                Icons.arrow_forward_ios,
+                color: AppColors.textTertiary,
+                size: 14,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

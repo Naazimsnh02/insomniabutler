@@ -135,7 +135,7 @@ class JournalScreenState extends State<JournalScreen>
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.containerPadding),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.containerPadding, AppSpacing.lg, AppSpacing.containerPadding, AppSpacing.md),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -144,49 +144,39 @@ class JournalScreenState extends State<JournalScreen>
             children: [
               Text(
                 'Journal',
-                style: AppTextStyles.h1.copyWith(fontWeight: FontWeight.bold),
+                style: AppTextStyles.h1.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                ),
               ),
               if (_stats != null)
-                Text(
-                  '${_stats!['totalEntries']} entries • ${_stats!['currentStreak']}🔥 streak',
-                  style: AppTextStyles.bodySm.copyWith(
-                    color: AppColors.textSecondary,
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    '${_stats!['totalEntries']} entries • ${_stats!['currentStreak']}🔥 streak',
+                    style: AppTextStyles.bodySm.copyWith(
+                      color: AppColors.textSecondary.withOpacity(0.8),
+                    ),
                   ),
                 ),
             ],
           ),
           Row(
             children: [
-              IconButton(
-                onPressed: () {
+              _buildIconButton(
+                icon: Icons.search_rounded,
+                onTap: () {
                   HapticHelper.lightImpact();
                   // TODO: Implement search
                 },
-                icon: const Icon(
-                  Icons.search_rounded,
-                  color: Colors.white,
-                  size: 22,
-                ),
-                style: IconButton.styleFrom(
-                  backgroundColor: AppColors.glassBgElevated,
-                  padding: const EdgeInsets.all(10),
-                ),
               ),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () {
+              const SizedBox(width: 12),
+              _buildIconButton(
+                icon: Icons.refresh_rounded,
+                onTap: () {
                   HapticHelper.lightImpact();
                   loadData();
                 },
-                icon: const Icon(
-                  Icons.refresh_rounded,
-                  color: Colors.white,
-                  size: 22,
-                ),
-                style: IconButton.styleFrom(
-                  backgroundColor: AppColors.glassBgElevated,
-                  padding: const EdgeInsets.all(10),
-                ),
               ),
             ],
           ),
@@ -195,15 +185,35 @@ class JournalScreenState extends State<JournalScreen>
     ).animate().fadeIn();
   }
 
+  Widget _buildIconButton({required IconData icon, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: GlassCard(
+        padding: const EdgeInsets.all(10),
+        borderRadius: 12,
+        color: AppColors.bgSecondary.withOpacity(0.4),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.15),
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+          size: 20,
+        ),
+      ),
+    );
+  }
+
   Widget _buildTabBar() {
-    return Container(
+    return GlassCard(
       margin: const EdgeInsets.symmetric(
         horizontal: AppSpacing.containerPadding,
       ),
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceElevated,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+      borderRadius: 24,
+      color: AppColors.bgSecondary.withOpacity(0.4),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
       ),
       child: TabBar(
         controller: _tabController,
@@ -255,7 +265,7 @@ class JournalScreenState extends State<JournalScreen>
       color: AppColors.accentPrimary,
       backgroundColor: AppColors.glassBgElevated,
       child: ListView.builder(
-        padding: const EdgeInsets.all(AppSpacing.containerPadding),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding, vertical: AppSpacing.md),
         itemCount: _entries.length,
         itemBuilder: (context, index) {
           final entry = _entries[index];
@@ -286,6 +296,12 @@ class JournalScreenState extends State<JournalScreen>
           },
           child: GlassCard(
             margin: const EdgeInsets.only(bottom: AppSpacing.md),
+            padding: const EdgeInsets.all(20),
+            borderRadius: 20,
+            color: AppColors.bgSecondary.withOpacity(0.3),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.1),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

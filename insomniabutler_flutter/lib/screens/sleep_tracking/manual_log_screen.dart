@@ -148,23 +148,22 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
-            style: IconButton.styleFrom(backgroundColor: AppColors.glassBg),
+          _buildIconButton(
+            icon: Icons.arrow_back_ios_new_rounded,
+            onTap: () => Navigator.pop(context),
           ),
-          Text(isEdit ? 'Edit Session' : 'Log Sleep', style: AppTextStyles.h4),
+          Text(
+            isEdit ? 'Edit Session' : 'Manual Log',
+            style: AppTextStyles.h3.copyWith(
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+            ),
+          ),
           if (isEdit)
-            IconButton(
-              onPressed: () => _showDeleteConfirm(),
-              icon: const Icon(
-                Icons.delete_outline_rounded,
-                color: AppColors.accentError,
-              ),
+            _buildIconButton(
+              icon: Icons.delete_outline_rounded,
+              iconColor: AppColors.accentError,
+              onTap: () => _showDeleteConfirm(),
             )
           else
             const SizedBox(width: 48),
@@ -173,30 +172,67 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
     );
   }
 
+  Widget _buildIconButton({required IconData icon, required VoidCallback onTap, Color? iconColor}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: GlassCard(
+        padding: const EdgeInsets.all(12),
+        borderRadius: 12,
+        color: AppColors.bgSecondary.withOpacity(0.4),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.15),
+        ),
+        child: Icon(
+          icon,
+          color: iconColor ?? Colors.white,
+          size: 20,
+        ),
+      ),
+    );
+  }
+
   Widget _buildDatePicker() {
     return GlassCard(
       onTap: _selectDate,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
       child: Row(
         children: [
-          const Icon(
-            Icons.calendar_today_rounded,
-            color: AppColors.accentPrimary,
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.accentPrimary.withOpacity(0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.calendar_today_rounded,
+              color: AppColors.accentPrimary,
+              size: 18,
+            ),
           ),
           const SizedBox(width: AppSpacing.md),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Session Date', style: AppTextStyles.caption),
+              Text(
+                'Session Date', 
+                style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)
+              ),
+              const SizedBox(height: 2),
               Text(
                 DateFormat('EEEE, MMM d, yyyy').format(_date),
-                style: AppTextStyles.bodyLg,
+                style: AppTextStyles.bodyLg.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),
           const Spacer(),
           const Icon(
-            Icons.edit_outlined,
-            size: 16,
+            Icons.chevron_right_rounded,
+            size: 20,
             color: AppColors.textTertiary,
           ),
         ],
@@ -207,14 +243,26 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
   Widget _buildTimePicker(String label, TimeOfDay time, VoidCallback onTap) {
     return GlassCard(
       onTap: onTap,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: AppTextStyles.caption),
-          const SizedBox(height: 4),
+          Text(
+            label, 
+            style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)
+          ),
+          const SizedBox(height: 8),
           Text(
             time.format(context),
-            style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold),
+            style: AppTextStyles.h3.copyWith(
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
           ),
         ],
       ),
@@ -222,22 +270,29 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
   }
 
   Widget _buildDurationInfo() {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.accentPrimary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-        border: Border.all(color: AppColors.accentPrimary.withOpacity(0.3)),
+    return GlassCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderRadius: 20,
+      color: AppColors.accentPrimary.withOpacity(0.08),
+      border: Border.all(
+        color: AppColors.accentPrimary.withOpacity(0.25),
+        width: 1.5,
       ),
       child: Row(
         children: [
-          const Icon(Icons.timer_outlined, color: AppColors.accentPrimary),
+          const Icon(Icons.timer_outlined, color: AppColors.accentPrimary, size: 20),
           const SizedBox(width: AppSpacing.md),
-          Text('Total Sleep Duration', style: AppTextStyles.body),
+          Text(
+            'Total Duration', 
+            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)
+          ),
           const Spacer(),
           Text(
             _calculateDuration(),
-            style: AppTextStyles.h4.copyWith(color: AppColors.accentPrimary),
+            style: AppTextStyles.h2.copyWith(
+              color: AppColors.accentPrimary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
@@ -248,8 +303,17 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Sleep Quality', style: AppTextStyles.labelLg),
-        const SizedBox(height: AppSpacing.md),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Sleep Quality', 
+              style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.bold)
+            ),
+            const Icon(Icons.auto_awesome, size: 16, color: AppColors.accentPrimary),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(5, (i) {
@@ -259,31 +323,32 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
               onTap: () => setState(() => _quality = val),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                width: 55,
-                height: 55,
+                width: 58,
+                height: 58,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.accentPrimary
-                      : AppColors.glassBgElevated,
-                  borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                      ? AppColors.accentPrimary.withOpacity(0.3)
+                      : AppColors.bgSecondary.withOpacity(0.3),
+                  shape: BoxShape.circle,
                   border: Border.all(
                     color: isSelected
-                        ? AppColors.accentPrimary
-                        : AppColors.glassBorder,
+                        ? AppColors.accentPrimary.withOpacity(0.6)
+                        : Colors.white.withOpacity(0.1),
+                    width: isSelected ? 2 : 1.5,
                   ),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: AppColors.accentPrimary.withOpacity(0.3),
-                            blurRadius: 10,
-                          ),
-                        ]
-                      : null,
+                  boxShadow: isSelected ? [
+                    BoxShadow(
+                      color: AppColors.accentPrimary.withOpacity(0.2),
+                      blurRadius: 12,
+                      spreadRadius: 2,
+                    )
+                  ] : null,
                 ),
                 child: Center(
                   child: Text(
                     '$val',
-                    style: AppTextStyles.h3.copyWith(
+                    style: AppTextStyles.h4.copyWith(
+                      fontWeight: FontWeight.bold,
                       color: isSelected ? Colors.white : AppColors.textPrimary,
                     ),
                   ),

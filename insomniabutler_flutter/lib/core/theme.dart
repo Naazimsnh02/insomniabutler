@@ -9,9 +9,9 @@ class AppColors {
   // Core Backgrounds
   // ─────────────────────────────────────────────
 
-  static const Color bgPrimary = Color(0xFF04060B); // Ink Black
-  static const Color bgSecondary = Color(0xFF0B0E1A); // Deep Night Blue
-  static const Color bgTertiary = Color(0xFF110D1F); // Midnight Violet
+  static const Color bgPrimary = Color(0xFF0A1125); // Deep Navy
+  static const Color bgSecondary = Color(0xFF101730); // Darker Navy
+  static const Color bgTertiary = Color(0xFF0D1C3C); // Deep Ocean Blue
 
   static const LinearGradient bgMainGradient = LinearGradient(
     colors: [bgPrimary, bgTertiary],
@@ -31,9 +31,9 @@ class AppColors {
   // Accents
   // ─────────────────────────────────────────────
 
-  /// Primary selection / focus accent (used sparingly)
-  static const Color accentPrimary = Color(0xFF8B6CFF);
-  static const Color accentPrimarySoft = Color(0xFF9F8CFF);
+  /// Primary selection / focus accent - Sky Blue
+  static const Color accentPrimary = Color(0xFF6FA8FF);
+  static const Color accentPrimarySoft = Color(0xFF8BB9FF);
 
   /// Cool blue accent (icons, progress, highlights)
   static const Color accentSecondary = Color(0xFF5FA8FF);
@@ -43,9 +43,9 @@ class AppColors {
   static const Color accentCyan = Color(0xFF00E5FF);
   static const Color accentCyanSoft = Color(0xFF7AEEFF);
 
-  /// Lavender / Soft Violet (AMBER substitute)
-  static const Color accentLavender = Color(0xFFB6A1FF);
-  static const Color accentLavenderSoft = Color(0xFFCDC0FF);
+  /// Soft Blue / Teal (Replaces lavender/purple)
+  static const Color accentLavender = Color(0xFF8BB9FF);
+  static const Color accentLavenderSoft = Color(0xFFB3D4FF);
 
   // ─────────────────────────────────────────────
   // Semantic Colors (Strictly Night Theme)
@@ -70,7 +70,7 @@ class AppColors {
 
   static const Color glassBackground = Color(0x33FFFFFF); // 20% white tint
   static const Color glassBorder = Colors.transparent; // Borderless design
-  static const Color aiBubbleColor = Color(0xFF1B1F33); // Distinct navy for AI
+  static const Color aiBubbleColor = Color(0xFF1E2640); // Distinct navy for AI
 
   // ─────────────────────────────────────────────
   // Dividers & Hairlines
@@ -83,7 +83,7 @@ class AppColors {
   // ─────────────────────────────────────────────
 
   static const LinearGradient gradientPrimary = LinearGradient(
-    colors: [accentPrimary, Color(0xFF6F8CFF)],
+    colors: [accentPrimary, Color(0xFF4A90E2)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -242,7 +242,7 @@ class AppShadows {
 
   static const List<BoxShadow> selectionGlow = [
     BoxShadow(
-      color: Color(0x408B6CFF), // subtle violet glow
+      color: Color(0x406FA8FF), // sky blue glow
       blurRadius: 32,
       offset: Offset(0, 8),
     ),

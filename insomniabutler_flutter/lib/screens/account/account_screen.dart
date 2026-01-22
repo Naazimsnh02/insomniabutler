@@ -198,6 +198,12 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildProfileHeader() {
     return GlassCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
       child: SizedBox(
         width: double.infinity,
         child: Column(
@@ -297,6 +303,12 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildStatCard(String emoji, String value, String label) {
     return GlassCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
       child: Column(
         children: [
           Text(emoji, style: const TextStyle(fontSize: 24)),
@@ -331,6 +343,12 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildSleepPreferences() {
     return GlassCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
       child: Column(
         children: [
           _buildSettingRow(
@@ -367,6 +385,12 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildNotificationSettings() {
     return GlassCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
       child: Column(
         children: [
           _buildToggleRow(
@@ -411,6 +435,12 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildDisplaySettings() {
     return GlassCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
       child: Column(
         children: [
           _buildToggleRow(
@@ -455,6 +485,12 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildDataPrivacy() {
     return GlassCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
       child: Column(
         children: [
           _buildSettingRow(
@@ -521,6 +557,12 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildSupportAbout() {
     return GlassCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
       child: Column(
         children: [
           _buildSettingRow(
@@ -672,6 +714,12 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildLogoutButton() {
     return GlassCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
       onTap: () {
         HapticHelper.mediumImpact();
         _showLogoutDialog();

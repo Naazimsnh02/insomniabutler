@@ -72,35 +72,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ],
           ),
 
-          // Bottom Overlay (Dots)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 32,
-            child: SafeArea(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  _totalPages,
-                  (index) => AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    height: 8,
-                    width: _currentPage == index ? 24 : 8,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      gradient: _currentPage == index
-                          ? AppColors.gradientPrimary
-                          : null,
-                      color: _currentPage == index
-                          ? null
-                          : AppColors.textTertiary.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(AppBorderRadius.full),
+          // Bottom Overlay (Dots) - Hide when keyboard is open
+          if (MediaQuery.of(context).viewInsets.bottom == 0)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 32,
+              child: SafeArea(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    _totalPages,
+                    (index) => AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      height: 8,
+                      width: _currentPage == index ? 24 : 8,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      decoration: BoxDecoration(
+                        gradient: _currentPage == index
+                            ? AppColors.gradientPrimary
+                            : null,
+                        color: _currentPage == index
+                            ? null
+                            : AppColors.textTertiary.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(AppBorderRadius.full),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

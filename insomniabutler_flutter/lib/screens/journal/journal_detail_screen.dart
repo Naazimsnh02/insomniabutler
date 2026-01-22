@@ -203,43 +203,24 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
+          _buildIconButton(
+            icon: Icons.arrow_back_ios_new,
             onTap: () {
               HapticHelper.lightImpact();
               Navigator.pop(context);
             },
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.glassBg,
-                borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                border: Border.all(color: AppColors.glassBorder),
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios_new,
-                color: AppColors.textPrimary,
-                size: 20,
-              ),
-            ),
-          ).animate().fadeIn(duration: 300.ms).scale(delay: 100.ms),
+          ),
           Row(
             children: [
-              IconButton(
-                onPressed: _toggleFavorite,
-                icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: isFavorite ? AppColors.accentError : Colors.white,
-                  size: 22,
-                ),
-                style: IconButton.styleFrom(
-                  backgroundColor: AppColors.glassBgElevated,
-                  padding: const EdgeInsets.all(10),
-                ),
+              _buildIconButton(
+                icon: isFavorite ? Icons.favorite : Icons.favorite_border,
+                iconColor: isFavorite ? AppColors.accentError : Colors.white,
+                onTap: _toggleFavorite,
               ),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () async {
+              const SizedBox(width: 12),
+              _buildIconButton(
+                icon: Icons.edit_rounded,
+                onTap: () async {
                   HapticHelper.lightImpact();
                   await Navigator.push(
                     context,
@@ -250,15 +231,6 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
                   );
                   _loadEntry(); // Refresh after edit
                 },
-                icon: const Icon(
-                  Icons.edit_rounded,
-                  color: Colors.white,
-                  size: 22,
-                ),
-                style: IconButton.styleFrom(
-                  backgroundColor: AppColors.glassBgElevated,
-                  padding: const EdgeInsets.all(10),
-                ),
               ),
             ],
           ),
@@ -267,8 +239,33 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
     );
   }
 
+  Widget _buildIconButton({required IconData icon, required VoidCallback onTap, Color? iconColor}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: GlassCard(
+        padding: const EdgeInsets.all(12),
+        borderRadius: 12,
+        color: AppColors.bgSecondary.withOpacity(0.4),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.15),
+        ),
+        child: Icon(
+          icon,
+          color: iconColor ?? Colors.white,
+          size: 20,
+        ),
+      ),
+    ).animate().fadeIn(duration: 300.ms).scale(delay: 100.ms);
+  }
+
   Widget _buildMetadata(DateTime date, String? moodEmoji, String? mood) {
     return GlassCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
       child: Row(
         children: [
           if (moodEmoji != null) ...[
@@ -334,43 +331,39 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
         vertical: AppSpacing.lg,
       ),
       decoration: BoxDecoration(
-        color: AppColors.bgPrimary.withOpacity(0.8),
-        border: const Border(
-          top: BorderSide(color: AppColors.glassBorder),
-        ),
+        color: Colors.transparent,
       ),
       child: SafeArea(
         top: false,
-        child: GestureDetector(
+        child: GlassCard(
           onTap: _isDeleting ? null : _deleteEntry,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: BoxDecoration(
-              color: AppColors.accentError.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-              border: Border.all(color: AppColors.accentError.withOpacity(0.3)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  _isDeleting
-                      ? Icons.hourglass_empty
-                      : Icons.delete_outline_rounded,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          borderRadius: 20,
+          color: AppColors.accentError.withOpacity(0.08),
+          border: Border.all(
+            color: AppColors.accentError.withOpacity(0.2),
+            width: 1.5,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                _isDeleting
+                    ? Icons.hourglass_empty
+                    : Icons.delete_outline_rounded,
+                color: AppColors.accentError,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                _isDeleting ? 'Deleting...' : 'Delete Entry',
+                style: AppTextStyles.labelLg.copyWith(
                   color: AppColors.accentError,
-                  size: 20,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  _isDeleting ? 'Deleting...' : 'Delete Entry',
-                  style: AppTextStyles.labelLg.copyWith(
-                    color: AppColors.accentError,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

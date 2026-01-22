@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../widgets/primary_button.dart';
 import '../../main.dart';
 import '../../services/user_service.dart';
+import '../../widgets/glass_card.dart';
 
 /// Onboarding Screen 7: Registration/Login
 class AuthScreen extends StatefulWidget {
@@ -108,13 +108,10 @@ class _AuthScreenState extends State<AuthScreen> {
 
                       // Title Section
                       Text(
-                            _isRegistering ? 'Create Account' : 'Welcome Back',
-                            style: AppTextStyles.h2,
-                            textAlign: TextAlign.center,
-                          )
-                          .animate()
-                          .fadeIn(duration: 400.ms)
-                          .slideY(begin: -0.2, end: 0),
+                        _isRegistering ? 'Create Account' : 'Welcome Back',
+                        style: AppTextStyles.h2,
+                        textAlign: TextAlign.center,
+                      ),
 
                       const SizedBox(height: AppSpacing.sm),
 
@@ -126,7 +123,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           color: AppColors.textSecondary,
                         ),
                         textAlign: TextAlign.center,
-                      ).animate().fadeIn(delay: 200.ms),
+                      ),
 
                       const SizedBox(height: AppSpacing.xxxl),
 
@@ -179,16 +176,13 @@ class _AuthScreenState extends State<AuthScreen> {
 
                       // Action Button
                       SizedBox(
-                            width: double.infinity,
-                            child: PrimaryButton(
-                              text: _isRegistering ? 'Register' : 'Login',
-                              isLoading: _isLoading,
-                              onPressed: _handleAuth,
-                            ),
-                          )
-                          .animate()
-                          .fadeIn(delay: 700.ms)
-                          .scale(curve: Curves.easeOutBack),
+                        width: double.infinity,
+                        child: PrimaryButton(
+                          text: _isRegistering ? 'Register' : 'Login',
+                          isLoading: _isLoading,
+                          onPressed: _handleAuth,
+                        ),
+                      ),
 
                       const SizedBox(height: AppSpacing.xxxl),
 
@@ -220,7 +214,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             ),
                           ),
                         ],
-                      ).animate().fadeIn(delay: 1.seconds),
+                      ),
 
                       const SizedBox(
                         height: 120,
@@ -258,15 +252,13 @@ class _AuthScreenState extends State<AuthScreen> {
             ),
           ),
         ),
-        Container(
+        GlassCard(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceElevated,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(
-              color: AppColors.accentPrimary.withOpacity(0.2),
-              width: 1.5,
-            ),
+          borderRadius: AppRadius.lg,
+          color: AppColors.bgSecondary.withOpacity(0.4),
+          border: Border.all(
+            color: AppColors.accentPrimary.withOpacity(0.3),
+            width: 1.5,
           ),
           child: TextFormField(
             controller: controller,
@@ -277,13 +269,13 @@ class _AuthScreenState extends State<AuthScreen> {
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: AppTextStyles.bodySm.copyWith(
-                color: AppColors.textTertiary,
+                color: AppColors.textTertiary.withOpacity(0.5),
               ),
               border: InputBorder.none,
               icon: Icon(
                 icon,
                 color: AppColors.accentPrimary.withOpacity(0.8),
-                size: 18,
+                size: 20,
               ),
             ),
             validator: (value) {
