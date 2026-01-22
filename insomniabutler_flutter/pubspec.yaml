@@ -39,6 +39,10 @@ dependencies:
   vibration: ^3.1.5
   package_info_plus: ^8.1.2
   url_launcher: ^6.3.1
+  just_audio: ^0.10.5
+  audio_service: ^0.18.18
+  just_audio_background: ^0.0.1-beta.17
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4
@@ -70,10 +74,12 @@ flutter:
   assets:
     - assets/config.json
     - assets/images/
+    - assets/images/sounds/
     - assets/logo/
     - assets/onboarding/Welcome.png
     - assets/onboarding/Problem.png
     - assets/onboarding/Solution.png
+    - assets/sounds/sleep/
 dependency_overrides:
   flutter_secure_storage: ^10.0.0
 

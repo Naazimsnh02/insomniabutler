@@ -17,6 +17,7 @@ import '../services/sleep_timer_service.dart';
 import 'journal/journal_screen.dart';
 import 'journal/journal_editor_screen.dart';
 import 'account/account_screen.dart';
+import 'sounds/sounds_screen.dart';
 
 /// Home Dashboard - Main app screen
 /// Redesigned with premium high-fidelity UI inspired by modern sleep trackers
@@ -365,28 +366,14 @@ class _NewHomeScreenState extends State<NewHomeScreen>
     switch (_selectedNavIndex) {
       case 0:
         return _buildHomeTab();
+      case 1:
+        return const SoundsScreen();
       case 2:
         return JournalScreen(isTab: true, key: _journalKey);
       case 3:
         return const AccountScreen(isTab: true);
       default:
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.music_note_rounded,
-                size: 64,
-                color: AppColors.textTertiary,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Sounds coming soon',
-                style: AppTextStyles.h3.copyWith(color: AppColors.textTertiary),
-              ),
-            ],
-          ),
-        );
+        return const SizedBox.shrink();
     }
   }
 

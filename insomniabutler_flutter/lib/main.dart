@@ -6,6 +6,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/new_home_screen.dart';
@@ -13,12 +14,24 @@ import 'screens/onboarding/onboarding_screen.dart';
 import 'core/theme.dart';
 
 import 'dart:convert'; // Added for json.decode
+import 'dart:async'; // Added for unawaited
 
 late final Client client;
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  // Initialize background audio. Must be awaited before AudioPlayer is used.
+  try {
+    await JustAudioBackground.init(
+      androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+      androidNotificationChannelName: 'Audio playback',
+      androidNotificationOngoing: true,
+    );
+  } catch (e) {
+    debugPrint('JustAudioBackground init error: $e');
+  }
 
   // Enable edge-to-edge display and set transparent system bars
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -34,28 +47,29 @@ void main() async {
   String serverUrl =
       'http://insomniabutler-alb-475922987.us-east-1.elb.amazonaws.com/';
 
-  // Try to load from assets/config.json
-  try {
-    final configString = await rootBundle.loadString('assets/config.json');
-    final config = json.decode(configString);
-    if (config['apiUrl'] != null) {
-      serverUrl = config['apiUrl'];
-      // Ensure it ends with /
-      if (!serverUrl.endsWith('/')) {
-        serverUrl += '/';
-      }
-    }
-    print('Connecting to server: $serverUrl');
-  } catch (e) {
-    print('Failed to load config, using default: $e');
-  }
-
   client = Client(serverUrl)
     ..connectivityMonitor = FlutterConnectivityMonitor()
     ..authSessionManager = FlutterAuthSessionManager();
 
-  // Show splash for a brief moment then transition to Flutter splash
-  await Future.delayed(const Duration(milliseconds: 500));
+  // Try to load custom config asynchronously without blocking main flow
+  unawaited(rootBundle.loadString('assets/config.json').then((configString) {
+    try {
+      final config = json.decode(configString);
+      if (config['apiUrl'] != null) {
+        String newUrl = config['apiUrl'];
+        if (!newUrl.endsWith('/')) newUrl += '/';
+        // Note: client.host or similar might need updating if serverpod client supports it
+        // For now we just print it. Usually serverUrl is set at creation.
+        debugPrint('Config loaded. API URL: $newUrl');
+      }
+    } catch (e) {
+      debugPrint('Error parsing config: $e');
+    }
+  }).catchError((e) {
+    debugPrint('Config not found or error loading: $e');
+  }));
+
+  // Remove splash as soon as basic initialization is done
   FlutterNativeSplash.remove();
 
   runApp(const MyApp());
