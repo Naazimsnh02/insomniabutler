@@ -24,6 +24,13 @@ abstract class SleepSession implements _i1.SerializableModel {
     this.sleepQuality,
     this.morningMood,
     required this.sessionDate,
+    this.deepSleepDuration,
+    this.lightSleepDuration,
+    this.remSleepDuration,
+    this.awakeDuration,
+    this.restingHeartRate,
+    this.hrv,
+    this.respiratoryRate,
   });
 
   factory SleepSession({
@@ -37,6 +44,13 @@ abstract class SleepSession implements _i1.SerializableModel {
     int? sleepQuality,
     String? morningMood,
     required DateTime sessionDate,
+    int? deepSleepDuration,
+    int? lightSleepDuration,
+    int? remSleepDuration,
+    int? awakeDuration,
+    int? restingHeartRate,
+    int? hrv,
+    int? respiratoryRate,
   }) = _SleepSessionImpl;
 
   factory SleepSession.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -55,6 +69,13 @@ abstract class SleepSession implements _i1.SerializableModel {
       sessionDate: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['sessionDate'],
       ),
+      deepSleepDuration: jsonSerialization['deepSleepDuration'] as int?,
+      lightSleepDuration: jsonSerialization['lightSleepDuration'] as int?,
+      remSleepDuration: jsonSerialization['remSleepDuration'] as int?,
+      awakeDuration: jsonSerialization['awakeDuration'] as int?,
+      restingHeartRate: jsonSerialization['restingHeartRate'] as int?,
+      hrv: jsonSerialization['hrv'] as int?,
+      respiratoryRate: jsonSerialization['respiratoryRate'] as int?,
     );
   }
 
@@ -81,6 +102,20 @@ abstract class SleepSession implements _i1.SerializableModel {
 
   DateTime sessionDate;
 
+  int? deepSleepDuration;
+
+  int? lightSleepDuration;
+
+  int? remSleepDuration;
+
+  int? awakeDuration;
+
+  int? restingHeartRate;
+
+  int? hrv;
+
+  int? respiratoryRate;
+
   /// Returns a shallow copy of this [SleepSession]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -95,6 +130,13 @@ abstract class SleepSession implements _i1.SerializableModel {
     int? sleepQuality,
     String? morningMood,
     DateTime? sessionDate,
+    int? deepSleepDuration,
+    int? lightSleepDuration,
+    int? remSleepDuration,
+    int? awakeDuration,
+    int? restingHeartRate,
+    int? hrv,
+    int? respiratoryRate,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -111,6 +153,13 @@ abstract class SleepSession implements _i1.SerializableModel {
       if (sleepQuality != null) 'sleepQuality': sleepQuality,
       if (morningMood != null) 'morningMood': morningMood,
       'sessionDate': sessionDate.toJson(),
+      if (deepSleepDuration != null) 'deepSleepDuration': deepSleepDuration,
+      if (lightSleepDuration != null) 'lightSleepDuration': lightSleepDuration,
+      if (remSleepDuration != null) 'remSleepDuration': remSleepDuration,
+      if (awakeDuration != null) 'awakeDuration': awakeDuration,
+      if (restingHeartRate != null) 'restingHeartRate': restingHeartRate,
+      if (hrv != null) 'hrv': hrv,
+      if (respiratoryRate != null) 'respiratoryRate': respiratoryRate,
     };
   }
 
@@ -134,6 +183,13 @@ class _SleepSessionImpl extends SleepSession {
     int? sleepQuality,
     String? morningMood,
     required DateTime sessionDate,
+    int? deepSleepDuration,
+    int? lightSleepDuration,
+    int? remSleepDuration,
+    int? awakeDuration,
+    int? restingHeartRate,
+    int? hrv,
+    int? respiratoryRate,
   }) : super._(
          id: id,
          userId: userId,
@@ -145,6 +201,13 @@ class _SleepSessionImpl extends SleepSession {
          sleepQuality: sleepQuality,
          morningMood: morningMood,
          sessionDate: sessionDate,
+         deepSleepDuration: deepSleepDuration,
+         lightSleepDuration: lightSleepDuration,
+         remSleepDuration: remSleepDuration,
+         awakeDuration: awakeDuration,
+         restingHeartRate: restingHeartRate,
+         hrv: hrv,
+         respiratoryRate: respiratoryRate,
        );
 
   /// Returns a shallow copy of this [SleepSession]
@@ -162,6 +225,13 @@ class _SleepSessionImpl extends SleepSession {
     Object? sleepQuality = _Undefined,
     Object? morningMood = _Undefined,
     DateTime? sessionDate,
+    Object? deepSleepDuration = _Undefined,
+    Object? lightSleepDuration = _Undefined,
+    Object? remSleepDuration = _Undefined,
+    Object? awakeDuration = _Undefined,
+    Object? restingHeartRate = _Undefined,
+    Object? hrv = _Undefined,
+    Object? respiratoryRate = _Undefined,
   }) {
     return SleepSession(
       id: id is int? ? id : this.id,
@@ -176,6 +246,23 @@ class _SleepSessionImpl extends SleepSession {
       sleepQuality: sleepQuality is int? ? sleepQuality : this.sleepQuality,
       morningMood: morningMood is String? ? morningMood : this.morningMood,
       sessionDate: sessionDate ?? this.sessionDate,
+      deepSleepDuration: deepSleepDuration is int?
+          ? deepSleepDuration
+          : this.deepSleepDuration,
+      lightSleepDuration: lightSleepDuration is int?
+          ? lightSleepDuration
+          : this.lightSleepDuration,
+      remSleepDuration: remSleepDuration is int?
+          ? remSleepDuration
+          : this.remSleepDuration,
+      awakeDuration: awakeDuration is int? ? awakeDuration : this.awakeDuration,
+      restingHeartRate: restingHeartRate is int?
+          ? restingHeartRate
+          : this.restingHeartRate,
+      hrv: hrv is int? ? hrv : this.hrv,
+      respiratoryRate: respiratoryRate is int?
+          ? respiratoryRate
+          : this.respiratoryRate,
     );
   }
 }

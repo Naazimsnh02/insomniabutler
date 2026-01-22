@@ -1592,8 +1592,16 @@ class _SleepSessionEndpoint {
     int userId,
     DateTime bedTime,
     DateTime wakeTime,
-    int sleepQuality,
-  ) async {
+    int sleepQuality, {
+    int? sleepLatencyMinutes,
+    int? deepSleepDuration,
+    int? lightSleepDuration,
+    int? remSleepDuration,
+    int? awakeDuration,
+    int? restingHeartRate,
+    int? hrv,
+    int? respiratoryRate,
+  }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
@@ -1610,6 +1618,14 @@ class _SleepSessionEndpoint {
             'bedTime': bedTime,
             'wakeTime': wakeTime,
             'sleepQuality': sleepQuality,
+            'sleepLatencyMinutes': sleepLatencyMinutes,
+            'deepSleepDuration': deepSleepDuration,
+            'lightSleepDuration': lightSleepDuration,
+            'remSleepDuration': remSleepDuration,
+            'awakeDuration': awakeDuration,
+            'restingHeartRate': restingHeartRate,
+            'hrv': hrv,
+            'respiratoryRate': respiratoryRate,
           }),
           serializationManager: _serializationManager,
         );
@@ -1632,8 +1648,15 @@ class _SleepSessionEndpoint {
     DateTime bedTime,
     DateTime wakeTime,
     int sleepQuality,
-    int? sleepLatencyMinutes,
-  ) async {
+    int? sleepLatencyMinutes, {
+    int? deepSleepDuration,
+    int? lightSleepDuration,
+    int? remSleepDuration,
+    int? awakeDuration,
+    int? restingHeartRate,
+    int? hrv,
+    int? respiratoryRate,
+  }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
@@ -1651,6 +1674,13 @@ class _SleepSessionEndpoint {
             'wakeTime': wakeTime,
             'sleepQuality': sleepQuality,
             'sleepLatencyMinutes': sleepLatencyMinutes,
+            'deepSleepDuration': deepSleepDuration,
+            'lightSleepDuration': lightSleepDuration,
+            'remSleepDuration': remSleepDuration,
+            'awakeDuration': awakeDuration,
+            'restingHeartRate': restingHeartRate,
+            'hrv': hrv,
+            'respiratoryRate': respiratoryRate,
           }),
           serializationManager: _serializationManager,
         );

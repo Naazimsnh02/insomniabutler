@@ -651,8 +651,16 @@ class EndpointSleepSession extends _i2.EndpointRef {
     int userId,
     DateTime bedTime,
     DateTime wakeTime,
-    int sleepQuality,
-  ) => caller.callServerEndpoint<_i7.SleepSession>(
+    int sleepQuality, {
+    int? sleepLatencyMinutes,
+    int? deepSleepDuration,
+    int? lightSleepDuration,
+    int? remSleepDuration,
+    int? awakeDuration,
+    int? restingHeartRate,
+    int? hrv,
+    int? respiratoryRate,
+  }) => caller.callServerEndpoint<_i7.SleepSession>(
     'sleepSession',
     'logManualSession',
     {
@@ -660,6 +668,14 @@ class EndpointSleepSession extends _i2.EndpointRef {
       'bedTime': bedTime,
       'wakeTime': wakeTime,
       'sleepQuality': sleepQuality,
+      'sleepLatencyMinutes': sleepLatencyMinutes,
+      'deepSleepDuration': deepSleepDuration,
+      'lightSleepDuration': lightSleepDuration,
+      'remSleepDuration': remSleepDuration,
+      'awakeDuration': awakeDuration,
+      'restingHeartRate': restingHeartRate,
+      'hrv': hrv,
+      'respiratoryRate': respiratoryRate,
     },
   );
 
@@ -669,8 +685,15 @@ class EndpointSleepSession extends _i2.EndpointRef {
     DateTime bedTime,
     DateTime wakeTime,
     int sleepQuality,
-    int? sleepLatencyMinutes,
-  ) => caller.callServerEndpoint<_i7.SleepSession?>(
+    int? sleepLatencyMinutes, {
+    int? deepSleepDuration,
+    int? lightSleepDuration,
+    int? remSleepDuration,
+    int? awakeDuration,
+    int? restingHeartRate,
+    int? hrv,
+    int? respiratoryRate,
+  }) => caller.callServerEndpoint<_i7.SleepSession?>(
     'sleepSession',
     'updateSession',
     {
@@ -679,6 +702,13 @@ class EndpointSleepSession extends _i2.EndpointRef {
       'wakeTime': wakeTime,
       'sleepQuality': sleepQuality,
       'sleepLatencyMinutes': sleepLatencyMinutes,
+      'deepSleepDuration': deepSleepDuration,
+      'lightSleepDuration': lightSleepDuration,
+      'remSleepDuration': remSleepDuration,
+      'awakeDuration': awakeDuration,
+      'restingHeartRate': restingHeartRate,
+      'hrv': hrv,
+      'respiratoryRate': respiratoryRate,
     },
   );
 

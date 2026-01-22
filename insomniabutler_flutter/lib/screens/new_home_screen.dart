@@ -51,6 +51,14 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   int _lastNightInterruptions = 0;
   double? _sleepEfficiency;
   bool _hasLastNightData = false;
+  
+  // Advanced Sleep Data
+  int? _deepMinutes;
+  int? _lightMinutes;
+  int? _remMinutes;
+  int? _awakeMinutes;
+  int? _rhr;
+  int? _hrv;
 
   // Real data state
   TimeOfDay _bedtime = const TimeOfDay(hour: 23, minute: 0);
@@ -143,6 +151,14 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               : efficiency > 80
               ? 1
               : 2;
+              
+          // Populate advanced metrics
+          _deepMinutes = lastNight.deepSleepDuration;
+          _lightMinutes = lastNight.lightSleepDuration;
+          _remMinutes = lastNight.remSleepDuration;
+          _awakeMinutes = lastNight.awakeDuration;
+          _rhr = lastNight.restingHeartRate;
+          _hrv = lastNight.hrv;
         });
       }
 
@@ -339,6 +355,10 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               if (_hasLastNightData) ...[
                 _buildLastNightSummary(),
                 const SizedBox(height: AppSpacing.xl),
+                if (_deepMinutes != null || _rhr != null) ...[
+                   _buildAdvancedMetrics(),
+                   const SizedBox(height: AppSpacing.xl),
+                ],
               ],
               _buildDailyAffirmation(),
               const SizedBox(height: AppSpacing.xl),
@@ -735,6 +755,121 @@ class _NewHomeScreenState extends State<NewHomeScreen>
             fontSize: 10,
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildAdvancedMetrics() {
+    return Column(
+      children: [
+        if (_deepMinutes != null) _buildSleepStructure(),
+        if (_deepMinutes != null && _rhr != null) const SizedBox(height: AppSpacing.lg),
+        if (_rhr != null || _hrv != null) _buildRecoveryCards(),
+      ],
+    );
+  }
+
+  Widget _buildSleepStructure() {
+    final total = (_deepMinutes ?? 0) + (_lightMinutes ?? 0) + (_remMinutes ?? 0) + (_awakeMinutes ?? 0);
+    if (total == 0) return const SizedBox.shrink();
+
+    return GlassCard(
+      padding: const EdgeInsets.all(20),
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Sleep Structure', style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              height: 24,
+              child: Row(
+                children: [
+                  _buildStructureBar(_deepMinutes ?? 0, total, AppColors.accentPrimary, 'Deep'),
+                  _buildStructureBar(_remMinutes ?? 0, total, AppColors.accentSkyBlue, 'REM'),
+                  _buildStructureBar(_lightMinutes ?? 0, total, AppColors.textSecondary, 'Light'),
+                  _buildStructureBar(_awakeMinutes ?? 0, total, AppColors.accentAmber, 'Awake'),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildLegendItem('Deep', AppColors.accentPrimary, '${_deepMinutes}m'),
+              _buildLegendItem('REM', AppColors.accentSkyBlue, '${_remMinutes}m'),
+              _buildLegendItem('Light', AppColors.textSecondary, '${_lightMinutes}m'),
+              _buildLegendItem('Awake', AppColors.accentAmber, '${_awakeMinutes}m'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildStructureBar(int value, int total, Color color, String label) {
+    if (value <= 0) return const SizedBox.shrink();
+    return Expanded(
+      flex: value,
+      child: Container(color: color),
+    );
+  }
+  
+  Widget _buildLegendItem(String label, Color color, String value) {
+    return Row(
+      children: [
+        CircleAvatar(radius: 4, backgroundColor: color),
+        const SizedBox(width: 4),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: const TextStyle(fontSize: 10, color: AppColors.textTertiary)),
+            Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _buildRecoveryCards() {
+    return Row(
+      children: [
+        if (_rhr != null)
+          Expanded(
+            child: GlassCard(
+              padding: const EdgeInsets.all(16),
+              color: AppColors.bgSecondary.withOpacity(0.3),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.favorite_rounded, color: AppColors.accentError, size: 20),
+                  const SizedBox(height: 8),
+                  Text('$_rhr bpm', style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold)),
+                  Text('Resting HR', style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)),
+                ],
+              ),
+            ),
+          ),
+        if (_rhr != null && _hrv != null) const SizedBox(width: 12),
+        if (_hrv != null)
+          Expanded(
+            child: GlassCard(
+              padding: const EdgeInsets.all(16),
+              color: AppColors.bgSecondary.withOpacity(0.3),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.monitor_heart_rounded, color: AppColors.accentSuccess, size: 20),
+                  const SizedBox(height: 8),
+                  Text('$_hrv ms', style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold)),
+                  Text('HRV', style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)),
+                ],
+              ),
+            ),
+          ),
       ],
     );
   }

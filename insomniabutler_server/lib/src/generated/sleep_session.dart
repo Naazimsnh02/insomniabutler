@@ -25,6 +25,13 @@ abstract class SleepSession
     this.sleepQuality,
     this.morningMood,
     required this.sessionDate,
+    this.deepSleepDuration,
+    this.lightSleepDuration,
+    this.remSleepDuration,
+    this.awakeDuration,
+    this.restingHeartRate,
+    this.hrv,
+    this.respiratoryRate,
   });
 
   factory SleepSession({
@@ -38,6 +45,13 @@ abstract class SleepSession
     int? sleepQuality,
     String? morningMood,
     required DateTime sessionDate,
+    int? deepSleepDuration,
+    int? lightSleepDuration,
+    int? remSleepDuration,
+    int? awakeDuration,
+    int? restingHeartRate,
+    int? hrv,
+    int? respiratoryRate,
   }) = _SleepSessionImpl;
 
   factory SleepSession.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -56,6 +70,13 @@ abstract class SleepSession
       sessionDate: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['sessionDate'],
       ),
+      deepSleepDuration: jsonSerialization['deepSleepDuration'] as int?,
+      lightSleepDuration: jsonSerialization['lightSleepDuration'] as int?,
+      remSleepDuration: jsonSerialization['remSleepDuration'] as int?,
+      awakeDuration: jsonSerialization['awakeDuration'] as int?,
+      restingHeartRate: jsonSerialization['restingHeartRate'] as int?,
+      hrv: jsonSerialization['hrv'] as int?,
+      respiratoryRate: jsonSerialization['respiratoryRate'] as int?,
     );
   }
 
@@ -84,6 +105,20 @@ abstract class SleepSession
 
   DateTime sessionDate;
 
+  int? deepSleepDuration;
+
+  int? lightSleepDuration;
+
+  int? remSleepDuration;
+
+  int? awakeDuration;
+
+  int? restingHeartRate;
+
+  int? hrv;
+
+  int? respiratoryRate;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -101,6 +136,13 @@ abstract class SleepSession
     int? sleepQuality,
     String? morningMood,
     DateTime? sessionDate,
+    int? deepSleepDuration,
+    int? lightSleepDuration,
+    int? remSleepDuration,
+    int? awakeDuration,
+    int? restingHeartRate,
+    int? hrv,
+    int? respiratoryRate,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -117,6 +159,13 @@ abstract class SleepSession
       if (sleepQuality != null) 'sleepQuality': sleepQuality,
       if (morningMood != null) 'morningMood': morningMood,
       'sessionDate': sessionDate.toJson(),
+      if (deepSleepDuration != null) 'deepSleepDuration': deepSleepDuration,
+      if (lightSleepDuration != null) 'lightSleepDuration': lightSleepDuration,
+      if (remSleepDuration != null) 'remSleepDuration': remSleepDuration,
+      if (awakeDuration != null) 'awakeDuration': awakeDuration,
+      if (restingHeartRate != null) 'restingHeartRate': restingHeartRate,
+      if (hrv != null) 'hrv': hrv,
+      if (respiratoryRate != null) 'respiratoryRate': respiratoryRate,
     };
   }
 
@@ -135,6 +184,13 @@ abstract class SleepSession
       if (sleepQuality != null) 'sleepQuality': sleepQuality,
       if (morningMood != null) 'morningMood': morningMood,
       'sessionDate': sessionDate.toJson(),
+      if (deepSleepDuration != null) 'deepSleepDuration': deepSleepDuration,
+      if (lightSleepDuration != null) 'lightSleepDuration': lightSleepDuration,
+      if (remSleepDuration != null) 'remSleepDuration': remSleepDuration,
+      if (awakeDuration != null) 'awakeDuration': awakeDuration,
+      if (restingHeartRate != null) 'restingHeartRate': restingHeartRate,
+      if (hrv != null) 'hrv': hrv,
+      if (respiratoryRate != null) 'respiratoryRate': respiratoryRate,
     };
   }
 
@@ -182,6 +238,13 @@ class _SleepSessionImpl extends SleepSession {
     int? sleepQuality,
     String? morningMood,
     required DateTime sessionDate,
+    int? deepSleepDuration,
+    int? lightSleepDuration,
+    int? remSleepDuration,
+    int? awakeDuration,
+    int? restingHeartRate,
+    int? hrv,
+    int? respiratoryRate,
   }) : super._(
          id: id,
          userId: userId,
@@ -193,6 +256,13 @@ class _SleepSessionImpl extends SleepSession {
          sleepQuality: sleepQuality,
          morningMood: morningMood,
          sessionDate: sessionDate,
+         deepSleepDuration: deepSleepDuration,
+         lightSleepDuration: lightSleepDuration,
+         remSleepDuration: remSleepDuration,
+         awakeDuration: awakeDuration,
+         restingHeartRate: restingHeartRate,
+         hrv: hrv,
+         respiratoryRate: respiratoryRate,
        );
 
   /// Returns a shallow copy of this [SleepSession]
@@ -210,6 +280,13 @@ class _SleepSessionImpl extends SleepSession {
     Object? sleepQuality = _Undefined,
     Object? morningMood = _Undefined,
     DateTime? sessionDate,
+    Object? deepSleepDuration = _Undefined,
+    Object? lightSleepDuration = _Undefined,
+    Object? remSleepDuration = _Undefined,
+    Object? awakeDuration = _Undefined,
+    Object? restingHeartRate = _Undefined,
+    Object? hrv = _Undefined,
+    Object? respiratoryRate = _Undefined,
   }) {
     return SleepSession(
       id: id is int? ? id : this.id,
@@ -224,6 +301,23 @@ class _SleepSessionImpl extends SleepSession {
       sleepQuality: sleepQuality is int? ? sleepQuality : this.sleepQuality,
       morningMood: morningMood is String? ? morningMood : this.morningMood,
       sessionDate: sessionDate ?? this.sessionDate,
+      deepSleepDuration: deepSleepDuration is int?
+          ? deepSleepDuration
+          : this.deepSleepDuration,
+      lightSleepDuration: lightSleepDuration is int?
+          ? lightSleepDuration
+          : this.lightSleepDuration,
+      remSleepDuration: remSleepDuration is int?
+          ? remSleepDuration
+          : this.remSleepDuration,
+      awakeDuration: awakeDuration is int? ? awakeDuration : this.awakeDuration,
+      restingHeartRate: restingHeartRate is int?
+          ? restingHeartRate
+          : this.restingHeartRate,
+      hrv: hrv is int? ? hrv : this.hrv,
+      respiratoryRate: respiratoryRate is int?
+          ? respiratoryRate
+          : this.respiratoryRate,
     );
   }
 }
@@ -278,6 +372,41 @@ class SleepSessionUpdateTable extends _i1.UpdateTable<SleepSessionTable> {
         table.sessionDate,
         value,
       );
+
+  _i1.ColumnValue<int, int> deepSleepDuration(int? value) => _i1.ColumnValue(
+    table.deepSleepDuration,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> lightSleepDuration(int? value) => _i1.ColumnValue(
+    table.lightSleepDuration,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> remSleepDuration(int? value) => _i1.ColumnValue(
+    table.remSleepDuration,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> awakeDuration(int? value) => _i1.ColumnValue(
+    table.awakeDuration,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> restingHeartRate(int? value) => _i1.ColumnValue(
+    table.restingHeartRate,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> hrv(int? value) => _i1.ColumnValue(
+    table.hrv,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> respiratoryRate(int? value) => _i1.ColumnValue(
+    table.respiratoryRate,
+    value,
+  );
 }
 
 class SleepSessionTable extends _i1.Table<int?> {
@@ -320,6 +449,34 @@ class SleepSessionTable extends _i1.Table<int?> {
       'sessionDate',
       this,
     );
+    deepSleepDuration = _i1.ColumnInt(
+      'deepSleepDuration',
+      this,
+    );
+    lightSleepDuration = _i1.ColumnInt(
+      'lightSleepDuration',
+      this,
+    );
+    remSleepDuration = _i1.ColumnInt(
+      'remSleepDuration',
+      this,
+    );
+    awakeDuration = _i1.ColumnInt(
+      'awakeDuration',
+      this,
+    );
+    restingHeartRate = _i1.ColumnInt(
+      'restingHeartRate',
+      this,
+    );
+    hrv = _i1.ColumnInt(
+      'hrv',
+      this,
+    );
+    respiratoryRate = _i1.ColumnInt(
+      'respiratoryRate',
+      this,
+    );
   }
 
   late final SleepSessionUpdateTable updateTable;
@@ -342,6 +499,20 @@ class SleepSessionTable extends _i1.Table<int?> {
 
   late final _i1.ColumnDateTime sessionDate;
 
+  late final _i1.ColumnInt deepSleepDuration;
+
+  late final _i1.ColumnInt lightSleepDuration;
+
+  late final _i1.ColumnInt remSleepDuration;
+
+  late final _i1.ColumnInt awakeDuration;
+
+  late final _i1.ColumnInt restingHeartRate;
+
+  late final _i1.ColumnInt hrv;
+
+  late final _i1.ColumnInt respiratoryRate;
+
   @override
   List<_i1.Column> get columns => [
     id,
@@ -354,6 +525,13 @@ class SleepSessionTable extends _i1.Table<int?> {
     sleepQuality,
     morningMood,
     sessionDate,
+    deepSleepDuration,
+    lightSleepDuration,
+    remSleepDuration,
+    awakeDuration,
+    restingHeartRate,
+    hrv,
+    respiratoryRate,
   ];
 }
 

@@ -1091,6 +1091,46 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<int>(),
               nullable: false,
             ),
+            'sleepLatencyMinutes': _i1.ParameterDescription(
+              name: 'sleepLatencyMinutes',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'deepSleepDuration': _i1.ParameterDescription(
+              name: 'deepSleepDuration',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'lightSleepDuration': _i1.ParameterDescription(
+              name: 'lightSleepDuration',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'remSleepDuration': _i1.ParameterDescription(
+              name: 'remSleepDuration',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'awakeDuration': _i1.ParameterDescription(
+              name: 'awakeDuration',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'restingHeartRate': _i1.ParameterDescription(
+              name: 'restingHeartRate',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'hrv': _i1.ParameterDescription(
+              name: 'hrv',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'respiratoryRate': _i1.ParameterDescription(
+              name: 'respiratoryRate',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -1103,6 +1143,14 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['bedTime'],
                     params['wakeTime'],
                     params['sleepQuality'],
+                    sleepLatencyMinutes: params['sleepLatencyMinutes'],
+                    deepSleepDuration: params['deepSleepDuration'],
+                    lightSleepDuration: params['lightSleepDuration'],
+                    remSleepDuration: params['remSleepDuration'],
+                    awakeDuration: params['awakeDuration'],
+                    restingHeartRate: params['restingHeartRate'],
+                    hrv: params['hrv'],
+                    respiratoryRate: params['respiratoryRate'],
                   ),
         ),
         'updateSession': _i1.MethodConnector(
@@ -1133,6 +1181,41 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<int?>(),
               nullable: true,
             ),
+            'deepSleepDuration': _i1.ParameterDescription(
+              name: 'deepSleepDuration',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'lightSleepDuration': _i1.ParameterDescription(
+              name: 'lightSleepDuration',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'remSleepDuration': _i1.ParameterDescription(
+              name: 'remSleepDuration',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'awakeDuration': _i1.ParameterDescription(
+              name: 'awakeDuration',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'restingHeartRate': _i1.ParameterDescription(
+              name: 'restingHeartRate',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'hrv': _i1.ParameterDescription(
+              name: 'hrv',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'respiratoryRate': _i1.ParameterDescription(
+              name: 'respiratoryRate',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -1146,6 +1229,13 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['wakeTime'],
                     params['sleepQuality'],
                     params['sleepLatencyMinutes'],
+                    deepSleepDuration: params['deepSleepDuration'],
+                    lightSleepDuration: params['lightSleepDuration'],
+                    remSleepDuration: params['remSleepDuration'],
+                    awakeDuration: params['awakeDuration'],
+                    restingHeartRate: params['restingHeartRate'],
+                    hrv: params['hrv'],
+                    respiratoryRate: params['respiratoryRate'],
                   ),
         ),
         'deleteSession': _i1.MethodConnector(

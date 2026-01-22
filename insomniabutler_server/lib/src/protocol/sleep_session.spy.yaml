@@ -10,3 +10,16 @@ fields:
   sleepQuality: int?
   morningMood: String?
   sessionDate: DateTime
+  
+  # Sleep Architecture
+  deepSleepDuration: int?
+  lightSleepDuration: int?
+  remSleepDuration: int?
+  awakeDuration: int?
+
+  # Recovery
+  restingHeartRate: int?
+  hrv: int?
+  respiratoryRate: int?
+  
+

@@ -22,6 +22,17 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
   late TimeOfDay _bedtime;
   late TimeOfDay _waketime;
   int _quality = 3;
+  
+  // Advanced Metrics State
+  bool _showAdvanced = false;
+  int? _deepSleep;
+  int? _lightSleep;
+  int? _remSleep;
+  int? _awake;
+  int? _hrv;
+  int? _rhr;
+  int? _respiratoryRate;
+
   bool _isLoading = false;
 
   @override
@@ -39,6 +50,18 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
       _date = DateTime.now();
       _bedtime = const TimeOfDay(hour: 23, minute: 0);
       _waketime = const TimeOfDay(hour: 7, minute: 0);
+    }
+
+    if (widget.initialData != null) {
+      final d = widget.initialData!;
+      _deepSleep = d['deepSleepDuration'];
+      _lightSleep = d['lightSleepDuration'];
+      _remSleep = d['remSleepDuration'];
+      _awake = d['awakeDuration'];
+      _hrv = d['hrv'];
+      _rhr = d['restingHeartRate'];
+      _respiratoryRate = d['respiratoryRate'];
+      if (_deepSleep != null || _hrv != null) _showAdvanced = true;
     }
   }
 
@@ -130,6 +153,8 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
                       _buildDurationInfo(),
                       const SizedBox(height: AppSpacing.xl),
                       _buildQualityPicker(),
+                      const SizedBox(height: AppSpacing.xl),
+                      _buildAdvancedSection(),
                     ],
                   ),
                 ),
@@ -367,6 +392,104 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
         ),
       ],
     );
+
+  }
+
+  Widget _buildAdvancedSection() {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () => setState(() => _showAdvanced = !_showAdvanced),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Advanced Recovery Data',
+                style: AppTextStyles.label.copyWith(
+                  color: AppColors.accentSkyBlue,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Icon(
+                _showAdvanced
+                    ? Icons.keyboard_arrow_up_rounded
+                    : Icons.keyboard_arrow_down_rounded,
+                color: AppColors.accentSkyBlue,
+              ),
+            ],
+          ),
+        ),
+        if (_showAdvanced) ...[
+          const SizedBox(height: AppSpacing.lg),
+          GlassCard(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            color: AppColors.bgSecondary.withOpacity(0.2),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Sleep Structure (Minutes)',
+                  style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  children: [
+                    Expanded(child: _buildNumberInput('Deep', _deepSleep, (v) => _deepSleep = v)),
+                    const SizedBox(width: 8),
+                    Expanded(child: _buildNumberInput('REM', _remSleep, (v) => _remSleep = v)),
+                    const SizedBox(width: 8),
+                    Expanded(child: _buildNumberInput('Light', _lightSleep, (v) => _lightSleep = v)),
+                    const SizedBox(width: 8),
+                    Expanded(child: _buildNumberInput('Awake', _awake, (v) => _awake = v)),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  'Recovery Metrics',
+                  style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  children: [
+                    Expanded(child: _buildNumberInput('HRV (ms)', _hrv, (v) => _hrv = v)),
+                    const SizedBox(width: 12),
+                    Expanded(child: _buildNumberInput('RHR (bpm)', _rhr, (v) => _rhr = v)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildNumberInput(String label, int? value, Function(int?) onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTextStyles.label.copyWith(fontSize: 10)),
+        const SizedBox(height: 4),
+        TextFormField(
+          initialValue: value?.toString(),
+          keyboardType: TextInputType.number,
+          style: AppTextStyles.bodySm,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.05),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            isDense: true,
+          ),
+          onChanged: (val) {
+            onChanged(int.tryParse(val));
+          },
+        ),
+      ],
+    );
   }
 
   Widget _buildSaveButton(bool isEdit) {
@@ -411,22 +534,36 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
         wakeDateTime = wakeDateTime.add(const Duration(days: 1));
       }
 
-      if (isEdit) {
-        await client.sleepSession.updateSession(
-          widget.initialData!['id'],
-          bedDateTime.toUtc(),
-          wakeDateTime.toUtc(),
-          _quality,
-          null, // sleepLatencyMinutes
-        );
-      } else {
-        await client.sleepSession.logManualSession(
-          userId,
-          bedDateTime.toUtc(),
-          wakeDateTime.toUtc(),
-          _quality,
-        );
-      }
+        if (isEdit) {
+          await client.sleepSession.updateSession(
+            widget.initialData!['id'],
+            bedDateTime.toUtc(),
+            wakeDateTime.toUtc(),
+            _quality,
+            null, // sleepLatencyMinutes
+            deepSleepDuration: _deepSleep,
+            lightSleepDuration: _lightSleep,
+            remSleepDuration: _remSleep,
+            awakeDuration: _awake,
+            restingHeartRate: _rhr,
+            hrv: _hrv,
+            respiratoryRate: _respiratoryRate,
+          );
+        } else {
+          await client.sleepSession.logManualSession(
+            userId,
+            bedDateTime.toUtc(),
+            wakeDateTime.toUtc(),
+            _quality,
+            deepSleepDuration: _deepSleep,
+            lightSleepDuration: _lightSleep,
+            remSleepDuration: _remSleep,
+            awakeDuration: _awake,
+            restingHeartRate: _rhr,
+            hrv: _hrv,
+            respiratoryRate: _respiratoryRate,
+          );
+        }
 
       HapticHelper.success();
       if (mounted) {

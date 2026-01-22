@@ -125,8 +125,16 @@ class SleepSessionEndpoint extends Endpoint {
     int userId,
     DateTime bedTime,
     DateTime wakeTime,
-    int sleepQuality,
-  ) async {
+    int sleepQuality, {
+    int? sleepLatencyMinutes,
+    int? deepSleepDuration,
+    int? lightSleepDuration,
+    int? remSleepDuration,
+    int? awakeDuration,
+    int? restingHeartRate,
+    int? hrv,
+    int? respiratoryRate,
+  }) async {
     final sleepSession = SleepSession(
       userId: userId,
       bedTime: bedTime,
@@ -135,6 +143,14 @@ class SleepSessionEndpoint extends Endpoint {
       usedButler: false,
       thoughtsProcessed: 0,
       sessionDate: bedTime,
+      sleepLatencyMinutes: sleepLatencyMinutes,
+      deepSleepDuration: deepSleepDuration,
+      lightSleepDuration: lightSleepDuration,
+      remSleepDuration: remSleepDuration,
+      awakeDuration: awakeDuration,
+      restingHeartRate: restingHeartRate,
+      hrv: hrv,
+      respiratoryRate: respiratoryRate,
     );
 
     return await SleepSession.db.insertRow(session, sleepSession);
@@ -147,8 +163,15 @@ class SleepSessionEndpoint extends Endpoint {
     DateTime bedTime,
     DateTime wakeTime,
     int sleepQuality,
-    int? sleepLatencyMinutes,
-  ) async {
+    int? sleepLatencyMinutes, {
+    int? deepSleepDuration,
+    int? lightSleepDuration,
+    int? remSleepDuration,
+    int? awakeDuration,
+    int? restingHeartRate,
+    int? hrv,
+    int? respiratoryRate,
+  }) async {
     final sleepSession = await SleepSession.db.findById(session, sessionId);
     if (sleepSession == null) return null;
 
@@ -157,6 +180,13 @@ class SleepSessionEndpoint extends Endpoint {
       wakeTime: wakeTime,
       sleepQuality: sleepQuality,
       sleepLatencyMinutes: sleepLatencyMinutes,
+      deepSleepDuration: deepSleepDuration,
+      lightSleepDuration: lightSleepDuration,
+      remSleepDuration: remSleepDuration,
+      awakeDuration: awakeDuration,
+      restingHeartRate: restingHeartRate,
+      hrv: hrv,
+      respiratoryRate: respiratoryRate,
     );
 
     return await SleepSession.db.updateRow(session, updated);
