@@ -59,6 +59,8 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   int? _awakeMinutes;
   int? _rhr;
   int? _hrv;
+  int? _respiratoryRate;
+  int? _consistencyScore;
 
   // Real data state
   TimeOfDay _bedtime = const TimeOfDay(hour: 23, minute: 0);
@@ -70,7 +72,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
     {'emoji': '😔', 'label': 'Sad'},
     {'emoji': '😑', 'label': 'Blah'},
     {'emoji': '😊', 'label': 'Happy'},
-    {'emoji': '➕', 'label': 'Add'},
+    {'emoji': '🥱', 'label': 'Tired'},
   ];
 
   @override
@@ -159,10 +161,59 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           _awakeMinutes = lastNight.awakeDuration;
           _rhr = lastNight.restingHeartRate;
           _hrv = lastNight.hrv;
+          _respiratoryRate = lastNight.respiratoryRate;
         });
       }
 
+      // Calculate 7-day consistency metric
+      int? calculatedConsistency;
+      if (sessions.isNotEmpty) {
+        final recentSessions = sessions.take(7).toList();
+        if (recentSessions.length >= 2) {
+          double totalBedtimeDev = 0;
+          double totalWakeDev = 0;
+          
+          // Calculate mean bedtime and wake time in minutes from midnight
+          double meanBedtime = 0;
+          double meanWake = 0;
+          int sessionsWithWake = 0;
+
+          for (var s in recentSessions) {
+            final bt = s.bedTime.toLocal();
+            meanBedtime += (bt.hour * 60 + bt.minute);
+            
+            if (s.wakeTime != null) {
+              final wt = s.wakeTime!.toLocal();
+              meanWake += (wt.hour * 60 + wt.minute);
+              sessionsWithWake++;
+            }
+          }
+          
+          meanBedtime /= recentSessions.length;
+          if (sessionsWithWake > 0) meanWake /= sessionsWithWake;
+          
+          for (var s in recentSessions) {
+            final bt = s.bedTime.toLocal();
+            totalBedtimeDev += (bt.hour * 60 + bt.minute - meanBedtime).abs();
+            
+            if (s.wakeTime != null) {
+              final wt = s.wakeTime!.toLocal();
+              totalWakeDev += (wt.hour * 60 + wt.minute - meanWake).abs();
+            }
+          }
+          
+          double avgDev = totalBedtimeDev / recentSessions.length;
+          if (sessionsWithWake > 0) {
+            avgDev = (avgDev + (totalWakeDev / sessionsWithWake)) / 2;
+          }
+          
+          // 100% consistency = 0 min deviation. 0% = 120 min deviation (2 hours)
+          calculatedConsistency = (100 - (avgDev / 1.2)).clamp(0, 100).toInt();
+        }
+      }
+
       setState(() {
+        _consistencyScore = calculatedConsistency;
         if (insights.latencyImprovement > 0)
           _latencyImprovement = insights.latencyImprovement;
         if (insights.avgLatencyWithButler > 0)
@@ -355,10 +406,8 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               if (_hasLastNightData) ...[
                 _buildLastNightSummary(),
                 const SizedBox(height: AppSpacing.xl),
-                if (_deepMinutes != null || _rhr != null) ...[
-                  _buildAdvancedMetrics(),
-                  const SizedBox(height: AppSpacing.xl),
-                ],
+                _buildAdvancedMetrics(),
+                const SizedBox(height: AppSpacing.xl),
               ],
               _buildDailyAffirmation(),
               const SizedBox(height: AppSpacing.xl),
@@ -374,7 +423,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               ],
               _buildMoodTracker(),
               const SizedBox(height: AppSpacing.xl),
-              _buildImpactSection(),
+              _buildTrendInsights(),
               const SizedBox(height: 140), // Space for fab & nav
             ]),
           ),
@@ -625,8 +674,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
                             '${hours}h ${minutes}m',
@@ -760,129 +808,180 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   }
 
   Widget _buildAdvancedMetrics() {
+    bool hasStructure = _deepMinutes != null || _remMinutes != null || _lightMinutes != null || _awakeMinutes != null;
+    bool hasRecovery = _rhr != null || _hrv != null;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (_deepMinutes != null) _buildSleepStructure(),
-        if (_deepMinutes != null && _rhr != null)
-          const SizedBox(height: AppSpacing.lg),
-        if (_rhr != null || _hrv != null) _buildRecoveryCards(),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Advanced Insights',
+                style: AppTextStyles.label.copyWith(
+                  color: AppColors.textTertiary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (!hasStructure || !hasRecovery)
+                Flexible(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ManualLogScreen(),
+                        ),
+                      );
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.add_circle_outline_rounded,
+                          size: 14,
+                          color: AppColors.accentSkyBlue.withOpacity(0.7),
+                        ),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            'Add Data',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.accentSkyBlue.withOpacity(0.7),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        _buildSleepStructure(),
+        const SizedBox(height: AppSpacing.md),
+        _buildRecoveryCards(),
       ],
     );
   }
 
   Widget _buildSleepStructure() {
-    final total =
-        (_deepMinutes ?? 0) +
-        (_lightMinutes ?? 0) +
-        (_remMinutes ?? 0) +
-        (_awakeMinutes ?? 0);
-    if (total == 0) return const SizedBox.shrink();
+    final deep = _deepMinutes ?? 0;
+    final rem = _remMinutes ?? 0;
+    final light = _lightMinutes ?? 0;
+    final awake = _awakeMinutes ?? 0;
+    final total = deep + rem + light + awake;
 
     return GlassCard(
       padding: const EdgeInsets.all(20),
       color: AppColors.bgSecondary.withOpacity(0.3),
+      borderRadius: 24,
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Sleep Structure',
-            style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: SizedBox(
-              height: 24,
-              child: Row(
-                children: [
-                  _buildStructureBar(
-                    _deepMinutes ?? 0,
-                    total,
-                    AppColors.accentPrimary,
-                    'Deep',
-                  ),
-                  _buildStructureBar(
-                    _remMinutes ?? 0,
-                    total,
-                    AppColors.accentSkyBlue,
-                    'REM',
-                  ),
-                  _buildStructureBar(
-                    _lightMinutes ?? 0,
-                    total,
-                    AppColors.textSecondary,
-                    'Light',
-                  ),
-                  _buildStructureBar(
-                    _awakeMinutes ?? 0,
-                    total,
-                    AppColors.accentAmber,
-                    'Awake',
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildLegendItem(
-                'Deep',
-                AppColors.accentPrimary,
-                '${_deepMinutes}m',
-              ),
-              _buildLegendItem(
-                'REM',
-                AppColors.accentSkyBlue,
-                '${_remMinutes}m',
-              ),
-              _buildLegendItem(
-                'Light',
-                AppColors.textSecondary,
-                '${_lightMinutes}m',
-              ),
-              _buildLegendItem(
-                'Awake',
-                AppColors.accentAmber,
-                '${_awakeMinutes}m',
-              ),
+              Text('Sleep Architecture', style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+              if (total > 0)
+                Text(
+                  '${(deep / total * 100).toStringAsFixed(0)}% Deep', 
+                  style: AppTextStyles.caption.copyWith(color: AppColors.accentPrimary)
+                ),
             ],
           ),
+          const SizedBox(height: 16),
+          if (total > 0) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: SizedBox(
+                height: 12,
+                child: Row(
+                  children: [
+                    if (deep > 0) Expanded(flex: deep, child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppColors.accentPrimary, AppColors.accentPrimary.withOpacity(0.7)],
+                        ),
+                      ),
+                    )),
+                    if (rem > 0) Expanded(flex: rem, child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppColors.accentSkyBlue, AppColors.accentSkyBlue.withOpacity(0.7)],
+                        ),
+                      ),
+                    )),
+                    if (light > 0) Expanded(flex: light, child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppColors.textSecondary.withOpacity(0.4), AppColors.textSecondary.withOpacity(0.6)],
+                        ),
+                      ),
+                    )),
+                    if (awake > 0) Expanded(flex: awake, child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppColors.accentAmber, AppColors.accentAmber.withOpacity(0.7)],
+                        ),
+                      ),
+                    )),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildLegendItem('Deep', AppColors.accentPrimary, '${deep}m'),
+                _buildLegendItem('REM', AppColors.accentSkyBlue, '${rem}m'),
+                _buildLegendItem('Light', AppColors.textSecondary, '${light}m'),
+                _buildLegendItem('Awake', AppColors.accentAmber, '${awake}m'),
+              ],
+            ),
+          ] else
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  'No sleep architecture data logged',
+                  style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildStructureBar(int value, int total, Color color, String label) {
-    if (value <= 0) return const SizedBox.shrink();
-    return Expanded(
-      flex: value,
-      child: Container(color: color),
-    );
-  }
-
   Widget _buildLegendItem(String label, Color color, String value) {
-    return Row(
+    return Column(
       children: [
-        CircleAvatar(radius: 4, backgroundColor: color),
-        const SizedBox(width: 4),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 10,
-                color: AppColors.textTertiary,
-              ),
-            ),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            ),
-          ],
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
+        const SizedBox(height: 4),
+        Text(value, style: AppTextStyles.bodySm.copyWith(fontWeight: FontWeight.bold, fontSize: 12)),
+        Text(label, style: AppTextStyles.caption.copyWith(fontSize: 10, color: AppColors.textTertiary)),
       ],
     );
   }
@@ -890,199 +989,221 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   Widget _buildRecoveryCards() {
     return Row(
       children: [
-        if (_rhr != null)
-          Expanded(
-            child: GlassCard(
-              padding: const EdgeInsets.all(16),
-              color: AppColors.bgSecondary.withOpacity(0.3),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(
-                    Icons.favorite_rounded,
-                    color: AppColors.accentError,
-                    size: 20,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '$_rhr bpm',
-                    style: AppTextStyles.h3.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'Resting HR',
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textTertiary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+        Expanded(
+          child: _buildRecoveryCard(
+            'Resting HR',
+            _rhr != null ? '$_rhr' : '--',
+            'bpm',
+            Icons.favorite_rounded,
+            AppColors.accentError,
           ),
-        if (_rhr != null && _hrv != null) const SizedBox(width: 12),
-        if (_hrv != null)
-          Expanded(
-            child: GlassCard(
-              padding: const EdgeInsets.all(16),
-              color: AppColors.bgSecondary.withOpacity(0.3),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(
-                    Icons.monitor_heart_rounded,
-                    color: AppColors.accentSuccess,
-                    size: 20,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '$_hrv ms',
-                    style: AppTextStyles.h3.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'HRV',
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textTertiary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: _buildRecoveryCard(
+            'HRV',
+            _hrv != null ? '$_hrv' : '--',
+            'ms',
+            Icons.bolt_rounded,
+            AppColors.accentSuccess,
           ),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: _buildRecoveryCard(
+            'Resp. Rate',
+            _respiratoryRate != null ? '$_respiratoryRate' : '--',
+            'brpm',
+            Icons.air_rounded,
+            AppColors.accentSkyBlue,
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget _buildRecoveryCard(String title, String value, String unit, IconData icon, Color color) {
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      borderRadius: 20,
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 16),
+          const SizedBox(height: 8),
+          Text(title, 
+            style: AppTextStyles.caption.copyWith(
+              fontSize: 10,
+              color: AppColors.textSecondary, 
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          FittedBox(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(value, style: AppTextStyles.bodyLg.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(width: 2),
+                Text(unit, style: AppTextStyles.caption.copyWith(fontSize: 8, color: AppColors.textTertiary)),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildSleepGauge() {
     final dateStr = DateFormat('EEE, dd MMMM').format(_selectedDate);
+    
+    // The gauge now strictly represents the goal/plan for the upcoming sleep
+    final displayDuration = _calculateDuration();
+    const scoreText = 'Target Score';
 
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(dateStr, style: AppTextStyles.h4),
-            const Icon(
-              Icons.ios_share_rounded,
-              color: AppColors.textSecondary,
-              size: 20,
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        SizedBox(
-          height: 240,
-          child: Stack(
-            alignment: Alignment.center,
+    return GlassCard(
+      padding: const EdgeInsets.all(20),
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      borderRadius: 24,
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Outer Glow
-              Container(
-                width: 220,
-                height: 220,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.accentPrimary.withOpacity(0.1),
-                      blurRadius: 50,
-                      spreadRadius: 10,
-                    ),
-                  ],
-                ),
-              ),
-              // Gauge Arc Placeholder (Using a decorated container for now)
-              Container(
-                width: 200,
-                height: 200,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white10, width: 2),
-                ),
-                child: CustomPaint(
-                  painter: _GaugePainter(_latencyImprovement.toDouble() / 100),
-                ),
-              ),
-              // Inner Content
-              Column(
-                mainAxisSize: MainAxisSize.min,
+              Text(dateStr, style: AppTextStyles.h4),
+              Row(
                 children: [
+                  Icon(Icons.auto_awesome_rounded, size: 14, color: AppColors.accentPrimary.withOpacity(0.7)),
+                  const SizedBox(width: 4),
                   Text(
-                        '${_latencyImprovement.clamp(0, 100)}%',
-                        style: AppTextStyles.displayMd.copyWith(
-                          color: AppColors.accentPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                      .animate(onPlay: (c) => c.repeat(reverse: true))
-                      .shimmer(duration: 3.seconds, color: Colors.white24),
-                  Text(
-                    'Sleep Score',
-                    style: AppTextStyles.label.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    _calculateDuration(),
-                    style: AppTextStyles.h2.copyWith(
+                    'Tonight\'s Goal',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.accentPrimary,
                       fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'Sleep duration',
-                    style: AppTextStyles.label.copyWith(
-                      color: AppColors.textSecondary,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ],
               ),
-              // Time Labels on Circle
-              ...List.generate(4, (i) {
-                final double angle = (i * 90 - 90) * (math.pi / 180);
-                final time = ['12', '3', '6', '9'][i];
-                // Using Alignment based on cos/sin for perfect circular placement
-                return Positioned.fill(
-                  child: Align(
-                    alignment: Alignment(
-                      math.cos(angle) *
-                          1.15, // Move slightly OUTSIDE the ring for better clarity
-                      math.sin(angle) * 1.15,
-                    ),
-                    child: Text(
-                      time,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textTertiary.withOpacity(0.8),
-                        fontWeight: FontWeight.w800,
-                        fontSize: 12,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                );
-              }),
             ],
           ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildMetricItem(
-              'Time in bed',
-              '${_bedtime.format(context)} - ${_alarm.format(context)}',
+          const SizedBox(height: AppSpacing.lg),
+          SizedBox(
+            height: 240,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Outer Glow
+                Container(
+                  width: 220,
+                  height: 220,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.accentPrimary.withOpacity(0.1),
+                        blurRadius: 50,
+                        spreadRadius: 10,
+                      ),
+                    ],
+                  ),
+                ),
+                // Gauge Arc
+                Container(
+                  width: 200,
+                  height: 200,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white10, width: 2),
+                  ),
+                  child: CustomPaint(
+                    painter: _GaugePainter(0.85), // Target goal visual
+                  ),
+                ),
+                // Inner Content
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.nights_stay_rounded, 
+                      color: AppColors.accentPrimary, 
+                      size: 48
+                    ).animate(onPlay: (c) => c.repeat(reverse: true))
+                     .shimmer(duration: 3.seconds, color: Colors.white24),
+                    const SizedBox(height: 8),
+                    Text(
+                      scoreText,
+                      style: AppTextStyles.label.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      displayDuration,
+                      style: AppTextStyles.h2.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'Target duration',
+                      style: AppTextStyles.label.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                // Time Labels
+                ...List.generate(4, (i) {
+                  final double angle = (i * 90 - 90) * (math.pi / 180);
+                  final time = ['12', '3', '6', '9'][i];
+                  return Positioned.fill(
+                    child: Align(
+                      alignment: Alignment(
+                        math.cos(angle) * 1.08,
+                        math.sin(angle) * 1.08,
+                      ),
+                      child: Text(
+                        time,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textTertiary.withOpacity(0.8),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ],
             ),
-            const SizedBox(width: 32),
-            _buildMetricItem(
-              'Sleep Quality',
-              _getQualityText(),
-              color: _getQualityColor(),
-            ),
-          ],
-        ),
-      ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildMetricItem(
+                'Schedule',
+                '${_bedtime.hour.toString().padLeft(2, '0')}:${_bedtime.minute.toString().padLeft(2, '0')} - ${_alarm.hour.toString().padLeft(2, '0')}:${_alarm.minute.toString().padLeft(2, '0')}',
+              ),
+              const SizedBox(width: 32),
+              _buildMetricItem(
+                'Butler Mode',
+                'Active',
+                color: AppColors.accentSuccess,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -1212,16 +1333,10 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: _moods.map((mood) {
-            final isAddedMood = mood['label'] == 'Add';
             final isSelected = _selectedMood == mood['label'];
             return GestureDetector(
               onTap: () async {
                 HapticHelper.lightImpact();
-                if (isAddedMood) {
-                  // In professional apps, this would open a custom mood selector or note screen
-                  return;
-                }
-
                 setState(() => _selectedMood = mood['label']);
 
                 // Save to backend
@@ -1273,22 +1388,24 @@ class _NewHomeScreenState extends State<NewHomeScreen>
     );
   }
 
-  Widget _buildImpactSection() {
+  Widget _buildTrendInsights() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GlassCard(
           padding: const EdgeInsets.all(20),
-          borderRadius: 16,
-          color: Colors.white.withOpacity(0.08),
-          border: null,
+          borderRadius: 20,
+          color: AppColors.bgSecondary.withOpacity(0.3),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.1),
+          ),
           child: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Sleep Insights',
+                    'Trend Insights',
                     style: AppTextStyles.labelLg.copyWith(
                       color: AppColors.accentSkyBlue,
                       fontWeight: FontWeight.bold,
@@ -1317,20 +1434,18 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                     color: Colors.white.withOpacity(0.08),
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                   ),
-                  if (_sleepEfficiency != null) ...[
-                    _buildSimpleStat(
-                      '✨',
-                      '${_sleepEfficiency!.toStringAsFixed(0)}%',
-                      'Efficiency',
-                      color: AppColors.accentSuccess,
-                    ),
-                    Container(
-                      width: 1,
-                      height: 32,
-                      color: Colors.white.withOpacity(0.08),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                    ),
-                  ],
+                  _buildSimpleStat(
+                    '🎯',
+                    _consistencyScore != null ? '${_consistencyScore}%' : '--',
+                    'Consistency',
+                    color: AppColors.accentSuccess,
+                  ),
+                  Container(
+                    width: 1,
+                    height: 32,
+                    color: Colors.white.withOpacity(0.08),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                  ),
                   _buildSimpleStat(
                     '🔥',
                     '${_streakDays}d',

@@ -61,7 +61,15 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
       _hrv = d['hrv'];
       _rhr = d['restingHeartRate'];
       _respiratoryRate = d['respiratoryRate'];
-      if (_deepSleep != null || _hrv != null) _showAdvanced = true;
+      if (_deepSleep != null || 
+          _lightSleep != null || 
+          _remSleep != null || 
+          _awake != null || 
+          _hrv != null || 
+          _rhr != null || 
+          _respiratoryRate != null) {
+        _showAdvanced = true;
+      }
     }
   }
 
@@ -368,8 +376,8 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
               onTap: () => setState(() => _quality = val),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                width: 58,
-                height: 58,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   color: isSelected
                       ? AppColors.accentPrimary.withOpacity(0.3)
@@ -420,139 +428,210 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
     return Column(
       children: [
         GestureDetector(
-          onTap: () => setState(() => _showAdvanced = !_showAdvanced),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Advanced Recovery Data',
-                style: AppTextStyles.label.copyWith(
-                  color: AppColors.accentSkyBlue,
-                  fontWeight: FontWeight.bold,
-                ),
+          onTap: () {
+            HapticHelper.lightImpact();
+            setState(() => _showAdvanced = !_showAdvanced);
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            decoration: BoxDecoration(
+              color: _showAdvanced 
+                  ? AppColors.accentPrimary.withOpacity(0.1) 
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _showAdvanced 
+                    ? AppColors.accentPrimary.withOpacity(0.3) 
+                    : Colors.white.withOpacity(0.1),
               ),
-              Icon(
-                _showAdvanced
-                    ? Icons.keyboard_arrow_up_rounded
-                    : Icons.keyboard_arrow_down_rounded,
-                color: AppColors.accentSkyBlue,
-              ),
-            ],
-          ),
-        ),
-        if (_showAdvanced) ...[
-          const SizedBox(height: AppSpacing.lg),
-          GlassCard(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            color: AppColors.bgSecondary.withOpacity(0.2),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
+                Icon(
+                  _showAdvanced ? Icons.insights_rounded : Icons.add_chart_rounded,
+                  size: 18,
+                  color: _showAdvanced ? AppColors.accentPrimary : AppColors.textTertiary,
+                ),
+                const SizedBox(width: 8),
                 Text(
-                  'Sleep Structure (Minutes)',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textSecondary,
+                  _showAdvanced ? 'Hide Advanced Metrics' : 'Add Recovery Metrics',
+                  style: AppTextStyles.label.copyWith(
+                    color: _showAdvanced ? AppColors.accentPrimary : AppColors.textTertiary,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildNumberInput(
-                        'Deep',
-                        _deepSleep,
-                        (v) => _deepSleep = v,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _buildNumberInput(
-                        'REM',
-                        _remSleep,
-                        (v) => _remSleep = v,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _buildNumberInput(
-                        'Light',
-                        _lightSleep,
-                        (v) => _lightSleep = v,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _buildNumberInput(
-                        'Awake',
-                        _awake,
-                        (v) => _awake = v,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  'Recovery Metrics',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildNumberInput(
-                        'HRV (ms)',
-                        _hrv,
-                        (v) => _hrv = v,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildNumberInput(
-                        'RHR (bpm)',
-                        _rhr,
-                        (v) => _rhr = v,
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 4),
+                Icon(
+                  _showAdvanced
+                      ? Icons.keyboard_arrow_up_rounded
+                      : Icons.keyboard_arrow_down_rounded,
+                  size: 18,
+                  color: _showAdvanced ? AppColors.accentPrimary : AppColors.textTertiary,
                 ),
               ],
             ),
           ),
+        ),
+        if (_showAdvanced) ...[
+          const SizedBox(height: AppSpacing.lg),
+          _buildSleepStructureInputs(),
+          const SizedBox(height: AppSpacing.md),
+          _buildRecoveryInputs(),
         ],
       ],
     );
   }
 
-  Widget _buildNumberInput(String label, int? value, Function(int?) onChanged) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: AppTextStyles.label.copyWith(fontSize: 10)),
-        const SizedBox(height: 4),
-        TextFormField(
-          initialValue: value?.toString(),
-          keyboardType: TextInputType.number,
-          style: AppTextStyles.bodySm,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white.withOpacity(0.05),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 8,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
-            ),
-            isDense: true,
+  Widget _buildSleepStructureInputs() {
+    return GlassCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      color: AppColors.bgSecondary.withOpacity(0.2),
+      borderRadius: 24,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.pie_chart_outline_rounded, size: 18, color: AppColors.accentPrimary),
+              const SizedBox(width: 8),
+              Text(
+                'Sleep Architecture (mins)',
+                style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
-          onChanged: (val) {
-            onChanged(int.tryParse(val));
-          },
-        ),
-      ],
+          const SizedBox(height: AppSpacing.lg),
+          Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(child: _buildMetricInput('Deep', _deepSleep, (v) => setState(() => _deepSleep = v), AppColors.accentPrimary)),
+                  const SizedBox(width: 12),
+                  Expanded(child: _buildMetricInput('REM', _remSleep, (v) => setState(() => _remSleep = v), AppColors.accentSkyBlue)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(child: _buildMetricInput('Light', _lightSleep, (v) => setState(() => _lightSleep = v), AppColors.textSecondary)),
+                  const SizedBox(width: 12),
+                  Expanded(child: _buildMetricInput('Awake', _awake, (v) => setState(() => _awake = v), AppColors.accentAmber)),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecoveryInputs() {
+    return GlassCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      color: AppColors.bgSecondary.withOpacity(0.2),
+      borderRadius: 24,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.favorite_outline_rounded, size: 18, color: AppColors.accentError),
+              const SizedBox(width: 8),
+              Text(
+                'Vitals & Recovery',
+                style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetricInput(
+                  'HRV (ms)', 
+                  _hrv, 
+                  (v) => setState(() => _hrv = v), 
+                  AppColors.accentSuccess,
+                  icon: Icons.bolt_rounded,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildMetricInput(
+                  'RHR (bpm)', 
+                  _rhr, 
+                  (v) => setState(() => _rhr = v), 
+                  AppColors.accentError,
+                  icon: Icons.favorite_rounded,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildMetricInput(
+            'Respiratory Rate (br/m)', 
+            _respiratoryRate, 
+            (v) => setState(() => _respiratoryRate = v), 
+            AppColors.accentSkyBlue,
+            icon: Icons.air_rounded,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricInput(
+    String label, 
+    int? value, 
+    Function(int?) onChanged, 
+    Color themeColor,
+    {IconData? icon}
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 12, color: themeColor.withOpacity(0.7)),
+                const SizedBox(width: 4),
+              ],
+              Text(
+                label,
+                style: AppTextStyles.caption.copyWith(
+                  fontSize: 10,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          TextField(
+            controller: TextEditingController(text: value?.toString() ?? '')..selection = TextSelection.fromPosition(TextPosition(offset: (value?.toString() ?? '').length)),
+            keyboardType: TextInputType.number,
+            style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold, color: themeColor),
+            decoration: InputDecoration(
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
+              border: InputBorder.none,
+              hintText: '--',
+              hintStyle: TextStyle(color: Colors.white.withOpacity(0.1)),
+            ),
+            onChanged: (val) {
+              onChanged(int.tryParse(val));
+            },
+          ),
+        ],
+      ),
     );
   }
 

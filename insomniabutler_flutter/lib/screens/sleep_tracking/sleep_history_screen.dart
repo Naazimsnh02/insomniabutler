@@ -187,6 +187,13 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             'bedTime': session.bedTime.toLocal(),
             'wakeTime': wakeTime.toLocal(),
             'sleepQuality': quality,
+            'deepSleepDuration': session.deepSleepDuration,
+            'lightSleepDuration': session.lightSleepDuration,
+            'remSleepDuration': session.remSleepDuration,
+            'awakeDuration': session.awakeDuration,
+            'hrv': session.hrv,
+            'restingHeartRate': session.restingHeartRate,
+            'respiratoryRate': session.respiratoryRate,
           };
 
           final result = await Navigator.push(
