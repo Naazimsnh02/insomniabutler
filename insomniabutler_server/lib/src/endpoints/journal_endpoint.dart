@@ -271,7 +271,10 @@ class JournalEndpoint extends Endpoint {
     }
 
     if (apiKey == null || apiKey.isEmpty) {
-      session.log('Warning: Gemini API key not found. Using rule-based insights.', level: LogLevel.warning);
+      session.log(
+        'Warning: Gemini API key not found. Using rule-based insights.',
+        level: LogLevel.warning,
+      );
       return GeminiService(''); // handle gracefully in caller
     }
 
@@ -320,11 +323,15 @@ class JournalEndpoint extends Endpoint {
       // Let's rely on try-catch.
 
       if (gemini.isConfigured) {
-         final entriesText = recentEntries.map((e) =>
-           'Date: ${e.entryDate.toString().split(' ')[0]}, Mood: ${e.mood ?? "N/A"}, Title: ${e.title ?? "N/A"}, Content: ${e.content}'
-         ).join('\n---\n');
+        final entriesText = recentEntries
+            .map(
+              (e) =>
+                  'Date: ${e.entryDate.toString().split(' ')[0]}, Mood: ${e.mood ?? "N/A"}, Title: ${e.title ?? "N/A"}, Content: ${e.content}',
+            )
+            .join('\n---\n');
 
-         final prompt = '''
+        final prompt =
+            '''
 Analyze these recent journal entries from a user struggling with sleep/insomnia.
 Provide 2-3 personalized, empathetic insights or specific advice based on patterns in their writing, mood, and daily events.
 Focus on connections between their day, feelings, and sleep.
@@ -338,7 +345,8 @@ $entriesText
 ''';
 
         final aiResponse = await gemini.sendMessage(
-          systemPrompt: 'You are an expert sleep psychologist and data analyst.',
+          systemPrompt:
+              'You are an expert sleep psychologist and data analyst.',
           userMessage: prompt,
         );
 
@@ -360,11 +368,11 @@ $entriesText
             ),
           );
         }
-        
-        // If AI was successful, we return here (plus stats). 
+
+        // If AI was successful, we return here (plus stats).
         // We can skip rule-based if we have enough AI insights.
         if (insights.length >= 2) {
-           return insights; 
+          return insights;
         }
       }
     } catch (e) {
@@ -373,7 +381,7 @@ $entriesText
     }
 
     // 3. Fallback / Supplemental Rule-based Insights (if AI failed or gave few results)
-    
+
     // Frequency
     final weekAgo = DateTime.now().toUtc().subtract(const Duration(days: 7));
     final thisWeekCount = recentEntries
@@ -384,7 +392,8 @@ $entriesText
       insights.add(
         JournalInsight(
           insightType: 'frequency',
-          message: '✨ You journaled $thisWeekCount times this week. Keeping this habit helps clear your mind.',
+          message:
+              '✨ You journaled $thisWeekCount times this week. Keeping this habit helps clear your mind.',
           confidence: 0.8,
         ),
       );
@@ -405,7 +414,8 @@ $entriesText
       insights.add(
         JournalInsight(
           insightType: 'mood',
-          message: '💭 Your recurring mood is "${dominantMood.key}". Noticing this pattern is the first step.',
+          message:
+              '💭 Your recurring mood is "${dominantMood.key}". Noticing this pattern is the first step.',
           confidence: 0.7,
         ),
       );

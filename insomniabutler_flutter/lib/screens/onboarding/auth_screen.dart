@@ -130,32 +130,32 @@ class _AuthScreenState extends State<AuthScreen> {
                       // Form Fields
                       if (_isRegistering) ...[
                         _buildTextField(
-                              controller: _nameController,
-                              label: 'Full Name',
-                              hint: 'Your name',
-                              icon: Icons.person_outline_rounded,
-                              textCapitalization: TextCapitalization.words,
-                            ),
+                          controller: _nameController,
+                          label: 'Full Name',
+                          hint: 'Your name',
+                          icon: Icons.person_outline_rounded,
+                          textCapitalization: TextCapitalization.words,
+                        ),
                         const SizedBox(height: AppSpacing.lg),
                       ],
 
                       _buildTextField(
-                            controller: _emailController,
-                            label: 'Email',
-                            hint: 'name@example.com',
-                            icon: Icons.email_outlined,
-                            keyboardType: TextInputType.emailAddress,
-                          ),
+                        controller: _emailController,
+                        label: 'Email',
+                        hint: 'name@example.com',
+                        icon: Icons.email_outlined,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
 
                       const SizedBox(height: AppSpacing.lg),
 
                       _buildTextField(
-                            controller: _passwordController,
-                            label: 'Password',
-                            hint: '••••••••',
-                            icon: Icons.lock_outline_rounded,
-                            obscureText: true,
-                          ),
+                        controller: _passwordController,
+                        label: 'Password',
+                        hint: '••••••••',
+                        icon: Icons.lock_outline_rounded,
+                        obscureText: true,
+                      ),
 
                       if (!_isRegistering)
                         Align(

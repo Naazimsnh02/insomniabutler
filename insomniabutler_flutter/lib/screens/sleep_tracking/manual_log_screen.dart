@@ -22,7 +22,7 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
   late TimeOfDay _bedtime;
   late TimeOfDay _waketime;
   int _quality = 3;
-  
+
   // Advanced Metrics State
   bool _showAdvanced = false;
   int? _deepSleep;
@@ -197,7 +197,11 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
     );
   }
 
-  Widget _buildIconButton({required IconData icon, required VoidCallback onTap, Color? iconColor}) {
+  Widget _buildIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    Color? iconColor,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: GlassCard(
@@ -244,13 +248,17 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Session Date', 
-                style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)
+                'Session Date',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textTertiary,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
                 DateFormat('EEEE, MMM d, yyyy').format(_date),
-                style: AppTextStyles.bodyLg.copyWith(fontWeight: FontWeight.bold),
+                style: AppTextStyles.bodyLg.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -278,8 +286,10 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label, 
-            style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)
+            label,
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textTertiary,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -305,11 +315,15 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.timer_outlined, color: AppColors.accentPrimary, size: 20),
+          const Icon(
+            Icons.timer_outlined,
+            color: AppColors.accentPrimary,
+            size: 20,
+          ),
           const SizedBox(width: AppSpacing.md),
           Text(
-            'Total Duration', 
-            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)
+            'Total Duration',
+            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
           ),
           const Spacer(),
           Text(
@@ -332,10 +346,16 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Sleep Quality', 
-              style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.bold)
+              'Sleep Quality',
+              style: AppTextStyles.labelLg.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const Icon(Icons.auto_awesome, size: 16, color: AppColors.accentPrimary),
+            const Icon(
+              Icons.auto_awesome,
+              size: 16,
+              color: AppColors.accentPrimary,
+            ),
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -361,13 +381,15 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
                         : Colors.white.withOpacity(0.1),
                     width: isSelected ? 2 : 1.5,
                   ),
-                  boxShadow: isSelected ? [
-                    BoxShadow(
-                      color: AppColors.accentPrimary.withOpacity(0.2),
-                      blurRadius: 12,
-                      spreadRadius: 2,
-                    )
-                  ] : null,
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.accentPrimary.withOpacity(0.2),
+                            blurRadius: 12,
+                            spreadRadius: 2,
+                          ),
+                        ]
+                      : null,
                 ),
                 child: Center(
                   child: Text(
@@ -392,7 +414,6 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
         ),
       ],
     );
-
   }
 
   Widget _buildAdvancedSection() {
@@ -429,31 +450,71 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
               children: [
                 Text(
                   'Sleep Structure (Minutes)',
-                  style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Row(
                   children: [
-                    Expanded(child: _buildNumberInput('Deep', _deepSleep, (v) => _deepSleep = v)),
+                    Expanded(
+                      child: _buildNumberInput(
+                        'Deep',
+                        _deepSleep,
+                        (v) => _deepSleep = v,
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    Expanded(child: _buildNumberInput('REM', _remSleep, (v) => _remSleep = v)),
+                    Expanded(
+                      child: _buildNumberInput(
+                        'REM',
+                        _remSleep,
+                        (v) => _remSleep = v,
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    Expanded(child: _buildNumberInput('Light', _lightSleep, (v) => _lightSleep = v)),
+                    Expanded(
+                      child: _buildNumberInput(
+                        'Light',
+                        _lightSleep,
+                        (v) => _lightSleep = v,
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    Expanded(child: _buildNumberInput('Awake', _awake, (v) => _awake = v)),
+                    Expanded(
+                      child: _buildNumberInput(
+                        'Awake',
+                        _awake,
+                        (v) => _awake = v,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   'Recovery Metrics',
-                  style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Row(
                   children: [
-                    Expanded(child: _buildNumberInput('HRV (ms)', _hrv, (v) => _hrv = v)),
+                    Expanded(
+                      child: _buildNumberInput(
+                        'HRV (ms)',
+                        _hrv,
+                        (v) => _hrv = v,
+                      ),
+                    ),
                     const SizedBox(width: 12),
-                    Expanded(child: _buildNumberInput('RHR (bpm)', _rhr, (v) => _rhr = v)),
+                    Expanded(
+                      child: _buildNumberInput(
+                        'RHR (bpm)',
+                        _rhr,
+                        (v) => _rhr = v,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -477,7 +538,10 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white.withOpacity(0.05),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 8,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide.none,
@@ -534,36 +598,36 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
         wakeDateTime = wakeDateTime.add(const Duration(days: 1));
       }
 
-        if (isEdit) {
-          await client.sleepSession.updateSession(
-            widget.initialData!['id'],
-            bedDateTime.toUtc(),
-            wakeDateTime.toUtc(),
-            _quality,
-            null, // sleepLatencyMinutes
-            deepSleepDuration: _deepSleep,
-            lightSleepDuration: _lightSleep,
-            remSleepDuration: _remSleep,
-            awakeDuration: _awake,
-            restingHeartRate: _rhr,
-            hrv: _hrv,
-            respiratoryRate: _respiratoryRate,
-          );
-        } else {
-          await client.sleepSession.logManualSession(
-            userId,
-            bedDateTime.toUtc(),
-            wakeDateTime.toUtc(),
-            _quality,
-            deepSleepDuration: _deepSleep,
-            lightSleepDuration: _lightSleep,
-            remSleepDuration: _remSleep,
-            awakeDuration: _awake,
-            restingHeartRate: _rhr,
-            hrv: _hrv,
-            respiratoryRate: _respiratoryRate,
-          );
-        }
+      if (isEdit) {
+        await client.sleepSession.updateSession(
+          widget.initialData!['id'],
+          bedDateTime.toUtc(),
+          wakeDateTime.toUtc(),
+          _quality,
+          null, // sleepLatencyMinutes
+          deepSleepDuration: _deepSleep,
+          lightSleepDuration: _lightSleep,
+          remSleepDuration: _remSleep,
+          awakeDuration: _awake,
+          restingHeartRate: _rhr,
+          hrv: _hrv,
+          respiratoryRate: _respiratoryRate,
+        );
+      } else {
+        await client.sleepSession.logManualSession(
+          userId,
+          bedDateTime.toUtc(),
+          wakeDateTime.toUtc(),
+          _quality,
+          deepSleepDuration: _deepSleep,
+          lightSleepDuration: _lightSleep,
+          remSleepDuration: _remSleep,
+          awakeDuration: _awake,
+          restingHeartRate: _rhr,
+          hrv: _hrv,
+          respiratoryRate: _respiratoryRate,
+        );
+      }
 
       HapticHelper.success();
       if (mounted) {

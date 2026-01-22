@@ -181,7 +181,8 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
                         children: [
                           if (title != null && title.isNotEmpty) ...[
                             Text(
-                              title.trim().substring(0, 1).toUpperCase() + title.trim().substring(1),
+                              title.trim().substring(0, 1).toUpperCase() +
+                                  title.trim().substring(1),
                               style: AppTextStyles.h2.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.accentPrimary,
@@ -254,7 +255,11 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
     );
   }
 
-  Widget _buildIconButton({required IconData icon, required VoidCallback onTap, Color? iconColor}) {
+  Widget _buildIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    Color? iconColor,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: GlassCard(

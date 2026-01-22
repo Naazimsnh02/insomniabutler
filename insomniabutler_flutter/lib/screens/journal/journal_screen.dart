@@ -135,7 +135,12 @@ class JournalScreenState extends State<JournalScreen>
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.containerPadding, AppSpacing.lg, AppSpacing.containerPadding, AppSpacing.md),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.containerPadding,
+        AppSpacing.lg,
+        AppSpacing.containerPadding,
+        AppSpacing.md,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -185,7 +190,11 @@ class JournalScreenState extends State<JournalScreen>
     );
   }
 
-  Widget _buildIconButton({required IconData icon, required VoidCallback onTap, Color? iconColor}) {
+  Widget _buildIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    Color? iconColor,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: GlassCard(
@@ -265,7 +274,10 @@ class JournalScreenState extends State<JournalScreen>
       color: AppColors.accentPrimary,
       backgroundColor: AppColors.glassBgElevated,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding, vertical: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.containerPadding,
+          vertical: AppSpacing.md,
+        ),
         itemCount: _entries.length,
         itemBuilder: (context, index) {
           final entry = _entries[index];
@@ -284,92 +296,93 @@ class JournalScreenState extends State<JournalScreen>
     final isFavorite = entry.isFavorite as bool;
 
     return GestureDetector(
-          onTap: () async {
-            await HapticHelper.lightImpact();
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => JournalDetailScreen(entryId: entry.id!),
-              ),
-            );
-            loadData(); // Refresh after returning
-          },
-          child: GlassCard(
-            margin: const EdgeInsets.only(bottom: AppSpacing.md),
-            padding: const EdgeInsets.all(20),
-            borderRadius: 20,
-            color: AppColors.bgSecondary.withOpacity(0.3),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.1),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      onTap: () async {
+        await HapticHelper.lightImpact();
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => JournalDetailScreen(entryId: entry.id!),
+          ),
+        );
+        loadData(); // Refresh after returning
+      },
+      child: GlassCard(
+        margin: const EdgeInsets.only(bottom: AppSpacing.md),
+        padding: const EdgeInsets.all(20),
+        borderRadius: 20,
+        color: AppColors.bgSecondary.withOpacity(0.3),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.1),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
+                    if (moodEmoji != null) ...[
+                      Text(moodEmoji, style: const TextStyle(fontSize: 24)),
+                      const SizedBox(width: AppSpacing.sm),
+                    ],
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (moodEmoji != null) ...[
-                          Text(moodEmoji, style: const TextStyle(fontSize: 24)),
-                          const SizedBox(width: AppSpacing.sm),
-                        ],
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              DateFormat('EEE, MMM d').format(date),
-                              style: AppTextStyles.label.copyWith(
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              DateFormat('h:mm a').format(date),
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.textTertiary,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          DateFormat('EEE, MMM d').format(date),
+                          style: AppTextStyles.label.copyWith(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          DateFormat('h:mm a').format(date),
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textTertiary,
+                            fontSize: 10,
+                          ),
                         ),
                       ],
                     ),
-                    if (isFavorite)
-                      const Icon(
-                        Icons.favorite_rounded,
-                        color: AppColors.accentError,
-                        size: 16,
-                      ),
                   ],
                 ),
-                if (title != null && title.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    title.trim().substring(0, 1).toUpperCase() + title.trim().substring(1),
-                    style: AppTextStyles.labelLg.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.accentPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                if (isFavorite)
+                  const Icon(
+                    Icons.favorite_rounded,
+                    color: AppColors.accentError,
+                    size: 16,
                   ),
-                ],
-                const SizedBox(height: 8),
-                Text(
-                  content,
-                  style: AppTextStyles.body.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                    fontSize: 14,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
               ],
             ),
-          ),
-        );
+            if (title != null && title.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                title.trim().substring(0, 1).toUpperCase() +
+                    title.trim().substring(1),
+                style: AppTextStyles.labelLg.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.accentPrimary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+            const SizedBox(height: 8),
+            Text(
+              content,
+              style: AppTextStyles.body.copyWith(
+                color: AppColors.textSecondary,
+                height: 1.5,
+                fontSize: 14,
+              ),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildCalendarTab() {
@@ -852,10 +865,10 @@ class JournalScreenState extends State<JournalScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(
-                  Icons.auto_stories_rounded,
-                  size: 80,
-                  color: AppColors.accentPrimary,
-                ),
+              Icons.auto_stories_rounded,
+              size: 80,
+              color: AppColors.accentPrimary,
+            ),
             const SizedBox(height: AppSpacing.xl),
             Text(
               'Start Your Sleep Journal',
@@ -878,31 +891,31 @@ class JournalScreenState extends State<JournalScreen>
 
   Widget _buildFAB() {
     return GestureDetector(
-          onTap: () async {
-            await HapticHelper.mediumImpact();
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const JournalEditorScreen()),
-            );
-            loadData(); // Refresh after creating entry
-          },
-          child: Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              gradient: AppColors.gradientPrimary,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.accentPrimary.withOpacity(0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
-          ),
+      onTap: () async {
+        await HapticHelper.mediumImpact();
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const JournalEditorScreen()),
         );
+        loadData(); // Refresh after creating entry
+      },
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          gradient: AppColors.gradientPrimary,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accentPrimary.withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
+      ),
+    );
   }
 
   String? _getMoodEmoji(String? mood) {

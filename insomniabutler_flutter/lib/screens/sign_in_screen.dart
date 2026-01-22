@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 import '../main.dart';
+import '../services/user_service.dart';
 
 class SignInScreen extends StatefulWidget {
   final Widget child;
@@ -17,20 +18,25 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   void initState() {
     super.initState();
-    client.auth.authInfoListenable.addListener(_updateSignedInState);
-    _isSignedIn = client.auth.isAuthenticated;
+    _checkSignInStatus();
+  }
+
+  Future<void> _checkSignInStatus() async {
+    final signedIn = await UserService.isLoggedIn();
+    if (mounted) {
+      setState(() {
+        _isSignedIn = signedIn;
+      });
+    }
   }
 
   @override
   void dispose() {
-    client.auth.authInfoListenable.removeListener(_updateSignedInState);
     super.dispose();
   }
 
   void _updateSignedInState() {
-    setState(() {
-      _isSignedIn = client.auth.isAuthenticated;
-    });
+    _checkSignInStatus();
   }
 
   @override

@@ -31,7 +31,8 @@ void main() async {
   );
 
   // Default server URL (fallback to AWS production)
-  String serverUrl = 'http://insomniabutler-alb-475922987.us-east-1.elb.amazonaws.com/';
+  String serverUrl =
+      'http://insomniabutler-alb-475922987.us-east-1.elb.amazonaws.com/';
 
   // Try to load from assets/config.json
   try {
@@ -126,40 +127,43 @@ class _AppInitializerState extends State<AppInitializer> {
               children: [
                 // Styled Logo
                 Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: AppColors.bgSecondary,
-                    borderRadius: BorderRadius.circular(28),
-                    border: Border.all(
-                      color: AppColors.accentPrimary.withOpacity(0.3),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.accentPrimary.withOpacity(0.2),
-                        blurRadius: 20,
-                        spreadRadius: 2,
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: AppColors.bgSecondary,
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(
+                          color: AppColors.accentPrimary.withOpacity(0.3),
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.accentPrimary.withOpacity(0.2),
+                            blurRadius: 20,
+                            spreadRadius: 2,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(26),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Image.asset(
-                        'assets/logo/splash_logo.png',
-                        fit: BoxFit.contain,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(26),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Image.asset(
+                            'assets/logo/splash_logo.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                       ),
+                    )
+                    .animate()
+                    .fadeIn(duration: 600.ms)
+                    .scale(
+                      begin: const Offset(0.8, 0.8),
+                      curve: Curves.easeOutBack,
                     ),
-                  ),
-                )
-                .animate()
-                .fadeIn(duration: 600.ms)
-                .scale(begin: const Offset(0.8, 0.8), curve: Curves.easeOutBack),
-                
+
                 const SizedBox(height: 48),
-                
+
                 // Minimal loading indicator
                 SizedBox(
                   width: 40,

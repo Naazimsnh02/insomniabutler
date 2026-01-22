@@ -95,7 +95,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         color: _currentPage == index
                             ? null
                             : AppColors.textTertiary.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(AppBorderRadius.full),
+                        borderRadius: BorderRadius.circular(
+                          AppBorderRadius.full,
+                        ),
                       ),
                     ),
                   ),

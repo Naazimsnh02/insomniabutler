@@ -47,10 +47,12 @@ class GlassCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(
                 borderRadius ?? AppRadius.lg,
               ),
-              border: border ?? Border.all(
-                color: AppColors.glassBorder,
-                width: 1,
-              ),
+              border:
+                  border ??
+                  Border.all(
+                    color: AppColors.glassBorder,
+                    width: 1,
+                  ),
               boxShadow: elevated ? AppShadows.card : null,
             ),
             child: child,

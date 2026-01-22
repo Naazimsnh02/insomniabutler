@@ -51,7 +51,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   int _lastNightInterruptions = 0;
   double? _sleepEfficiency;
   bool _hasLastNightData = false;
-  
+
   // Advanced Sleep Data
   int? _deepMinutes;
   int? _lightMinutes;
@@ -151,7 +151,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               : efficiency > 80
               ? 1
               : 2;
-              
+
           // Populate advanced metrics
           _deepMinutes = lastNight.deepSleepDuration;
           _lightMinutes = lastNight.lightSleepDuration;
@@ -356,8 +356,8 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                 _buildLastNightSummary(),
                 const SizedBox(height: AppSpacing.xl),
                 if (_deepMinutes != null || _rhr != null) ...[
-                   _buildAdvancedMetrics(),
-                   const SizedBox(height: AppSpacing.xl),
+                  _buildAdvancedMetrics(),
+                  const SizedBox(height: AppSpacing.xl),
                 ],
               ],
               _buildDailyAffirmation(),
@@ -763,14 +763,19 @@ class _NewHomeScreenState extends State<NewHomeScreen>
     return Column(
       children: [
         if (_deepMinutes != null) _buildSleepStructure(),
-        if (_deepMinutes != null && _rhr != null) const SizedBox(height: AppSpacing.lg),
+        if (_deepMinutes != null && _rhr != null)
+          const SizedBox(height: AppSpacing.lg),
         if (_rhr != null || _hrv != null) _buildRecoveryCards(),
       ],
     );
   }
 
   Widget _buildSleepStructure() {
-    final total = (_deepMinutes ?? 0) + (_lightMinutes ?? 0) + (_remMinutes ?? 0) + (_awakeMinutes ?? 0);
+    final total =
+        (_deepMinutes ?? 0) +
+        (_lightMinutes ?? 0) +
+        (_remMinutes ?? 0) +
+        (_awakeMinutes ?? 0);
     if (total == 0) return const SizedBox.shrink();
 
     return GlassCard(
@@ -779,7 +784,10 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Sleep Structure', style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            'Sleep Structure',
+            style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 16),
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
@@ -787,10 +795,30 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               height: 24,
               child: Row(
                 children: [
-                  _buildStructureBar(_deepMinutes ?? 0, total, AppColors.accentPrimary, 'Deep'),
-                  _buildStructureBar(_remMinutes ?? 0, total, AppColors.accentSkyBlue, 'REM'),
-                  _buildStructureBar(_lightMinutes ?? 0, total, AppColors.textSecondary, 'Light'),
-                  _buildStructureBar(_awakeMinutes ?? 0, total, AppColors.accentAmber, 'Awake'),
+                  _buildStructureBar(
+                    _deepMinutes ?? 0,
+                    total,
+                    AppColors.accentPrimary,
+                    'Deep',
+                  ),
+                  _buildStructureBar(
+                    _remMinutes ?? 0,
+                    total,
+                    AppColors.accentSkyBlue,
+                    'REM',
+                  ),
+                  _buildStructureBar(
+                    _lightMinutes ?? 0,
+                    total,
+                    AppColors.textSecondary,
+                    'Light',
+                  ),
+                  _buildStructureBar(
+                    _awakeMinutes ?? 0,
+                    total,
+                    AppColors.accentAmber,
+                    'Awake',
+                  ),
                 ],
               ),
             ),
@@ -799,17 +827,33 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildLegendItem('Deep', AppColors.accentPrimary, '${_deepMinutes}m'),
-              _buildLegendItem('REM', AppColors.accentSkyBlue, '${_remMinutes}m'),
-              _buildLegendItem('Light', AppColors.textSecondary, '${_lightMinutes}m'),
-              _buildLegendItem('Awake', AppColors.accentAmber, '${_awakeMinutes}m'),
+              _buildLegendItem(
+                'Deep',
+                AppColors.accentPrimary,
+                '${_deepMinutes}m',
+              ),
+              _buildLegendItem(
+                'REM',
+                AppColors.accentSkyBlue,
+                '${_remMinutes}m',
+              ),
+              _buildLegendItem(
+                'Light',
+                AppColors.textSecondary,
+                '${_lightMinutes}m',
+              ),
+              _buildLegendItem(
+                'Awake',
+                AppColors.accentAmber,
+                '${_awakeMinutes}m',
+              ),
             ],
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildStructureBar(int value, int total, Color color, String label) {
     if (value <= 0) return const SizedBox.shrink();
     return Expanded(
@@ -817,7 +861,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       child: Container(color: color),
     );
   }
-  
+
   Widget _buildLegendItem(String label, Color color, String value) {
     return Row(
       children: [
@@ -826,10 +870,19 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: const TextStyle(fontSize: 10, color: AppColors.textTertiary)),
-            Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 10,
+                color: AppColors.textTertiary,
+              ),
+            ),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -845,10 +898,24 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.favorite_rounded, color: AppColors.accentError, size: 20),
+                  const Icon(
+                    Icons.favorite_rounded,
+                    color: AppColors.accentError,
+                    size: 20,
+                  ),
                   const SizedBox(height: 8),
-                  Text('$_rhr bpm', style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold)),
-                  Text('Resting HR', style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)),
+                  Text(
+                    '$_rhr bpm',
+                    style: AppTextStyles.h3.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Resting HR',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -862,10 +929,24 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.monitor_heart_rounded, color: AppColors.accentSuccess, size: 20),
+                  const Icon(
+                    Icons.monitor_heart_rounded,
+                    color: AppColors.accentSuccess,
+                    size: 20,
+                  ),
                   const SizedBox(height: 8),
-                  Text('$_hrv ms', style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold)),
-                  Text('HRV', style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)),
+                  Text(
+                    '$_hrv ms',
+                    style: AppTextStyles.h3.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'HRV',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -989,9 +1070,16 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildMetricItem('Time in bed', '${_bedtime.format(context)} - ${_alarm.format(context)}'),
+            _buildMetricItem(
+              'Time in bed',
+              '${_bedtime.format(context)} - ${_alarm.format(context)}',
+            ),
             const SizedBox(width: 32),
-            _buildMetricItem('Sleep Quality', _getQualityText(), color: _getQualityColor()),
+            _buildMetricItem(
+              'Sleep Quality',
+              _getQualityText(),
+              color: _getQualityColor(),
+            ),
           ],
         ),
       ],
@@ -1002,7 +1090,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
     return Column(
       children: [
         Text(
-          label, 
+          label,
           style: AppTextStyles.caption.copyWith(
             color: AppColors.textTertiary.withOpacity(0.8),
             letterSpacing: 0.5,
@@ -1087,7 +1175,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                   Icon(icon, size: 14, color: AppColors.accentPrimary),
                   const SizedBox(width: 6),
                   Text(
-                    title, 
+                    title,
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.textSecondary,
                       fontWeight: FontWeight.w500,
@@ -1163,13 +1251,15 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                         : Colors.white.withOpacity(0.1),
                     width: isSelected ? 2 : 1.5,
                   ),
-                  boxShadow: isSelected ? [
-                    BoxShadow(
-                      color: AppColors.accentPrimary.withOpacity(0.2),
-                      blurRadius: 12,
-                      spreadRadius: 2,
-                    )
-                  ] : null,
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.accentPrimary.withOpacity(0.2),
+                            blurRadius: 12,
+                            spreadRadius: 2,
+                          ),
+                        ]
+                      : null,
                 ),
                 child: Text(
                   mood['emoji']!,
@@ -1334,7 +1424,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                  builder: (_) => const InsomniaButlerScreen(),
+                        builder: (_) => const InsomniaButlerScreen(),
                       ),
                     );
                   },
@@ -1356,11 +1446,12 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                       child: Image.asset(
                         'assets/logo/butler_logo.png',
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => const Icon(
-                          Icons.chat_bubble_rounded,
-                          color: Colors.white,
-                          size: 28,
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                              Icons.chat_bubble_rounded,
+                              color: Colors.white,
+                              size: 28,
+                            ),
                       ),
                     ),
                   ),
@@ -1518,7 +1609,11 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       ),
     );
   }
-  Widget _buildIconButton({required IconData icon, required VoidCallback onTap}) {
+
+  Widget _buildIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: GlassCard(
@@ -1643,69 +1738,69 @@ class _TrackingSelectorSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          Text('How would you like to track?', style: AppTextStyles.h3),
-          const SizedBox(height: AppSpacing.md),
-          _buildOption(
-            context,
-            'Insomnia Butler',
-            'Let Butler clear your thoughts for better sleep.',
-            assetPath: 'assets/logo/butler_logo.png',
-            AppColors.gradientPrimary,
-            () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const InsomniaButlerScreen(),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _buildOption(
-            context,
-            'Silent Timer',
-            'Start a quiet timer for sleep and wake up to Butler.',
-            AppColors.gradientCalm,
-            () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SleepTimerScreen()),
-              );
-            },
-            icon: Icons.timer_outlined,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _buildOption(
-            context,
-            'Manual Log',
-            'Retroactively log sleep duration and quality.',
-            AppColors.gradientLavender,
-            () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ManualLogScreen()),
-              );
-            },
-            icon: Icons.history_edu_rounded,
-          ),
-          const SizedBox(height: AppSpacing.xxl),
-        ],
+            const SizedBox(height: AppSpacing.xl),
+            Text('How would you like to track?', style: AppTextStyles.h3),
+            const SizedBox(height: AppSpacing.md),
+            _buildOption(
+              context,
+              'Insomnia Butler',
+              'Let Butler clear your thoughts for better sleep.',
+              assetPath: 'assets/logo/butler_logo.png',
+              AppColors.gradientPrimary,
+              () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const InsomniaButlerScreen(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _buildOption(
+              context,
+              'Silent Timer',
+              'Start a quiet timer for sleep and wake up to Butler.',
+              AppColors.gradientCalm,
+              () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SleepTimerScreen()),
+                );
+              },
+              icon: Icons.timer_outlined,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _buildOption(
+              context,
+              'Manual Log',
+              'Retroactively log sleep duration and quality.',
+              AppColors.gradientLavender,
+              () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ManualLogScreen()),
+                );
+              },
+              icon: Icons.history_edu_rounded,
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -1731,18 +1826,24 @@ class _TrackingSelectorSheet extends StatelessWidget {
           Container(
             width: 48,
             height: 48,
-            padding: assetPath != null ? EdgeInsets.zero : const EdgeInsets.all(12),
+            padding: assetPath != null
+                ? EdgeInsets.zero
+                : const EdgeInsets.all(12),
             decoration: BoxDecoration(
               gradient: gradient,
-              color: gradient == null ? AppColors.bgSecondary.withOpacity(0.4) : null,
+              color: gradient == null
+                  ? AppColors.bgSecondary.withOpacity(0.4)
+                  : null,
               shape: BoxShape.circle,
-              boxShadow: gradient != null ? [
-                BoxShadow(
-                  color: (gradient.colors.first).withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ] : null,
+              boxShadow: gradient != null
+                  ? [
+                      BoxShadow(
+                        color: (gradient.colors.first).withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null,
             ),
             child: assetPath != null
                 ? ClipOval(
@@ -1774,7 +1875,7 @@ class _TrackingSelectorSheet extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  subtitle, 
+                  subtitle,
                   style: AppTextStyles.caption.copyWith(
                     color: AppColors.textSecondary,
                   ),

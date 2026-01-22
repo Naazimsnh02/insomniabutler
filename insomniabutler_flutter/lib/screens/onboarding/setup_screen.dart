@@ -184,11 +184,13 @@ class _SetupScreenState extends State<SetupScreen> {
             vertical: 20,
           ),
           borderRadius: 16,
-          color: isSelected 
-              ? AppColors.accentPrimary.withOpacity(0.12) 
+          color: isSelected
+              ? AppColors.accentPrimary.withOpacity(0.12)
               : AppColors.bgSecondary.withOpacity(0.3),
           border: Border.all(
-            color: isSelected ? AppColors.accentPrimary.withOpacity(0.4) : Colors.white.withOpacity(0.1),
+            color: isSelected
+                ? AppColors.accentPrimary.withOpacity(0.4)
+                : Colors.white.withOpacity(0.1),
             width: isSelected ? 1.5 : 1.0,
           ),
           child: Row(
@@ -196,7 +198,9 @@ class _SetupScreenState extends State<SetupScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.05),
+                  color: isSelected
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.white.withOpacity(0.05),
                   shape: BoxShape.circle,
                 ),
                 child: Text(

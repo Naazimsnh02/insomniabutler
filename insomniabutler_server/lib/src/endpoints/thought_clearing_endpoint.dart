@@ -19,7 +19,9 @@ class ThoughtClearingEndpoint extends Endpoint {
     }
 
     if (apiKey == null || apiKey.isEmpty) {
-      throw Exception('Gemini API key not found in passwords.yaml or environment variables');
+      throw Exception(
+        'Gemini API key not found in passwords.yaml or environment variables',
+      );
     }
 
     _geminiService = GeminiService(apiKey);

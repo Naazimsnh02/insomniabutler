@@ -119,7 +119,10 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     );
   }
 
-  Widget _buildIconButton({required IconData icon, required VoidCallback onTap}) {
+  Widget _buildIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: GlassCard(
@@ -255,7 +258,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                   ),
                 ),
                 Text(
-                  'Sleep', 
+                  'Sleep',
                   style: AppTextStyles.caption.copyWith(fontSize: 10),
                 ),
               ],

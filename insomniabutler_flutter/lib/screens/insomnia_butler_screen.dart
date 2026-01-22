@@ -203,7 +203,6 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
     }
   }
 
-
   Color _getReadinessColor(int readiness) {
     if (readiness < 50) return AppColors.sleepReadyLow;
     if (readiness < 75) return AppColors.sleepReadyMid;
@@ -257,11 +256,12 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         children: [
           // Back button with glass effect
           _buildIconButton(
-            icon: Icons.arrow_back_ios_new_rounded,
-            onTap: () => Navigator.pop(context),
-          ).animate(key: const ValueKey('chat_back_btn'))
-            .fadeIn(duration: 300.ms)
-            .scale(delay: 100.ms),
+                icon: Icons.arrow_back_ios_new_rounded,
+                onTap: () => Navigator.pop(context),
+              )
+              .animate(key: const ValueKey('chat_back_btn'))
+              .fadeIn(duration: 300.ms)
+              .scale(delay: 100.ms),
 
           const Spacer(),
 
@@ -308,26 +308,32 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
               maxWidth: MediaQuery.of(context).size.width * 0.8,
             ),
             decoration: BoxDecoration(
-              color: isUser 
-                  ? AppColors.accentPrimary.withOpacity(0.15) 
+              color: isUser
+                  ? AppColors.accentPrimary.withOpacity(0.15)
                   : AppColors.bgSecondary.withOpacity(0.4),
               border: Border.all(
-                color: isUser 
-                    ? AppColors.accentPrimary.withOpacity(0.3) 
+                color: isUser
+                    ? AppColors.accentPrimary.withOpacity(0.3)
                     : Colors.white.withOpacity(0.15),
                 width: isUser ? 1.2 : 1.0,
               ),
               borderRadius: BorderRadius.circular(20).copyWith(
-                bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(20),
-                bottomLeft: isUser ? const Radius.circular(20) : const Radius.circular(4),
+                bottomRight: isUser
+                    ? const Radius.circular(4)
+                    : const Radius.circular(20),
+                bottomLeft: isUser
+                    ? const Radius.circular(20)
+                    : const Radius.circular(4),
               ),
-              boxShadow: isUser ? [
-                BoxShadow(
-                  color: AppColors.accentPrimary.withOpacity(0.1),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                )
-              ] : null,
+              boxShadow: isUser
+                  ? [
+                      BoxShadow(
+                        color: AppColors.accentPrimary.withOpacity(0.1),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null,
             ),
             child: Text(
               message.content,
@@ -423,7 +429,10 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
             if (_currentCategory != null) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text('·', style: TextStyle(color: Colors.white.withOpacity(0.3))),
+                child: Text(
+                  '·',
+                  style: TextStyle(color: Colors.white.withOpacity(0.3)),
+                ),
               ),
               Text(
                 _currentCategory!,
@@ -435,7 +444,10 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
             ],
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text('·', style: TextStyle(color: Colors.white.withOpacity(0.3))),
+              child: Text(
+                '·',
+                style: TextStyle(color: Colors.white.withOpacity(0.3)),
+              ),
             ),
             AnimatedBuilder(
               animation: _readinessAnimation,
@@ -540,7 +552,10 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
     );
   }
 
-  Widget _buildIconButton({required IconData icon, required VoidCallback onTap}) {
+  Widget _buildIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: GlassCard(

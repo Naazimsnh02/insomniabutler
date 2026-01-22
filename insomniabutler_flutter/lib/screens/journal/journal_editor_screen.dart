@@ -250,7 +250,10 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
     );
   }
 
-  Widget _buildIconButton({required IconData icon, required VoidCallback onTap}) {
+  Widget _buildIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: GlassCard(
@@ -438,7 +441,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
         Padding(
           padding: const EdgeInsets.only(left: 4),
           child: Text(
-            'How are you feeling?', 
+            'How are you feeling?',
             style: AppTextStyles.label.copyWith(
               color: AppColors.textSecondary,
               fontWeight: FontWeight.bold,
@@ -479,13 +482,20 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(mood['emoji']!, style: const TextStyle(fontSize: 24)),
+                      Text(
+                        mood['emoji']!,
+                        style: const TextStyle(fontSize: 24),
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         mood['label']!,
                         style: AppTextStyles.caption.copyWith(
-                          color: isSelected ? AppColors.accentPrimary : AppColors.textTertiary,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected
+                              ? AppColors.accentPrimary
+                              : AppColors.textTertiary,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                           fontSize: 10,
                         ),
                       ),

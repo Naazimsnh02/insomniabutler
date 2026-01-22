@@ -91,7 +91,10 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
     );
   }
 
-  Widget _buildIconButton({required IconData icon, required VoidCallback onTap}) {
+  Widget _buildIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: GlassCard(
@@ -118,25 +121,25 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
           children: [
             // Pulsing Background Glow
             Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.accentPrimary.withOpacity(0.12),
-                    blurRadius: 120,
-                    spreadRadius: 30,
+                  width: 280,
+                  height: 280,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.accentPrimary.withOpacity(0.12),
+                        blurRadius: 120,
+                        spreadRadius: 30,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            )
-            .animate(onPlay: (c) => c.repeat(reverse: true))
-            .scale(
-              duration: 4.seconds,
-              begin: const Offset(1, 1),
-              end: const Offset(1.15, 1.15),
-            ),
+                )
+                .animate(onPlay: (c) => c.repeat(reverse: true))
+                .scale(
+                  duration: 4.seconds,
+                  begin: const Offset(1, 1),
+                  end: const Offset(1.15, 1.15),
+                ),
 
             // Outer Ring (Glass)
             Container(
@@ -151,7 +154,7 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
                 color: Colors.white.withOpacity(0.03),
               ),
             ),
-            
+
             // Progress Ring (Visual Only)
             Container(
               width: 250,
@@ -166,7 +169,7 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
                   BoxShadow(
                     color: AppColors.accentPrimary.withOpacity(0.1),
                     blurRadius: 20,
-                  )
+                  ),
                 ],
               ),
             ).animate(onPlay: (c) => c.repeat()).rotate(duration: 20.seconds),
@@ -175,12 +178,12 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.nightlight_round,
-                  size: 44,
-                  color: AppColors.accentPrimary.withOpacity(0.9),
-                )
-                .animate(onPlay: (c) => c.repeat(reverse: true))
-                .moveY(begin: 0, end: -10, duration: 2.seconds),
+                      Icons.nightlight_round,
+                      size: 44,
+                      color: AppColors.accentPrimary.withOpacity(0.9),
+                    )
+                    .animate(onPlay: (c) => c.repeat(reverse: true))
+                    .moveY(begin: 0, end: -10, duration: 2.seconds),
                 const SizedBox(height: 16),
                 Text(
                   _timerService.isRunning
@@ -194,7 +197,9 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _timerService.isRunning ? 'TRACKING ACTIVE' : 'READY TO SLEEP',
+                  _timerService.isRunning
+                      ? 'TRACKING ACTIVE'
+                      : 'READY TO SLEEP',
                   style: AppTextStyles.caption.copyWith(
                     color: AppColors.textTertiary,
                     letterSpacing: 2,
@@ -332,23 +337,31 @@ class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
           ),
           const SizedBox(height: AppSpacing.xl),
           Text(
-            'Good Morning!', 
-            style: AppTextStyles.h2.copyWith(fontWeight: FontWeight.bold)
+            'Good Morning!',
+            style: AppTextStyles.h2.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
             'You slept for ${widget.duration.inHours}h ${widget.duration.inMinutes.remainder(60)}m',
-            style: AppTextStyles.bodyLg.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.bodyLg.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'How was your sleep?', 
-                style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.bold)
+                'How was your sleep?',
+                style: AppTextStyles.labelLg.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const Icon(Icons.auto_awesome, size: 16, color: AppColors.accentPrimary),
+              const Icon(
+                Icons.auto_awesome,
+                size: 16,
+                color: AppColors.accentPrimary,
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -374,13 +387,15 @@ class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
                           : Colors.white.withOpacity(0.1),
                       width: isSelected ? 2 : 1.5,
                     ),
-                    boxShadow: isSelected ? [
-                      BoxShadow(
-                        color: AppColors.accentPrimary.withOpacity(0.2),
-                        blurRadius: 12,
-                        spreadRadius: 2,
-                      )
-                    ] : null,
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: AppColors.accentPrimary.withOpacity(0.2),
+                              blurRadius: 12,
+                              spreadRadius: 2,
+                            ),
+                          ]
+                        : null,
                   ),
                   child: Center(
                     child: Text(

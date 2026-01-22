@@ -100,19 +100,19 @@ class AppColors {
   static const Color backgroundDeep = bgPrimary;
   static const Color surfaceBlueBlack = bgSecondary;
   static const LinearGradient bgPrimaryGradient = bgMainGradient;
-  
+
   static const Color accentCopper = accentLavender;
   static const Color accentAmber = accentLavender;
   static const Color accentSkyBlue = accentSecondary;
   static const Color accentWarm = accentLavender;
-  
+
   static const Color accentSuccess = success;
   static const Color accentWarning = warning;
   static const Color accentError = error;
-  
+
   static const Color glassBg = glassBackground;
   static const Color glassBgElevated = Color(0x261F2538);
-  
+
   static const LinearGradient bgCard = LinearGradient(
     colors: [Color(0xCC1A1F2E), Color(0x9910162A)],
     begin: Alignment.topLeft,
@@ -123,7 +123,7 @@ class AppColors {
   static const LinearGradient gradientSuccess = gradientCool;
   static const LinearGradient gradientThought = gradientPrimary;
   static const LinearGradient gradientWarm = gradientLavender;
-  
+
   static const Color sleepReadyLow = error;
   static const Color sleepReadyMid = accentLavender;
   static const Color sleepReadyHigh = accentPrimary;
@@ -185,7 +185,7 @@ class AppTextStyles {
   static const TextStyle displayXl = h1;
   static const TextStyle bodyLg = body;
   static const TextStyle labelLg = label;
-  static const TextStyle h4 = h3; 
+  static const TextStyle h4 = h3;
 }
 
 /// ─────────────────────────────────────────────
@@ -200,7 +200,7 @@ class AppSpacing {
   static const double xl = 32;
   static const double xxl = 48;
   static const double xxxl = 64;
-  
+
   // Custom mappings for existing code
   static const double containerPadding = 20;
 }

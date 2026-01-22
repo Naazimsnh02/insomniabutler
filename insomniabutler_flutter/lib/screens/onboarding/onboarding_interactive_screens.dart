@@ -193,11 +193,11 @@ class _DemoScreenState extends State<DemoScreen> {
               color: AppColors.accentPrimary.withOpacity(0.1),
               blurRadius: 12,
               offset: const Offset(0, 4),
-            )
+            ),
           ],
         ),
         child: Text(
-          text, 
+          text,
           style: AppTextStyles.body.copyWith(height: 1.5),
         ),
       ),
@@ -285,14 +285,14 @@ class _DemoScreenState extends State<DemoScreen> {
           mainAxisSize: MainAxisSize.min,
           children: List.generate(3, (i) {
             return Container(
-              width: 6,
-              height: 6,
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              decoration: const BoxDecoration(
-                color: AppColors.accentPrimary,
-                shape: BoxShape.circle,
-              ),
-            )
+                  width: 6,
+                  height: 6,
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  decoration: const BoxDecoration(
+                    color: AppColors.accentPrimary,
+                    shape: BoxShape.circle,
+                  ),
+                )
                 .animate(onPlay: (c) => c.repeat())
                 .scale(
                   duration: 600.ms,
@@ -375,7 +375,12 @@ class _DemoScreenState extends State<DemoScreen> {
           ],
         ),
       ),
-    ).animate().slideY(begin: 1, end: 0, duration: 600.ms, curve: Curves.easeOutCubic);
+    ).animate().slideY(
+      begin: 1,
+      end: 0,
+      duration: 600.ms,
+      curve: Curves.easeOutCubic,
+    );
   }
 
   Widget _buildOptionsArea() {
@@ -539,80 +544,77 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
 
                   // Privacy Statement
                   Container(
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.15),
-                              blurRadius: 40,
-                              offset: const Offset(0, 15),
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          blurRadius: 40,
+                          offset: const Offset(0, 15),
+                        ),
+                      ],
+                    ),
+                    child: GlassCard(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: 24,
+                      ),
+                      color: AppColors.bgSecondary.withOpacity(0.3),
+                      borderRadius: AppRadius.xl,
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.1),
+                        width: 1,
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.05),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.1),
+                              ),
                             ),
-                          ],
-                        ),
-                        child: GlassCard(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.lg,
-                            vertical: 24,
+                            child: Text(
+                              '🔒',
+                              style: TextStyle(
+                                fontSize: 24,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.white.withOpacity(0.2),
+                                    blurRadius: 10,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          color: AppColors.bgSecondary.withOpacity(0.3),
-                          borderRadius: AppRadius.xl,
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.1),
-                            width: 1,
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.05),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.1),
+                          const SizedBox(width: AppSpacing.lg),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Your thoughts are private',
+                                  style: AppTextStyles.labelLg.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.3,
                                   ),
                                 ),
-                                child: Text(
-                                  '🔒',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.white.withOpacity(0.2),
-                                        blurRadius: 10,
-                                      ),
-                                    ],
+                                const SizedBox(height: 6),
+                                Text(
+                                  'Everything is encrypted. We never sell your data.',
+                                  style: AppTextStyles.bodySm.copyWith(
+                                    color: AppColors.textSecondary,
+                                    height: 1.4,
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: AppSpacing.lg),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Your thoughts are private',
-                                      style: AppTextStyles.labelLg.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.3,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      'Everything is encrypted. We never sell your data.',
-                                      style: AppTextStyles.bodySm.copyWith(
-                                        color: AppColors.textSecondary,
-                                        height: 1.4,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      )
-                      .animate()
-                      .slideY(begin: 0.2, end: 0, delay: 800.ms)
-                      .fadeIn(),
+                        ],
+                      ),
+                    ),
+                  ).animate().slideY(begin: 0.2, end: 0, delay: 800.ms).fadeIn(),
 
                   const SizedBox(height: 40),
 
@@ -657,28 +659,32 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
       decoration: BoxDecoration(
-        boxShadow: value ? [
-          BoxShadow(
-            color: AppColors.accentPrimary.withOpacity(0.15),
-            blurRadius: 32,
-            offset: const Offset(0, 8),
-          ),
-        ] : [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 24,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: value
+            ? [
+                BoxShadow(
+                  color: AppColors.accentPrimary.withOpacity(0.15),
+                  blurRadius: 32,
+                  offset: const Offset(0, 8),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 24,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: GlassCard(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         borderRadius: AppRadius.xl,
-        color: value 
-            ? AppColors.accentPrimary.withOpacity(0.08) 
+        color: value
+            ? AppColors.accentPrimary.withOpacity(0.08)
             : AppColors.bgSecondary.withOpacity(0.3),
         border: Border.all(
-          color: value ? AppColors.accentPrimary.withOpacity(0.3) : Colors.white.withOpacity(0.1),
+          color: value
+              ? AppColors.accentPrimary.withOpacity(0.3)
+              : Colors.white.withOpacity(0.1),
           width: value ? 1.5 : 1.0,
         ),
         child: Row(
@@ -686,21 +692,23 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: value 
-                    ? AppColors.accentPrimary.withOpacity(0.15) 
+                color: value
+                    ? AppColors.accentPrimary.withOpacity(0.15)
                     : Colors.white.withOpacity(0.05),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: value 
-                      ? AppColors.accentPrimary.withOpacity(0.3) 
+                  color: value
+                      ? AppColors.accentPrimary.withOpacity(0.3)
                       : Colors.white.withOpacity(0.1),
                 ),
-                boxShadow: value ? [
-                  BoxShadow(
-                    color: AppColors.accentPrimary.withOpacity(0.2),
-                    blurRadius: 8,
-                  )
-                ] : null,
+                boxShadow: value
+                    ? [
+                        BoxShadow(
+                          color: AppColors.accentPrimary.withOpacity(0.2),
+                          blurRadius: 8,
+                        ),
+                      ]
+                    : null,
               ),
               child: Text(
                 emoji,
@@ -716,7 +724,9 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                     title,
                     style: AppTextStyles.labelLg.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: value ? AppColors.textPrimary : AppColors.textPrimary.withOpacity(0.9),
+                      color: value
+                          ? AppColors.textPrimary
+                          : AppColors.textPrimary.withOpacity(0.9),
                     ),
                   ),
                   const SizedBox(height: 6),
