@@ -230,35 +230,41 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
+          _buildIconButton(
+            icon: Icons.arrow_back_ios_new,
             onTap: () {
               HapticHelper.lightImpact();
               Navigator.pop(context);
             },
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.glassBg,
-                borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                border: Border.all(color: AppColors.glassBorder),
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios_new,
-                color: AppColors.textPrimary,
-                size: 20,
-              ),
-            ),
-          ).animate().fadeIn(duration: 300.ms).scale(delay: 100.ms),
+          ),
           Text(
             widget.entryId == null ? 'New Entry' : 'Edit Entry',
             style: AppTextStyles.bodyLg.copyWith(
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w500,
             ),
-          ).animate().fadeIn(delay: 200.ms),
+          ),
           const SizedBox(width: 48), // Balance
         ],
+      ),
+    );
+  }
+
+  Widget _buildIconButton({required IconData icon, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: GlassCard(
+        padding: const EdgeInsets.all(12),
+        borderRadius: 12,
+        color: AppColors.bgSecondary.withOpacity(0.4),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.15),
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+          size: 20,
+        ),
       ),
     );
   }
@@ -295,7 +301,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
         const SizedBox(height: AppSpacing.md),
         ..._prompts.take(3).map((prompt) => _buildPromptCard(prompt)),
       ],
-    ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.1, end: 0);
+    );
   }
 
   Widget _buildPromptCard(dynamic prompt) {
@@ -304,36 +310,41 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
         HapticHelper.lightImpact();
         _contentController.text = prompt.promptText + '\n\n';
         setState(() => _showPrompts = false);
-        // Focus on content field
-        FocusScope.of(context).requestFocus(FocusNode());
       },
-      child: Container(
+      child: GlassCard(
         margin: const EdgeInsets.only(bottom: AppSpacing.sm),
         padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.glassBg,
-          borderRadius: BorderRadius.circular(AppBorderRadius.md),
-          border: Border.all(color: AppColors.glassBorder),
+        borderRadius: 20,
+        color: AppColors.bgSecondary.withOpacity(0.3),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.1),
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.lightbulb_outline_rounded,
-              color: AppColors.accentAmber,
-              size: 20,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.accentAmber.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.lightbulb_outline_rounded,
+                color: AppColors.accentAmber,
+                size: 16,
+              ),
             ),
-            const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
                 prompt.promptText,
                 style: AppTextStyles.bodySm.copyWith(
-                  color: AppColors.textSecondary,
+                  color: AppColors.textPrimary.withOpacity(0.9),
                 ),
               ),
             ),
             const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 14,
+              Icons.chevron_right_rounded,
+              size: 18,
               color: AppColors.textTertiary,
             ),
           ],
@@ -344,24 +355,38 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
 
   Widget _buildDateSelector() {
     return GlassCard(
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.calendar_today_rounded,
-                color: AppColors.accentSkyBlue,
-                size: 20,
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.accentSkyBlue.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.calendar_today_rounded,
+                  color: AppColors.accentSkyBlue,
+                  size: 18,
+                ),
               ),
-              const SizedBox(width: AppSpacing.sm),
+              const SizedBox(width: AppSpacing.md),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     DateFormat('EEEE, MMMM d').format(_selectedDate),
-                    style: AppTextStyles.bodySm.copyWith(
+                    style: AppTextStyles.label.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   Text(
@@ -374,8 +399,9 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
               ),
             ],
           ),
-          IconButton(
-            onPressed: () async {
+          _buildIconButton(
+            icon: Icons.edit_calendar_rounded,
+            onTap: () async {
               HapticHelper.lightImpact();
               final date = await showDatePicker(
                 context: context,
@@ -399,110 +425,135 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
                 setState(() => _selectedDate = date);
               }
             },
-            icon: const Icon(
-              Icons.edit_calendar_rounded,
-              size: 20,
-              color: AppColors.textTertiary,
-            ),
           ),
         ],
       ),
-    ).animate().fadeIn(delay: 100.ms);
+    );
   }
 
   Widget _buildMoodSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('How are you feeling?', style: AppTextStyles.labelLg),
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            'How are you feeling?', 
+            style: AppTextStyles.label.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
         const SizedBox(height: AppSpacing.md),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: _moods.map((mood) {
-            final isSelected = _selectedMood == mood['label'];
-            return GestureDetector(
-              onTap: () {
-                HapticHelper.lightImpact();
-                setState(() => _selectedMood = mood['label']);
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.accentPrimary.withOpacity(0.2)
-                      : AppColors.glassBg,
-                  borderRadius: BorderRadius.circular(AppBorderRadius.full),
-                  border: Border.all(
+        SizedBox(
+          height: 80,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            itemCount: _moods.length,
+            itemBuilder: (context, index) {
+              final mood = _moods[index];
+              final isSelected = _selectedMood == mood['label'];
+              return GestureDetector(
+                onTap: () {
+                  HapticHelper.lightImpact();
+                  setState(() => _selectedMood = mood['label']);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: 64,
+                  margin: const EdgeInsets.only(right: 12),
+                  decoration: BoxDecoration(
                     color: isSelected
-                        ? AppColors.accentPrimary
-                        : AppColors.glassBorder,
-                    width: isSelected ? 2 : 1,
+                        ? AppColors.accentPrimary.withOpacity(0.15)
+                        : AppColors.bgSecondary.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppColors.accentPrimary.withOpacity(0.5)
+                          : Colors.white.withOpacity(0.1),
+                      width: isSelected ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(mood['emoji']!, style: const TextStyle(fontSize: 24)),
+                      const SizedBox(height: 4),
+                      Text(
+                        mood['label']!,
+                        style: AppTextStyles.caption.copyWith(
+                          color: isSelected ? AppColors.accentPrimary : AppColors.textTertiary,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(mood['emoji']!, style: const TextStyle(fontSize: 20)),
-                    const SizedBox(width: 6),
-                    Text(
-                      mood['label']!,
-                      style: AppTextStyles.bodySm.copyWith(
-                        color: isSelected
-                            ? AppColors.accentPrimary
-                            : AppColors.textSecondary,
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
+              );
+            },
+          ),
         ),
       ],
-    ).animate().fadeIn(delay: 200.ms);
+    );
   }
 
   Widget _buildTitleInput() {
-    return TextField(
-      controller: _titleController,
-      style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold),
-      decoration: InputDecoration(
-        hintText: 'Title (optional)',
-        hintStyle: AppTextStyles.h3.copyWith(
-          color: AppColors.textTertiary,
-          fontWeight: FontWeight.normal,
-        ),
-        border: InputBorder.none,
-        contentPadding: EdgeInsets.zero,
+    return GlassCard(
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
       ),
-      maxLines: 1,
-    ).animate().fadeIn(delay: 300.ms);
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _titleController,
+            style: AppTextStyles.h3.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.accentPrimary,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Title (optional)',
+              hintStyle: AppTextStyles.h3.copyWith(
+                color: AppColors.textTertiary.withOpacity(0.5),
+                fontWeight: FontWeight.normal,
+              ),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.zero,
+            ),
+            maxLines: 1,
+          ),
+          const Divider(color: Colors.white10, height: 32),
+          TextField(
+            controller: _contentController,
+            style: AppTextStyles.body.copyWith(
+              height: 1.6,
+              color: AppColors.textPrimary.withOpacity(0.9),
+            ),
+            decoration: InputDecoration(
+              hintText: 'Write your thoughts...',
+              hintStyle: AppTextStyles.body.copyWith(
+                color: AppColors.textTertiary.withOpacity(0.6),
+              ),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.zero,
+            ),
+            maxLines: null,
+            minLines: 12,
+            autofocus: widget.entryId == null,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildContentInput() {
-    return TextField(
-      controller: _contentController,
-      style: AppTextStyles.body.copyWith(height: 1.6),
-      decoration: InputDecoration(
-        hintText: 'Write your thoughts...',
-        hintStyle: AppTextStyles.body.copyWith(
-          color: AppColors.textTertiary,
-        ),
-        border: InputBorder.none,
-        contentPadding: EdgeInsets.zero,
-      ),
-      maxLines: null,
-      minLines: 10,
-      autofocus: widget.entryId == null,
-    ).animate().fadeIn(delay: 400.ms);
+    return const SizedBox.shrink(); // Integrated into _buildTitleInput
   }
 
   Widget _buildSaveButton() {
@@ -512,7 +563,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
         vertical: AppSpacing.lg,
       ),
       decoration: BoxDecoration(
-        color: AppColors.bgPrimary.withOpacity(0.8),
+        color: AppColors.bgTertiary,
         border: const Border(
           top: BorderSide(color: AppColors.glassBorder),
         ),

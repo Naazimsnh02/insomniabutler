@@ -286,7 +286,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           if (_selectedNavIndex == 2)
             Positioned(
               right: 20,
-              bottom: 100,
+              bottom: 120,
               child: _buildJournalFAB(),
             ),
         ],
@@ -1054,11 +1054,9 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       children: [
         GlassCard(
           padding: const EdgeInsets.all(20),
-          color: AppColors.bgSecondary.withOpacity(0.3),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.15),
-            width: 1.2,
-          ),
+          borderRadius: 16,
+          color: Colors.white.withOpacity(0.08),
+          border: null,
           child: Column(
             children: [
               Row(

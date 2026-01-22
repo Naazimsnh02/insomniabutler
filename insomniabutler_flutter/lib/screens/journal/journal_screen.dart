@@ -182,14 +182,14 @@ class JournalScreenState extends State<JournalScreen>
           ),
         ],
       ),
-    ).animate().fadeIn();
+    );
   }
 
-  Widget _buildIconButton({required IconData icon, required VoidCallback onTap}) {
+  Widget _buildIconButton({required IconData icon, required VoidCallback onTap, Color? iconColor}) {
     return GestureDetector(
       onTap: onTap,
       child: GlassCard(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(12),
         borderRadius: 12,
         color: AppColors.bgSecondary.withOpacity(0.4),
         border: Border.all(
@@ -246,7 +246,7 @@ class JournalScreenState extends State<JournalScreen>
           Tab(text: 'Insights'),
         ],
       ),
-    ).animate().fadeIn(delay: 100.ms);
+    );
   }
 
   Widget _buildTimelineTab() {
@@ -319,8 +319,9 @@ class JournalScreenState extends State<JournalScreen>
                           children: [
                             Text(
                               DateFormat('EEE, MMM d').format(date),
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.textSecondary,
+                              style: AppTextStyles.label.copyWith(
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
@@ -336,29 +337,31 @@ class JournalScreenState extends State<JournalScreen>
                     ),
                     if (isFavorite)
                       const Icon(
-                        Icons.favorite,
+                        Icons.favorite_rounded,
                         color: AppColors.accentError,
                         size: 16,
                       ),
                   ],
                 ),
                 if (title != null && title.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: 12),
                   Text(
-                    title,
+                    title.trim().substring(0, 1).toUpperCase() + title.trim().substring(1),
                     style: AppTextStyles.labelLg.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: AppColors.accentPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: 8),
                 Text(
                   content,
                   style: AppTextStyles.body.copyWith(
                     color: AppColors.textSecondary,
                     height: 1.5,
+                    fontSize: 14,
                   ),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
@@ -366,10 +369,7 @@ class JournalScreenState extends State<JournalScreen>
               ],
             ),
           ),
-        )
-        .animate(key: ValueKey('entry_${entry.id}'))
-        .fadeIn(delay: (index * 50).ms, duration: 300.ms)
-        .slideY(begin: 0.1, end: 0);
+        );
   }
 
   Widget _buildCalendarTab() {
@@ -378,7 +378,7 @@ class JournalScreenState extends State<JournalScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildCalendarHeader(),
+          _buildDateSelector(),
           const SizedBox(height: AppSpacing.lg),
           _buildCalendarGrid(),
           const SizedBox(height: AppSpacing.xl),
@@ -388,8 +388,13 @@ class JournalScreenState extends State<JournalScreen>
     );
   }
 
-  Widget _buildCalendarHeader() {
+  Widget _buildDateSelector() {
     return GlassCard(
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -403,11 +408,14 @@ class JournalScreenState extends State<JournalScreen>
                 );
               });
             },
-            icon: const Icon(Icons.chevron_left, color: Colors.white),
+            icon: const Icon(Icons.chevron_left_rounded, color: Colors.white),
           ),
           Text(
             DateFormat('MMMM yyyy').format(_currentMonth),
-            style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold),
+            style: AppTextStyles.h3.copyWith(
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+            ),
           ),
           IconButton(
             onPressed: () {
@@ -419,11 +427,11 @@ class JournalScreenState extends State<JournalScreen>
                 );
               });
             },
-            icon: const Icon(Icons.chevron_right, color: Colors.white),
+            icon: const Icon(Icons.chevron_right_rounded, color: Colors.white),
           ),
         ],
       ),
-    ).animate().fadeIn();
+    );
   }
 
   Widget _buildCalendarGrid() {
@@ -437,10 +445,14 @@ class JournalScreenState extends State<JournalScreen>
       _currentMonth.month + 1,
       0,
     );
-    final firstWeekday = firstDayOfMonth.weekday % 7; // 0 = Sunday
     final daysInMonth = lastDayOfMonth.day;
-
+    final firstWeekday = firstDayOfMonth.weekday % 7; // 0 = Sunday
     return GlassCard(
+      borderRadius: 24,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
       child: Column(
         children: [
           // Weekday headers
@@ -454,7 +466,7 @@ class JournalScreenState extends State<JournalScreen>
                       day,
                       textAlign: TextAlign.center,
                       style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textTertiary,
+                        color: AppColors.accentPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -466,7 +478,7 @@ class JournalScreenState extends State<JournalScreen>
           // Calendar days
           ...List.generate((daysInMonth + firstWeekday) ~/ 7 + 1, (weekIndex) {
             return Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: List.generate(7, (dayIndex) {
@@ -481,7 +493,7 @@ class JournalScreenState extends State<JournalScreen>
           }),
         ],
       ),
-    ).animate().fadeIn(delay: 100.ms);
+    );
   }
 
   Widget _buildCalendarDay(int day) {
@@ -528,10 +540,7 @@ class JournalScreenState extends State<JournalScreen>
                   ],
                 )
               : null,
-          borderRadius: BorderRadius.circular(AppBorderRadius.md),
-          border: isToday && !isSelected
-              ? Border.all(color: AppColors.accentPrimary, width: 1)
-              : null,
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Stack(
           alignment: Alignment.center,
@@ -593,7 +602,7 @@ class JournalScreenState extends State<JournalScreen>
             ),
           ],
         ),
-      ).animate().fadeIn();
+      );
     }
 
     return Column(
@@ -614,7 +623,7 @@ class JournalScreenState extends State<JournalScreen>
           ),
         ),
       ],
-    ).animate().fadeIn();
+    );
   }
 
   String? _getDominantMood(List<dynamic> entries) {
@@ -666,9 +675,16 @@ class JournalScreenState extends State<JournalScreen>
           _buildStatsCards(),
           const SizedBox(height: AppSpacing.xl),
           if (_insights.isNotEmpty) ...[
-            Text('AI Insights', style: AppTextStyles.labelLg),
+            Text(
+              'Butler Insights',
+              style: AppTextStyles.labelLg.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.accentPrimary,
+              ),
+            ),
             const SizedBox(height: AppSpacing.md),
             ..._insights.map((insight) => _buildInsightCard(insight)),
+            const SizedBox(height: 140), // Increased bottom padding
           ],
         ],
       ),
@@ -724,15 +740,28 @@ class JournalScreenState extends State<JournalScreen>
           ],
         ),
       ],
-    ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0);
+    );
   }
 
   Widget _buildStatCard(String emoji, String value, String label, Color color) {
     return GlassCard(
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 20),
       child: Column(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 32)),
-          const SizedBox(height: AppSpacing.sm),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Text(emoji, style: const TextStyle(fontSize: 24)),
+          ),
+          const SizedBox(height: AppSpacing.md),
           Text(
             value,
             style: AppTextStyles.h2.copyWith(
@@ -740,9 +769,15 @@ class JournalScreenState extends State<JournalScreen>
               color: color,
             ),
           ),
+          const SizedBox(height: 4),
           Text(
-            label,
-            style: AppTextStyles.caption.copyWith(fontSize: 10),
+            label.toUpperCase(),
+            style: AppTextStyles.caption.copyWith(
+              fontSize: 10,
+              letterSpacing: 0.5,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textTertiary,
+            ),
           ),
         ],
       ),
@@ -752,36 +787,61 @@ class JournalScreenState extends State<JournalScreen>
   Widget _buildInsightCard(dynamic insight) {
     return GlassCard(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
-      gradient: LinearGradient(
-        colors: [
-          AppColors.accentPrimary.withOpacity(0.1),
-          AppColors.glassBgElevated.withOpacity(0.5),
-        ],
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               gradient: AppColors.gradientPrimary,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accentPrimary.withOpacity(0.3),
+                  blurRadius: 10,
+                ),
+              ],
             ),
-            child: const Icon(
-              Icons.auto_awesome_rounded,
-              color: Colors.white,
-              size: 20,
+            child: ClipOval(
+              child: Image.asset(
+                'assets/logo/butler_logo.png',
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.lg),
           Expanded(
-            child: Text(
-              insight.message as String,
-              style: AppTextStyles.body.copyWith(height: 1.5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Butler Suggestion',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.accentPrimary,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  insight.message as String,
+                  style: AppTextStyles.body.copyWith(
+                    height: 1.5,
+                    fontSize: 14,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.1, end: 0);
+    );
   }
 
   Widget _buildEmptyState() {
@@ -795,9 +855,7 @@ class JournalScreenState extends State<JournalScreen>
                   Icons.auto_stories_rounded,
                   size: 80,
                   color: AppColors.accentPrimary,
-                )
-                .animate(onPlay: (c) => c.repeat(reverse: true))
-                .shimmer(duration: 2.seconds, color: Colors.white24),
+                ),
             const SizedBox(height: AppSpacing.xl),
             Text(
               'Start Your Sleep Journal',
@@ -844,9 +902,7 @@ class JournalScreenState extends State<JournalScreen>
             ),
             child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
           ),
-        )
-        .animate(onPlay: (c) => c.repeat(reverse: true))
-        .moveY(begin: 0, end: -4, duration: 1500.ms);
+        );
   }
 
   String? _getMoodEmoji(String? mood) {

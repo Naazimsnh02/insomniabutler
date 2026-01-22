@@ -168,23 +168,38 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildMetadata(date, moodEmoji, mood),
-                    const SizedBox(height: AppSpacing.xl),
-                    if (title != null && title.isNotEmpty) ...[
-                      Text(
-                        title,
-                        style: AppTextStyles.h2.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ).animate().fadeIn(delay: 100.ms),
-                      const SizedBox(height: AppSpacing.lg),
-                    ],
-                    Text(
-                      content,
-                      style: AppTextStyles.body.copyWith(
-                        height: 1.8,
-                        fontSize: 16,
+                    const SizedBox(height: AppSpacing.lg),
+                    GlassCard(
+                      padding: const EdgeInsets.all(24),
+                      borderRadius: 24,
+                      color: AppColors.bgSecondary.withOpacity(0.3),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.1),
                       ),
-                    ).animate().fadeIn(delay: 200.ms),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (title != null && title.isNotEmpty) ...[
+                            Text(
+                              title.trim().substring(0, 1).toUpperCase() + title.trim().substring(1),
+                              style: AppTextStyles.h2.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.accentPrimary,
+                              ),
+                            ),
+                            const Divider(color: Colors.white10, height: 32),
+                          ],
+                          Text(
+                            content,
+                            style: AppTextStyles.body.copyWith(
+                              height: 1.8,
+                              fontSize: 16,
+                              color: AppColors.textPrimary.withOpacity(0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 100),
                   ],
                 ),
@@ -255,12 +270,12 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
           size: 20,
         ),
       ),
-    ).animate().fadeIn(duration: 300.ms).scale(delay: 100.ms);
+    );
   }
 
   Widget _buildMetadata(DateTime date, String? moodEmoji, String? mood) {
     return GlassCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(20),
       borderRadius: 20,
       color: AppColors.bgSecondary.withOpacity(0.3),
       border: Border.all(
@@ -274,6 +289,12 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
               decoration: BoxDecoration(
                 gradient: AppColors.gradientPrimary,
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.accentPrimary.withOpacity(0.3),
+                    blurRadius: 10,
+                  ),
+                ],
               ),
               child: Text(moodEmoji, style: const TextStyle(fontSize: 28)),
             ),
@@ -287,6 +308,7 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
                   DateFormat('EEEE, MMMM d, y').format(date),
                   style: AppTextStyles.labelLg.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -311,6 +333,7 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
                         mood,
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.accentPrimary,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -321,7 +344,7 @@ class _JournalDetailScreenState extends State<JournalDetailScreen> {
           ),
         ],
       ),
-    ).animate().fadeIn().slideY(begin: -0.1, end: 0);
+    );
   }
 
   Widget _buildActionButtons() {
