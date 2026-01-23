@@ -186,6 +186,11 @@ class _AccountScreenState extends State<AccountScreen> {
               _buildSupportAbout(),
               const SizedBox(height: AppSpacing.xl),
 
+              _buildSectionHeader('Developer Tools'),
+              const SizedBox(height: AppSpacing.md),
+              _buildDevTools(),
+              const SizedBox(height: AppSpacing.xl),
+
               _buildLogoutButton(),
               const SizedBox(height: AppSpacing.xxl),
               const SizedBox(height: 100), // Bottom nav spacing
@@ -603,6 +608,96 @@ class _AccountScreenState extends State<AccountScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildDevTools() {
+    return GlassCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderRadius: 20,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+      ),
+      child: Column(
+        children: [
+          _buildSettingRow(
+            icon: Icons.analytics_rounded,
+            title: 'Generate Realistic Data',
+            subtitle: 'Last 30 days of sleep & journal data',
+            trailing: const Icon(
+              Icons.bolt_rounded,
+              color: AppColors.accentPrimary,
+            ),
+            onTap: () {
+              HapticHelper.heavyImpact();
+              _showGenerateDataDialog();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showGenerateDataDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.bgPrimary,
+        title: const Text('Generate Data?', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'This will generate 30 days of realistic sleep sessions, journal entries, and thought logs. This is for testing purposes.',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _generateRealisticData();
+            },
+            child: const Text('Generate', style: TextStyle(color: AppColors.accentPrimary)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _generateRealisticData() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final userId = await UserService.getCurrentUserId();
+      if (userId == null) throw Exception('User not logged in');
+
+      final success = await client.dev.generateRealisticData(userId);
+
+      if (success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Realistic data generated successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Refresh screen data
+          _loadData();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error generating data: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.accentError,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildSettingRow({

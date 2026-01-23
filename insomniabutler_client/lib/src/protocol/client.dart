@@ -329,6 +329,21 @@ class EndpointAuth extends _i2.EndpointRef {
       );
 }
 
+/// {@category Endpoint}
+class EndpointDev extends _i2.EndpointRef {
+  EndpointDev(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'dev';
+
+  _i3.Future<bool> generateRealisticData(int userId) =>
+      caller.callServerEndpoint<bool>(
+        'dev',
+        'generateRealisticData',
+        {'userId': userId},
+      );
+}
+
 /// Analytics and insights endpoint for sleep intelligence
 /// {@category Endpoint}
 class EndpointInsights extends _i2.EndpointRef {
@@ -829,6 +844,7 @@ class Client extends _i2.ServerpodClientShared {
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
     auth = EndpointAuth(this);
+    dev = EndpointDev(this);
     insights = EndpointInsights(this);
     journal = EndpointJournal(this);
     sleepSession = EndpointSleepSession(this);
@@ -842,6 +858,8 @@ class Client extends _i2.ServerpodClientShared {
   late final EndpointJwtRefresh jwtRefresh;
 
   late final EndpointAuth auth;
+
+  late final EndpointDev dev;
 
   late final EndpointInsights insights;
 
@@ -860,6 +878,7 @@ class Client extends _i2.ServerpodClientShared {
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
     'auth': auth,
+    'dev': dev,
     'insights': insights,
     'journal': journal,
     'sleepSession': sleepSession,

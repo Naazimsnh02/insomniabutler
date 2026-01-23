@@ -94,12 +94,67 @@ class AuthEndpoint extends Endpoint {
   /// Get user statistics
   /// Returns total sleep sessions, journal entries, and current streak
   Future<Map<String, int>> getUserStats(Session session, int userId) async {
-    // TODO: Implement actual queries once we have the data
-    // For now, return placeholder data
+    final totalSleepSessions = await SleepSession.db.count(
+      session,
+      where: (t) => t.userId.equals(userId),
+    );
+
+    final totalJournalEntries = await JournalEntry.db.count(
+      session,
+      where: (t) => t.userId.equals(userId),
+    );
+
+    // Calculate current streak from sleep sessions
+    final sessions = await SleepSession.db.find(
+      session,
+      where: (t) => t.userId.equals(userId),
+      orderBy: (t) => t.sessionDate,
+      orderDescending: true,
+    );
+
+    int currentStreak = 0;
+    if (sessions.isNotEmpty) {
+      DateTime? lastDate;
+      for (var s in sessions) {
+        final sessionDate = DateTime(
+          s.sessionDate.year,
+          s.sessionDate.month,
+          s.sessionDate.day,
+        );
+
+        if (lastDate == null) {
+          // Check if the most recent session is from today or yesterday
+          final today = DateTime.now().toUtc();
+          final todayDate = DateTime(today.year, today.month, today.day);
+          final diff = todayDate.difference(sessionDate).inDays;
+
+          if (diff <= 1) {
+            currentStreak = 1;
+            lastDate = sessionDate;
+          } else {
+            // Streak broken
+            break;
+          }
+        } else {
+          final diff = lastDate.difference(sessionDate).inDays;
+          if (diff == 1) {
+            currentStreak++;
+            lastDate = sessionDate;
+          } else if (diff == 0) {
+            // Multiple sessions on same day, skip
+            continue;
+          } else {
+            // Streak broken
+            break;
+          }
+        }
+      }
+    }
+
     return {
-      'totalSleepSessions': 0,
-      'totalJournalEntries': 0,
-      'currentStreak': 0,
+      'totalSleepSessions': totalSleepSessions,
+      'totalJournalEntries': totalJournalEntries,
+      'currentStreak': currentStreak,
     };
   }
 }

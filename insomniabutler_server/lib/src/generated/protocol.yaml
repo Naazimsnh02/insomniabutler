@@ -16,6 +16,8 @@ auth:
   - updateUserProfile:
   - deleteUser:
   - getUserStats:
+dev:
+  - generateRealisticData:
 insights:
   - getUserInsights:
   - getWeeklyInsights:
