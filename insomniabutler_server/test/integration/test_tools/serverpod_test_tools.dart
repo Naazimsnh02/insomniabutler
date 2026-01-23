@@ -27,8 +27,10 @@ import 'package:insomniabutler_server/src/generated/journal_insight.dart'
 import 'package:insomniabutler_server/src/generated/thought_response.dart'
     as _i12;
 import 'package:insomniabutler_server/src/generated/chat_message.dart' as _i13;
-import 'package:insomniabutler_server/src/generated/greetings/greeting.dart'
+import 'package:insomniabutler_server/src/generated/chat_session_info.dart'
     as _i14;
+import 'package:insomniabutler_server/src/generated/greetings/greeting.dart'
+    as _i15;
 import 'package:insomniabutler_server/src/generated/protocol.dart';
 import 'package:insomniabutler_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -1933,7 +1935,7 @@ class _ThoughtClearingEndpoint {
     });
   }
 
-  _i3.Future<List<_i13.ChatMessage>> getSessionHistory(
+  _i3.Future<List<_i13.ChatMessage>> getChatSessionMessages(
     _i1.TestSessionBuilder sessionBuilder,
     String sessionId,
   ) async {
@@ -1941,13 +1943,13 @@ class _ThoughtClearingEndpoint {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
             endpoint: 'thoughtClearing',
-            method: 'getSessionHistory',
+            method: 'getChatSessionMessages',
           );
       try {
         var _localCallContext = await _endpointDispatch.getMethodCallContext(
           createSessionCallback: (_) => _localUniqueSession,
           endpointPath: 'thoughtClearing',
-          methodName: 'getSessionHistory',
+          methodName: 'getChatSessionMessages',
           parameters: _i1.testObjectToJson({'sessionId': sessionId}),
           serializationManager: _serializationManager,
         );
@@ -1957,6 +1959,37 @@ class _ThoughtClearingEndpoint {
                   _localCallContext.arguments,
                 )
                 as _i3.Future<List<_i13.ChatMessage>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i14.ChatSessionInfo>> getChatHistory(
+    _i1.TestSessionBuilder sessionBuilder,
+    int userId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'thoughtClearing',
+            method: 'getChatHistory',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'thoughtClearing',
+          methodName: 'getChatHistory',
+          parameters: _i1.testObjectToJson({'userId': userId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i14.ChatSessionInfo>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1975,7 +2008,7 @@ class _GreetingEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i14.Greeting> hello(
+  _i3.Future<_i15.Greeting> hello(
     _i1.TestSessionBuilder sessionBuilder,
     String name,
   ) async {
@@ -1998,7 +2031,7 @@ class _GreetingEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i14.Greeting>);
+                as _i3.Future<_i15.Greeting>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

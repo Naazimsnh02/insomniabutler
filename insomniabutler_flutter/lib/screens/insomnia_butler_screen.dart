@@ -12,7 +12,9 @@ import '../utils/haptic_helper.dart';
 /// Thought Clearing Chat UI - CORE FEATURE
 /// Premium glassmorphic chat interface for processing anxious thoughts
 class InsomniaButlerScreen extends StatefulWidget {
-  const InsomniaButlerScreen({super.key});
+  final String? sessionId;
+
+  const InsomniaButlerScreen({super.key, this.sessionId});
 
   @override
   State<InsomniaButlerScreen> createState() => _InsomniaButlerScreenState();
@@ -23,7 +25,8 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<ChatMessage> _messages = [];
-  final String _sessionId = DateTime.now().millisecondsSinceEpoch.toString();
+  late final String _sessionId;
+  bool _isHistoryLoading = false;
 
   int _sleepReadiness = 45;
   int _previousReadiness = 45;
@@ -53,15 +56,45 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
           ),
         );
 
-    // Initial AI greeting
-    _addMessage(
-      ChatMessage(
-        role: 'assistant',
-        content:
-            "What's on your mind tonight? I'm here to help you clear your thoughts so you can rest.",
-        timestamp: DateTime.now(),
-      ),
-    );
+    _sessionId = widget.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString();
+
+    if (widget.sessionId != null) {
+      _loadSessionHistory();
+    } else {
+      // Initial AI greeting
+      _addMessage(
+        ChatMessage(
+          role: 'assistant',
+          content:
+              "What's on your mind tonight? I'm here to help you clear your thoughts so you can rest.",
+          timestamp: DateTime.now(),
+        ),
+      );
+    }
+  }
+
+  Future<void> _loadSessionHistory() async {
+    setState(() => _isHistoryLoading = true);
+    try {
+      final messages = await client.thoughtClearing.getChatSessionMessages(_sessionId);
+      
+      // Map Serverpod ChatMessage to our local ChatMessage model
+      final mappedMessages = messages.map((m) => ChatMessage(
+        role: m.role,
+        content: m.content,
+        timestamp: m.timestamp,
+        category: null, 
+      )).toList();
+
+      setState(() {
+        _messages.addAll(mappedMessages);
+        _isHistoryLoading = false;
+      });
+      _scrollToBottom();
+    } catch (e) {
+      print('Error loading session history: $e');
+      setState(() => _isHistoryLoading = false);
+    }
   }
 
   @override
@@ -211,82 +244,161 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.bgMainGradient,
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              _buildInsightsPanel(),
-              const SizedBox(height: 8),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => FocusScope.of(context).unfocus(),
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.containerPadding,
-                      vertical: AppSpacing.md,
+      backgroundColor: AppColors.bgPrimary,
+      body: Stack(
+        children: [
+          // Decorative background elements
+          Positioned(
+            top: -100,
+            left: -50,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.accentPrimary.withOpacity(0.04),
+              ),
+            ).animate().fadeIn(duration: 1200.ms),
+          ),
+          Positioned(
+            bottom: 200,
+            right: -80,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.accentLavender.withOpacity(0.03),
+              ),
+            ).animate().fadeIn(delay: 400.ms, duration: 1200.ms),
+          ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(),
+                _buildInsightsPanel(),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => FocusScope.of(context).unfocus(),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.containerPadding,
+                        vertical: AppSpacing.md,
+                      ),
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: _messages.length + (_isLoading ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (_isHistoryLoading && index == 0) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20.0),
+                              child: CircularProgressIndicator(color: AppColors.accentPrimary),
+                            ),
+                          );
+                        }
+                        if (index == _messages.length) {
+                          return _buildTypingIndicator();
+                        }
+                        return _buildChatBubble(_messages[index], index);
+                      },
                     ),
-                    itemCount: _messages.length + (_isLoading ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == _messages.length) {
-                        return _buildTypingIndicator();
-                      }
-                      return _buildChatBubble(_messages[index], index);
-                    },
                   ),
                 ),
-              ),
-              _buildInputField(),
-            ],
+                _buildInputField(),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.containerPadding),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.containerPadding,
+        AppSpacing.lg,
+        AppSpacing.containerPadding,
+        AppSpacing.md,
+      ),
       child: Row(
         children: [
-          // Back button with glass effect
           _buildIconButton(
                 icon: Icons.arrow_back_ios_new_rounded,
                 onTap: () => Navigator.pop(context, true),
               )
-              .animate(key: const ValueKey('chat_back_btn'))
-              .fadeIn(duration: 300.ms)
+              .animate()
+              .fadeIn(duration: 400.ms)
               .scale(delay: 100.ms),
 
           const Spacer(),
 
-          // Title
           Column(
             children: [
               Text(
                 'Insomnia Butler',
-                style: AppTextStyles.bodyLg.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
+                style: AppTextStyles.h3.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                  fontSize: 18,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                'Clear your mind',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textTertiary,
-                ),
+              const SizedBox(height: 2),
+              Row(
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: AppColors.accentCyan,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Always here for you',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textTertiary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ],
-          ).animate(key: const ValueKey('chat_title')).fadeIn(delay: 200.ms),
+          ).animate().fadeIn(delay: 200.ms).slideY(begin: -0.2, end: 0),
 
           const Spacer(),
 
-          const SizedBox(width: 48), // Balance the back button
+          _buildIconButton(
+                icon: Icons.history_rounded,
+                onTap: () async {
+                  await HapticHelper.lightImpact();
+                  final result = await Navigator.pushNamed(context, '/chat_history');
+                  if (result != null && result is String) {
+                    if (result == "NEW_SESSION") {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const InsomniaButlerScreen(),
+                        ),
+                      );
+                    } else if (result != _sessionId) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => InsomniaButlerScreen(sessionId: result),
+                        ),
+                      );
+                    }
+                  }
+                },
+              )
+              .animate()
+              .fadeIn(duration: 400.ms)
+              .scale(delay: 150.ms),
         ],
       ),
     );
@@ -298,37 +410,45 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
     return Align(
           alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
-            margin: const EdgeInsets.only(bottom: AppSpacing.md),
+            margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.symmetric(
               horizontal: 18,
               vertical: 14,
             ),
             constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.8,
+              maxWidth: MediaQuery.of(context).size.width * 0.75,
             ),
             decoration: BoxDecoration(
-              color: isUser
-                  ? AppColors.accentPrimary.withOpacity(0.15)
-                  : AppColors.bgSecondary.withOpacity(0.4),
+              gradient: isUser
+                  ? LinearGradient(
+                      colors: [
+                        AppColors.accentPrimary.withOpacity(0.2),
+                        AppColors.accentPrimary.withOpacity(0.1),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                  : null,
+              color: isUser ? null : AppColors.bgSecondary.withOpacity(0.4),
               border: Border.all(
                 color: isUser
                     ? AppColors.accentPrimary.withOpacity(0.3)
-                    : Colors.white.withOpacity(0.15),
-                width: isUser ? 1.2 : 1.0,
+                    : Colors.white.withOpacity(0.1),
+                width: 1.2,
               ),
-              borderRadius: BorderRadius.circular(20).copyWith(
+              borderRadius: BorderRadius.circular(24).copyWith(
                 bottomRight: isUser
                     ? const Radius.circular(4)
-                    : const Radius.circular(20),
+                    : const Radius.circular(24),
                 bottomLeft: isUser
-                    ? const Radius.circular(20)
+                    ? const Radius.circular(24)
                     : const Radius.circular(4),
               ),
               boxShadow: isUser
                   ? [
                       BoxShadow(
                         color: AppColors.accentPrimary.withOpacity(0.1),
-                        blurRadius: 12,
+                        blurRadius: 15,
                         offset: const Offset(0, 4),
                       ),
                     ]
@@ -336,19 +456,20 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
             ),
             child: Text(
               message.content,
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textPrimary,
-                height: 1.5,
+              style: AppTextStyles.bodySm.copyWith(
+                color: AppColors.textPrimary.withOpacity(0.9),
+                height: 1.6,
+                fontSize: 14,
               ),
             ),
           ),
         )
         .animate(key: ValueKey(message.timestamp.millisecondsSinceEpoch))
-        .fadeIn(duration: 300.ms)
+        .fadeIn(duration: 400.ms)
         .slideY(
-          begin: 0.3,
+          begin: 0.2,
           end: 0,
-          duration: 300.ms,
+          duration: 400.ms,
           curve: Curves.easeOut,
         );
   }
@@ -399,55 +520,48 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.containerPadding,
-        vertical: AppSpacing.xs,
       ),
       child: GlassCard(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        borderRadius: 16,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: 20,
         color: AppColors.bgSecondary.withOpacity(0.2),
         border: Border.all(
-          color: Colors.white.withOpacity(0.15),
+          color: Colors.white.withOpacity(0.1),
           width: 1.2,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.insights_rounded,
-              size: 14,
-              color: AppColors.textTertiary.withOpacity(0.7),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Insights',
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textTertiary,
-                fontWeight: FontWeight.w600,
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: AppColors.accentPrimary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.insights_rounded,
+                size: 14,
+                color: AppColors.accentPrimary,
               ),
             ),
+            const SizedBox(width: 12),
             if (_currentCategory != null) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  '·',
-                  style: TextStyle(color: Colors.white.withOpacity(0.3)),
-                ),
-              ),
               Text(
                 _currentCategory!,
                 style: AppTextStyles.caption.copyWith(
                   color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Text(
+                  '|',
+                  style: TextStyle(color: Colors.white.withOpacity(0.1)),
                 ),
               ),
             ],
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                '·',
-                style: TextStyle(color: Colors.white.withOpacity(0.3)),
-              ),
-            ),
             AnimatedBuilder(
               animation: _readinessAnimation,
               builder: (context, child) {
@@ -456,15 +570,20 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '🌙',
-                      style: TextStyle(fontSize: 12),
+                      'Sleep Readiness:',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textTertiary,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 11,
+                      ),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 6),
                     Text(
                       '$currentValue%',
                       style: AppTextStyles.caption.copyWith(
                         color: _getReadinessColor(currentValue),
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 12,
                       ),
                     ),
                   ],
@@ -474,26 +593,23 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
           ],
         ),
       ),
-    ).animate().fadeIn(delay: 300.ms).slideY(begin: -0.2, end: 0);
+    ).animate().fadeIn(delay: 300.ms).scale(begin: const Offset(0.95, 0.95));
   }
 
   Widget _buildInputField() {
     return Container(
-      padding: EdgeInsets.only(
-        left: AppSpacing.md,
-        right: AppSpacing.md,
-        top: AppSpacing.md,
-        bottom: MediaQuery.of(context).padding.bottom + AppSpacing.md,
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.transparent,
+      padding: const EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 12,
+        bottom: 24,
       ),
       child: GlassCard(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        borderRadius: 28,
-        color: AppColors.bgSecondary.withOpacity(0.5),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        borderRadius: 32,
+        color: AppColors.bgSecondary.withOpacity(0.6),
         border: Border.all(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withOpacity(0.15),
           width: 1.5,
         ),
         child: Row(
@@ -501,18 +617,19 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
             Expanded(
               child: TextField(
                 controller: _controller,
-                style: AppTextStyles.body.copyWith(
+                style: AppTextStyles.bodySm.copyWith(
                   color: AppColors.textPrimary,
+                  fontSize: 15,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Type your thoughts...',
-                  hintStyle: AppTextStyles.body.copyWith(
-                    color: AppColors.textTertiary.withOpacity(0.5),
+                  hintText: 'Share what\'s on your mind...',
+                  hintStyle: AppTextStyles.bodySm.copyWith(
+                    color: AppColors.textTertiary.withOpacity(0.4),
                   ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 12,
+                    vertical: 14,
                   ),
                 ),
                 maxLines: null,
@@ -521,34 +638,33 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
               ),
             ),
             const SizedBox(width: 8),
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                gradient: AppColors.gradientPrimary,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.accentPrimary.withOpacity(0.3),
-                    blurRadius: 10,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                onPressed: _sendMessage,
-                icon: const Icon(
-                  Icons.arrow_upward_rounded,
+            GestureDetector(
+              onTap: _sendMessage,
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: AppColors.gradientPrimary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accentPrimary.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.send_rounded,
                   color: Colors.white,
-                  size: 24,
+                  size: 20,
                 ),
               ),
             ),
           ],
         ),
       ),
-    );
+    ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2, end: 0);
   }
 
   Widget _buildIconButton({

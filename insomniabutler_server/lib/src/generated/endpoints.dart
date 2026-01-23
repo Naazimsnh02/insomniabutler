@@ -1419,8 +1419,8 @@ class Endpoints extends _i1.EndpointDispatch {
                         params['currentReadiness'],
                       ),
         ),
-        'getSessionHistory': _i1.MethodConnector(
-          name: 'getSessionHistory',
+        'getChatSessionMessages': _i1.MethodConnector(
+          name: 'getChatSessionMessages',
           params: {
             'sessionId': _i1.ParameterDescription(
               name: 'sessionId',
@@ -1434,9 +1434,29 @@ class Endpoints extends _i1.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async =>
                   (endpoints['thoughtClearing'] as _i9.ThoughtClearingEndpoint)
-                      .getSessionHistory(
+                      .getChatSessionMessages(
                         session,
                         params['sessionId'],
+                      ),
+        ),
+        'getChatHistory': _i1.MethodConnector(
+          name: 'getChatHistory',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['thoughtClearing'] as _i9.ThoughtClearingEndpoint)
+                      .getChatHistory(
+                        session,
+                        params['userId'],
                       ),
         ),
       },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
@@ -9,7 +10,7 @@ import 'journal_editor_screen.dart';
 import 'journal_detail_screen.dart';
 
 /// Journal Screen - Main hub for journaling
-/// Features: Timeline, Calendar, Insights tabs with glassmorphic design
+/// Features: Timeline, Calendar, Insights tabs with premium glassmorphic design
 class JournalScreen extends StatefulWidget {
   final bool isTab;
   const JournalScreen({super.key, this.isTab = false});
@@ -83,35 +84,39 @@ class JournalScreenState extends State<JournalScreen>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isTab) {
-      return Column(
-        children: [
-          _buildHeader(),
-          _buildTabBar(),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildTimelineTab(),
-                _buildCalendarTab(),
-                _buildInsightsTab(),
-              ],
+    return Stack(
+      children: [
+        // Decorative background elements
+        Positioned(
+          top: -100,
+          left: -50,
+          child: Container(
+            width: 300,
+            height: 300,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.accentPrimary.withOpacity(0.04),
             ),
-          ),
-        ],
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: AppColors.bgPrimary,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.bgMainGradient,
+          ).animate().fadeIn(duration: 1200.ms),
         ),
-        child: SafeArea(
-          child: Column(
+        Positioned(
+          top: 200,
+          right: -80,
+          child: Container(
+            width: 250,
+            height: 250,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.accentLavender.withOpacity(0.03),
+            ),
+          ).animate().fadeIn(delay: 400.ms, duration: 1200.ms),
+        ),
+
+        if (widget.isTab)
+          Column(
             children: [
               _buildHeader(),
+              const SizedBox(height: AppSpacing.sm),
               _buildTabBar(),
               Expanded(
                 child: TabBarView(
@@ -124,10 +129,32 @@ class JournalScreenState extends State<JournalScreen>
                 ),
               ),
             ],
+          )
+        else
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            body: SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  const SizedBox(height: AppSpacing.sm),
+                  _buildTabBar(),
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildTimelineTab(),
+                        _buildCalendarTab(),
+                        _buildInsightsTab(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            floatingActionButton: _buildFAB(),
           ),
-        ),
-      ),
-      floatingActionButton: _buildFAB(),
+      ],
     );
   }
 
@@ -135,7 +162,7 @@ class JournalScreenState extends State<JournalScreen>
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.containerPadding,
-        AppSpacing.lg,
+        AppSpacing.xl,
         AppSpacing.containerPadding,
         AppSpacing.md,
       ),
@@ -146,22 +173,36 @@ class JournalScreenState extends State<JournalScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Journal',
-                style: AppTextStyles.h1.copyWith(
+                'Sleep Journal',
+                style: AppTextStyles.h2.copyWith(
                   fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
+                  letterSpacing: -1.0,
                 ),
-              ),
+              ).animate().fadeIn().slideX(begin: -0.1, end: 0),
               if (_stats != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    '${_stats!['totalEntries']} entries • ${_stats!['currentStreak']}🔥 streak',
-                    style: AppTextStyles.bodySm.copyWith(
-                      color: AppColors.textSecondary.withOpacity(0.8),
-                    ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: AppColors.accentPrimary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${_stats!['totalEntries']} moments shared',
+                        style: AppTextStyles.bodySm.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                ).animate().fadeIn(delay: 200.ms),
             ],
           ),
           Row(
@@ -196,10 +237,10 @@ class JournalScreenState extends State<JournalScreen>
       onTap: onTap,
       child: GlassCard(
         padding: const EdgeInsets.all(12),
-        borderRadius: 12,
+        borderRadius: 14,
         color: AppColors.bgSecondary.withOpacity(0.4),
         border: Border.all(
-          color: Colors.white.withOpacity(0.15),
+          color: Colors.white.withOpacity(0.1),
         ),
         child: Icon(
           icon,
@@ -211,16 +252,18 @@ class JournalScreenState extends State<JournalScreen>
   }
 
   Widget _buildTabBar() {
-    return GlassCard(
+    return Container(
       margin: const EdgeInsets.symmetric(
         horizontal: AppSpacing.containerPadding,
       ),
-      padding: const EdgeInsets.all(4),
-      borderRadius: 24,
-      color: AppColors.bgSecondary.withOpacity(0.4),
-      border: Border.all(
-        color: Colors.white.withOpacity(0.1),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: AppColors.bgSecondary.withOpacity(0.4),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.05),
+        ),
       ),
+      padding: const EdgeInsets.all(4),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
@@ -229,8 +272,8 @@ class JournalScreenState extends State<JournalScreen>
           boxShadow: [
             BoxShadow(
               color: AppColors.accentPrimary.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -239,12 +282,14 @@ class JournalScreenState extends State<JournalScreen>
         dividerColor: Colors.transparent,
         labelColor: Colors.white,
         unselectedLabelColor: AppColors.textTertiary,
-        labelStyle: AppTextStyles.labelLg.copyWith(
+        labelStyle: AppTextStyles.label.copyWith(
           fontWeight: FontWeight.bold,
           letterSpacing: 0.5,
+          fontSize: 13,
         ),
-        unselectedLabelStyle: AppTextStyles.labelLg.copyWith(
+        unselectedLabelStyle: AppTextStyles.label.copyWith(
           fontWeight: FontWeight.w500,
+          fontSize: 13,
         ),
         tabs: const [
           Tab(text: 'Timeline'),
@@ -252,7 +297,7 @@ class JournalScreenState extends State<JournalScreen>
           Tab(text: 'Insights'),
         ],
       ),
-    );
+    ).animate().fadeIn(delay: 300.ms);
   }
 
   Widget _buildTimelineTab() {
@@ -269,7 +314,7 @@ class JournalScreenState extends State<JournalScreen>
     return RefreshIndicator(
       onRefresh: loadData,
       color: AppColors.accentPrimary,
-      backgroundColor: AppColors.glassBgElevated,
+      backgroundColor: AppColors.bgSecondary,
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.containerPadding,
@@ -277,6 +322,7 @@ class JournalScreenState extends State<JournalScreen>
           AppSpacing.containerPadding,
           140, // Space for floating bottom tab bar
         ),
+        physics: const BouncingScrollPhysics(),
         itemCount: _entries.length,
         itemBuilder: (context, index) {
           final entry = _entries[index];
@@ -308,10 +354,10 @@ class JournalScreenState extends State<JournalScreen>
       child: GlassCard(
         margin: const EdgeInsets.only(bottom: AppSpacing.md),
         padding: const EdgeInsets.all(20),
-        borderRadius: 20,
+        borderRadius: 24,
         color: AppColors.bgSecondary.withOpacity(0.3),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withOpacity(0.08),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,25 +367,32 @@ class JournalScreenState extends State<JournalScreen>
               children: [
                 Row(
                   children: [
-                    if (moodEmoji != null) ...[
-                      Text(moodEmoji, style: const TextStyle(fontSize: 24)),
-                      const SizedBox(width: AppSpacing.sm),
-                    ],
+                    if (moodEmoji != null)
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: _getMoodColor(mood).withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(moodEmoji, style: const TextStyle(fontSize: 20)),
+                      ),
+                    const SizedBox(width: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          DateFormat('EEE, MMM d').format(date),
+                          DateFormat('EEEE, MMM d').format(date),
                           style: AppTextStyles.label.copyWith(
                             color: AppColors.textPrimary,
                             fontWeight: FontWeight.bold,
+                            fontSize: 14,
                           ),
                         ),
                         Text(
                           DateFormat('h:mm a').format(date),
                           style: AppTextStyles.caption.copyWith(
                             color: AppColors.textTertiary,
-                            fontSize: 10,
+                            fontSize: 11,
                           ),
                         ),
                       ],
@@ -350,42 +403,75 @@ class JournalScreenState extends State<JournalScreen>
                   const Icon(
                     Icons.favorite_rounded,
                     color: AppColors.accentError,
-                    size: 16,
+                    size: 18,
                   ),
               ],
             ),
+            const SizedBox(height: 16),
             if (title != null && title.isNotEmpty) ...[
-              const SizedBox(height: 12),
               Text(
                 title.trim().substring(0, 1).toUpperCase() +
                     title.trim().substring(1),
-                style: AppTextStyles.labelLg.copyWith(
+                style: AppTextStyles.body.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppColors.accentPrimary,
+                  fontSize: 16,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
+              const SizedBox(height: 6),
             ],
-            const SizedBox(height: 8),
             Text(
               content,
-              style: AppTextStyles.body.copyWith(
+              style: AppTextStyles.bodySm.copyWith(
                 color: AppColors.textSecondary,
-                height: 1.5,
+                height: 1.6,
                 fontSize: 14,
               ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  Icons.notes_rounded,
+                  size: 12,
+                  color: AppColors.textTertiary.withOpacity(0.5),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${content.split(' ').length} words',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textTertiary.withOpacity(0.5),
+                    fontSize: 10,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  'Read more',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.accentPrimary.withOpacity(0.7),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 14,
+                  color: AppColors.accentPrimary.withOpacity(0.7),
+                ),
+              ],
+            ),
           ],
         ),
-      ),
+      ).animate().fadeIn(delay: (index * 50).ms).slideY(begin: 0.1, end: 0),
     );
   }
 
   Widget _buildCalendarTab() {
     return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.containerPadding,
         AppSpacing.containerPadding,
@@ -407,6 +493,7 @@ class JournalScreenState extends State<JournalScreen>
 
   Widget _buildDateSelector() {
     return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       borderRadius: 20,
       color: AppColors.bgSecondary.withOpacity(0.3),
       border: Border.all(
@@ -432,6 +519,7 @@ class JournalScreenState extends State<JournalScreen>
             style: AppTextStyles.h3.copyWith(
               fontWeight: FontWeight.bold,
               letterSpacing: -0.5,
+              fontSize: 20,
             ),
           ),
           IconButton(
@@ -448,7 +536,7 @@ class JournalScreenState extends State<JournalScreen>
           ),
         ],
       ),
-    );
+    ).animate().fadeIn().scale(begin: const Offset(0.95, 0.95));
   }
 
   Widget _buildCalendarGrid() {
@@ -464,11 +552,13 @@ class JournalScreenState extends State<JournalScreen>
     );
     final daysInMonth = lastDayOfMonth.day;
     final firstWeekday = firstDayOfMonth.weekday % 7; // 0 = Sunday
+
     return GlassCard(
+      padding: const EdgeInsets.all(16),
       borderRadius: 24,
       color: AppColors.bgSecondary.withOpacity(0.3),
       border: Border.all(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.08),
       ),
       child: Column(
         children: [
@@ -483,8 +573,9 @@ class JournalScreenState extends State<JournalScreen>
                       day,
                       textAlign: TextAlign.center,
                       style: AppTextStyles.caption.copyWith(
-                        color: AppColors.accentPrimary,
+                        color: AppColors.accentPrimary.withOpacity(0.7),
                         fontWeight: FontWeight.bold,
+                        fontSize: 12,
                       ),
                     ),
                   ),
@@ -495,7 +586,7 @@ class JournalScreenState extends State<JournalScreen>
           // Calendar days
           ...List.generate((daysInMonth + firstWeekday) ~/ 7 + 1, (weekIndex) {
             return Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: List.generate(7, (dayIndex) {
@@ -510,7 +601,7 @@ class JournalScreenState extends State<JournalScreen>
           }),
         ],
       ),
-    );
+    ).animate().fadeIn(delay: 100.ms);
   }
 
   Widget _buildCalendarDay(int day) {
@@ -543,7 +634,8 @@ class JournalScreenState extends State<JournalScreen>
           _selectedDate = date;
         });
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         width: 40,
         height: 40,
         decoration: BoxDecoration(
@@ -558,6 +650,9 @@ class JournalScreenState extends State<JournalScreen>
                 )
               : null,
           borderRadius: BorderRadius.circular(12),
+          border: isToday && !isSelected
+              ? Border.all(color: AppColors.accentPrimary.withOpacity(0.5))
+              : null,
         ),
         child: Stack(
           alignment: Alignment.center,
@@ -579,11 +674,17 @@ class JournalScreenState extends State<JournalScreen>
               Positioned(
                 bottom: 4,
                 child: Container(
-                  width: 6,
-                  height: 6,
+                  width: 5,
+                  height: 5,
                   decoration: BoxDecoration(
                     color: _getMoodColor(dominantMood),
                     shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: _getMoodColor(dominantMood).withOpacity(0.4),
+                        blurRadius: 4,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -603,36 +704,49 @@ class JournalScreenState extends State<JournalScreen>
 
     if (selectedEntries.isEmpty) {
       return GlassCard(
+        padding: const EdgeInsets.all(24),
+        borderRadius: 24,
         child: Column(
           children: [
             const Icon(
-              Icons.event_note,
+              Icons.event_note_rounded,
               color: AppColors.textTertiary,
-              size: 32,
+              size: 40,
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: 16),
             Text(
-              'No entries for ${DateFormat('MMM d, yyyy').format(_selectedDate!)}',
+              'No entries for this day',
               style: AppTextStyles.body.copyWith(
                 color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              DateFormat('MMMM d, yyyy').format(_selectedDate!),
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textTertiary,
               ),
             ),
           ],
         ),
-      );
+      ).animate().fadeIn().slideY(begin: 0.1, end: 0);
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          DateFormat('EEEE, MMMM d').format(_selectedDate!),
-          style: AppTextStyles.labelLg.copyWith(
-            color: AppColors.accentAmber,
-            fontWeight: FontWeight.bold,
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 12),
+          child: Text(
+            DateFormat('EEEE, MMMM d').format(_selectedDate!),
+            style: AppTextStyles.label.copyWith(
+              color: AppColors.accentAmber,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
         ...selectedEntries.map(
           (entry) => Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -640,7 +754,7 @@ class JournalScreenState extends State<JournalScreen>
           ),
         ),
       ],
-    );
+    ).animate().fadeIn().slideY(begin: 0.1, end: 0);
   }
 
   String? _getDominantMood(List<dynamic> entries) {
@@ -663,15 +777,15 @@ class JournalScreenState extends State<JournalScreen>
     if (mood == null) return AppColors.accentPrimary;
 
     final moodColors = {
-      'Great': const Color(0xFF4CAF50),
-      'Good': const Color(0xFF8BC34A),
-      'Okay': const Color(0xFFFFC107),
-      'Low': const Color(0xFFFF9800),
-      'Sad': const Color(0xFF2196F3),
-      'Anxious': const Color(0xFF9C27B0),
-      'Frustrated': const Color(0xFFF44336),
-      'Calm': const Color(0xFF00BCD4),
-      'Tired': const Color(0xFF607D8B),
+      'Great': const Color(0xFF66BB6A),
+      'Good': const Color(0xFF9CCC65),
+      'Okay': const Color(0xFFFFD54F),
+      'Low': const Color(0xFFFFB74D),
+      'Sad': const Color(0xFF64B5F6),
+      'Anxious': const Color(0xFFBA68C8),
+      'Frustrated': const Color(0xFFE57373),
+      'Calm': const Color(0xFF4DD0E1),
+      'Tired': const Color(0xFF90A4AE),
     };
 
     return moodColors[mood] ?? AppColors.accentPrimary;
@@ -685,6 +799,7 @@ class JournalScreenState extends State<JournalScreen>
     }
 
     return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.all(AppSpacing.containerPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -692,16 +807,20 @@ class JournalScreenState extends State<JournalScreen>
           _buildStatsCards(),
           const SizedBox(height: AppSpacing.xl),
           if (_insights.isNotEmpty) ...[
-            Text(
-              'Butler Insights',
-              style: AppTextStyles.labelLg.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.accentPrimary,
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 16),
+              child: Text(
+                'BUTLER INSIGHTS',
+                style: AppTextStyles.label.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.accentPrimary,
+                  letterSpacing: 1.5,
+                  fontSize: 11,
+                ),
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
             ..._insights.map((insight) => _buildInsightCard(insight)),
-            const SizedBox(height: 140), // Increased bottom padding
+            const SizedBox(height: 140),
           ],
         ],
       ),
@@ -719,7 +838,7 @@ class JournalScreenState extends State<JournalScreen>
               child: _buildStatCard(
                 '🔥',
                 '${_stats!['currentStreak']}',
-                'Day Streak',
+                'Streak',
                 AppColors.accentPrimary,
               ),
             ),
@@ -728,7 +847,7 @@ class JournalScreenState extends State<JournalScreen>
               child: _buildStatCard(
                 '📝',
                 '${_stats!['totalEntries']}',
-                'Total Entries',
+                'Entries',
                 AppColors.accentSkyBlue,
               ),
             ),
@@ -757,15 +876,15 @@ class JournalScreenState extends State<JournalScreen>
           ],
         ),
       ],
-    );
+    ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1, end: 0);
   }
 
   Widget _buildStatCard(String emoji, String value, String label, Color color) {
     return GlassCard(
-      borderRadius: 20,
+      borderRadius: 24,
       color: AppColors.bgSecondary.withOpacity(0.3),
       border: Border.all(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.08),
       ),
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: Column(
@@ -776,23 +895,23 @@ class JournalScreenState extends State<JournalScreen>
               color: color.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Text(emoji, style: const TextStyle(fontSize: 24)),
+            child: Text(emoji, style: const TextStyle(fontSize: 22)),
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: 12),
           Text(
             value,
             style: AppTextStyles.h2.copyWith(
               fontWeight: FontWeight.bold,
               color: color,
+              fontSize: 24,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
-            label.toUpperCase(),
+            label,
             style: AppTextStyles.caption.copyWith(
-              fontSize: 10,
-              letterSpacing: 0.5,
-              fontWeight: FontWeight.bold,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
               color: AppColors.textTertiary,
             ),
           ),
@@ -804,53 +923,58 @@ class JournalScreenState extends State<JournalScreen>
   Widget _buildInsightCard(dynamic insight) {
     return GlassCard(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
-      borderRadius: 20,
+      borderRadius: 24,
       color: AppColors.bgSecondary.withOpacity(0.3),
       border: Border.all(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.08),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               gradient: AppColors.gradientPrimary,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
                   color: AppColors.accentPrimary.withOpacity(0.3),
-                  blurRadius: 10,
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
               ],
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
             ),
             child: ClipOval(
               child: Image.asset(
                 'assets/logo/butler_logo.png',
                 fit: BoxFit.cover,
+                errorBuilder: (c, e, s) => const Icon(Icons.psychology_rounded, color: Colors.white),
               ),
             ),
           ),
-          const SizedBox(width: AppSpacing.lg),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Butler Suggestion',
+                  'BUTLER ADVICE',
                   style: AppTextStyles.caption.copyWith(
                     color: AppColors.accentPrimary,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.0,
+                    fontSize: 10,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   insight.message as String,
-                  style: AppTextStyles.body.copyWith(
-                    height: 1.5,
+                  style: AppTextStyles.bodySm.copyWith(
+                    height: 1.6,
                     fontSize: 14,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textPrimary.withOpacity(0.9),
                   ),
                 ),
               ],
@@ -858,7 +982,7 @@ class JournalScreenState extends State<JournalScreen>
           ),
         ],
       ),
-    );
+    ).animate().fadeIn().slideX(begin: 0.1, end: 0);
   }
 
   Widget _buildEmptyState() {
@@ -868,19 +992,30 @@ class JournalScreenState extends State<JournalScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.auto_stories_rounded,
-              size: 80,
-              color: AppColors.accentPrimary,
-            ),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppColors.accentPrimary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.auto_stories_rounded,
+                size: 64,
+                color: AppColors.accentPrimary,
+              ),
+            ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(
+                  begin: const Offset(1, 1),
+                  end: const Offset(1.1, 1.1),
+                  duration: 2.seconds,
+                ),
             const SizedBox(height: AppSpacing.xl),
             Text(
-              'Start Your Sleep Journal',
+              'Your Journey Starts Here',
               style: AppTextStyles.h2.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Journaling before bed helps clear your mind and improve sleep quality. Tap the + button to write your first entry.',
+              'Journaling before bed helps clear your mind and improve sleep quality. Share your first moment with the Butler.',
               style: AppTextStyles.body.copyWith(
                 color: AppColors.textSecondary,
                 height: 1.6,
@@ -890,7 +1025,7 @@ class JournalScreenState extends State<JournalScreen>
           ],
         ),
       ),
-    );
+    ).animate().fadeIn();
   }
 
   Widget _buildFAB() {
@@ -904,8 +1039,8 @@ class JournalScreenState extends State<JournalScreen>
         loadData(); // Refresh after creating entry
       },
       child: Container(
-        width: 60,
-        height: 60,
+        width: 64,
+        height: 64,
         decoration: BoxDecoration(
           gradient: AppColors.gradientPrimary,
           shape: BoxShape.circle,
@@ -913,13 +1048,17 @@ class JournalScreenState extends State<JournalScreen>
             BoxShadow(
               color: AppColors.accentPrimary.withOpacity(0.3),
               blurRadius: 15,
-              offset: const Offset(0, 5),
+              offset: const Offset(0, 6),
             ),
           ],
         ),
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
+        child: const Icon(Icons.add_rounded, color: Colors.white, size: 36),
       ),
-    );
+    ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(
+          begin: const Offset(1, 1),
+          end: const Offset(1.05, 1.05),
+          duration: 2.seconds,
+        );
   }
 
   String? _getMoodEmoji(String? mood) {

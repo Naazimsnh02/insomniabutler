@@ -135,98 +135,140 @@ class _AccountScreenState extends State<AccountScreen> {
       );
     }
 
-    return CustomScrollView(
-      physics: const BouncingScrollPhysics(),
-      slivers: [
-        // Profile Header
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.containerPadding),
-            child: Column(
-              children: [
-                const SizedBox(height: AppSpacing.xl),
-                _buildProfileHeader(),
-                const SizedBox(height: AppSpacing.lg),
-                _buildStatsRow(),
-                const SizedBox(height: AppSpacing.xl),
-              ],
+    return Stack(
+      children: [
+        // Decorative background elements
+        Positioned(
+          top: -100,
+          right: -50,
+          child: Container(
+            width: 300,
+            height: 300,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.accentPrimary.withOpacity(0.05),
             ),
-          ),
+          ).animate().fadeIn(duration: 1200.ms),
+        ),
+        Positioned(
+          top: 150,
+          left: -80,
+          child: Container(
+            width: 250,
+            height: 250,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.accentLavender.withOpacity(0.03),
+            ),
+          ).animate().fadeIn(delay: 400.ms, duration: 1200.ms),
         ),
 
-        // Settings Sections
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.containerPadding,
-          ),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              _buildSectionHeader('Sleep Preferences'),
-              const SizedBox(height: AppSpacing.md),
-              _buildSleepPreferences(),
-              const SizedBox(height: AppSpacing.xl),
+        CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // Profile Header
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.containerPadding,
+                ),
+                child: Column(
+                  children: [
+                    const SizedBox(height: AppSpacing.xl * 1.5),
+                    _buildProfileHeader(),
+                    const SizedBox(height: AppSpacing.xl),
+                    _buildStatsRow(),
+                    const SizedBox(height: AppSpacing.xl),
+                  ],
+                ),
+              ),
+            ),
 
-              _buildSectionHeader('Notifications'),
-              const SizedBox(height: AppSpacing.md),
-              _buildNotificationSettings(),
-              const SizedBox(height: AppSpacing.xl),
+            // Settings Sections
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.containerPadding,
+              ),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  _buildSectionHeader('Sleep Preferences'),
+                  const SizedBox(height: AppSpacing.md),
+                  _buildSleepPreferences(),
+                  const SizedBox(height: AppSpacing.xl),
 
-              _buildSectionHeader('Display & Sound'),
-              const SizedBox(height: AppSpacing.md),
-              _buildDisplaySettings(),
-              const SizedBox(height: AppSpacing.xl),
+                  _buildSectionHeader('Notifications'),
+                  const SizedBox(height: AppSpacing.md),
+                  _buildNotificationSettings(),
+                  const SizedBox(height: AppSpacing.xl),
 
-              _buildSectionHeader('Data & Privacy'),
-              const SizedBox(height: AppSpacing.md),
-              _buildDataPrivacy(),
-              const SizedBox(height: AppSpacing.xl),
+                  _buildSectionHeader('Display & Sound'),
+                  const SizedBox(height: AppSpacing.md),
+                  _buildDisplaySettings(),
+                  const SizedBox(height: AppSpacing.xl),
 
-              _buildSectionHeader('Support & About'),
-              const SizedBox(height: AppSpacing.md),
-              _buildSupportAbout(),
-              const SizedBox(height: AppSpacing.xl),
+                  _buildSectionHeader('Data & Privacy'),
+                  const SizedBox(height: AppSpacing.md),
+                  _buildDataPrivacy(),
+                  const SizedBox(height: AppSpacing.xl),
 
-              _buildSectionHeader('Developer Tools'),
-              const SizedBox(height: AppSpacing.md),
-              _buildDevTools(),
-              const SizedBox(height: AppSpacing.xl),
+                  _buildSectionHeader('Support & About'),
+                  const SizedBox(height: AppSpacing.md),
+                  _buildSupportAbout(),
+                  const SizedBox(height: AppSpacing.xl),
 
-              _buildLogoutButton(),
-              const SizedBox(height: AppSpacing.xxl),
-              const SizedBox(height: 100), // Bottom nav spacing
-            ]),
-          ),
+                  _buildSectionHeader('Developer Tools'),
+                  const SizedBox(height: AppSpacing.md),
+                  _buildDevTools(),
+                  const SizedBox(height: AppSpacing.xl),
+
+                  _buildLogoutButton(),
+                  const SizedBox(height: AppSpacing.xxl),
+                  const SizedBox(height: 100), // Bottom nav spacing
+                ]),
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
   Widget _buildProfileHeader() {
-    return GlassCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      borderRadius: 20,
-      color: AppColors.bgSecondary.withOpacity(0.3),
-      border: Border.all(
-        color: Colors.white.withOpacity(0.1),
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        child: Column(
+    return Column(
+      children: [
+        // Avatar with glow
+        Stack(
+          alignment: Alignment.center,
           children: [
-            // Avatar
             Container(
-              width: 80,
-              height: 80,
+              width: 110,
+              height: 110,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.accentPrimary.withOpacity(0.1),
+              ),
+            ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(
+                  begin: const Offset(1, 1),
+                  end: const Offset(1.1, 1.1),
+                  duration: 3.seconds,
+                ),
+            Container(
+              width: 90,
+              height: 90,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: AppColors.gradientPrimary,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.accentPrimary.withOpacity(0.3),
+                    color: AppColors.accentPrimary.withOpacity(0.4),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
                 ],
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 2,
+                ),
               ),
               child: Center(
                 child: Text(
@@ -234,50 +276,65 @@ class _AccountScreenState extends State<AccountScreen> {
                   style: AppTextStyles.h1.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
+                    fontSize: 32,
                   ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-
-            // Name
-            Text(
-              _userName,
-              style: AppTextStyles.h2.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-
-            // Email
-            Text(
-              _userEmail,
-              style: AppTextStyles.bodySm.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            // Account age
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.accentPrimary.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppColors.accentPrimary.withOpacity(0.3),
-                ),
-              ),
-              child: Text(
-                'Member for ${_getAccountAge()}',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.accentPrimary,
-                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ],
         ),
-      ),
-    ).animate().fadeIn().scale(begin: const Offset(0.95, 0.95));
+        const SizedBox(height: AppSpacing.lg),
+
+        // Name & Email
+        Text(
+          _userName,
+          style: AppTextStyles.h2.copyWith(
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _userEmail,
+          style: AppTextStyles.bodySm.copyWith(
+            color: AppColors.textSecondary,
+            letterSpacing: 0.2,
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Account age badge
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.bgSecondary.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: AppColors.accentPrimary.withOpacity(0.2),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.verified_user_rounded,
+                size: 14,
+                color: AppColors.accentPrimary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Member for ${_getAccountAge()}',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ).animate().fadeIn().slideY(begin: 0.1, end: 0);
   }
 
   Widget _buildStatsRow() {
@@ -287,7 +344,8 @@ class _AccountScreenState extends State<AccountScreen> {
           child: _buildStatCard(
             '🌙',
             _totalSessions.toString(),
-            'Sleep Sessions',
+            'Sleep',
+            AppColors.accentPrimary,
           ),
         ),
         const SizedBox(width: AppSpacing.md),
@@ -295,64 +353,86 @@ class _AccountScreenState extends State<AccountScreen> {
           child: _buildStatCard(
             '📔',
             _totalJournalEntries.toString(),
-            'Journal Entries',
+            'Journal',
+            AppColors.accentLavender,
           ),
         ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
-          child: _buildStatCard('🔥', _currentStreak.toString(), 'Day Streak'),
+          child: _buildStatCard(
+            '🔥',
+            _currentStreak.toString(),
+            'Streak',
+            const Color(0xFFFFB156), // Warm Amber
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildStatCard(String emoji, String value, String label) {
+  Widget _buildStatCard(String emoji, String value, String label, Color color) {
     return GlassCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      borderRadius: 20,
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+      borderRadius: 24,
       color: AppColors.bgSecondary.withOpacity(0.3),
       border: Border.all(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.08),
       ),
       child: Column(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 24)),
-          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Text(emoji, style: const TextStyle(fontSize: 20)),
+          ),
+          const SizedBox(height: 12),
           Text(
             value,
             style: AppTextStyles.h3.copyWith(
               fontWeight: FontWeight.bold,
-              color: AppColors.accentPrimary,
+              color: color,
             ),
-          ),
-          const SizedBox(height: 4),
+          ).animate().scale(delay: 200.ms, duration: 400.ms),
+          const SizedBox(height: 2),
           Text(
             label,
-            style: AppTextStyles.caption.copyWith(fontSize: 10),
+            style: AppTextStyles.caption.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textTertiary,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
       ),
-    ).animate().fadeIn().slideY(begin: 0.1, end: 0);
+    ).animate().fadeIn().scale(begin: const Offset(0.9, 0.9));
   }
 
   Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
-      style: AppTextStyles.labelLg.copyWith(
-        color: AppColors.textSecondary,
-        letterSpacing: 1.2,
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 4),
+      child: Text(
+        title.toUpperCase(),
+        style: AppTextStyles.label.copyWith(
+          color: AppColors.textTertiary,
+          letterSpacing: 1.5,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }
 
   Widget _buildSleepPreferences() {
     return GlassCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      borderRadius: 20,
+      padding: const EdgeInsets.all(8),
+      borderRadius: 24,
       color: AppColors.bgSecondary.withOpacity(0.3),
       border: Border.all(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.08),
       ),
       child: Column(
         children: [
@@ -360,23 +440,27 @@ class _AccountScreenState extends State<AccountScreen> {
             icon: Icons.bedtime_rounded,
             title: 'Sleep Goal',
             subtitle: '8 hours per night',
+            iconColor: AppColors.accentPrimary,
             trailing: const Icon(
               Icons.chevron_right_rounded,
               color: AppColors.textTertiary,
+              size: 20,
             ),
             onTap: () {
               HapticHelper.lightImpact();
               _showSleepGoalDialog();
             },
           ),
-          const Divider(color: AppColors.glassBorder, height: 1),
+          _buildDivider(),
           _buildSettingRow(
             icon: Icons.alarm_rounded,
             title: 'Preferred Bedtime',
             subtitle: '11:00 PM',
+            iconColor: AppColors.accentLavender,
             trailing: const Icon(
               Icons.chevron_right_rounded,
               color: AppColors.textTertiary,
+              size: 20,
             ),
             onTap: () {
               HapticHelper.lightImpact();
@@ -390,11 +474,11 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildNotificationSettings() {
     return GlassCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      borderRadius: 20,
+      padding: const EdgeInsets.all(8),
+      borderRadius: 24,
       color: AppColors.bgSecondary.withOpacity(0.3),
       border: Border.all(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.08),
       ),
       child: Column(
         children: [
@@ -402,6 +486,7 @@ class _AccountScreenState extends State<AccountScreen> {
             icon: Icons.notifications_rounded,
             title: 'Bedtime Reminders',
             subtitle: 'Get reminded when it\'s time for bed',
+            iconColor: const Color(0xFF64B5F6),
             value: _bedtimeNotifications,
             onChanged: (value) async {
               await HapticHelper.lightImpact();
@@ -409,11 +494,12 @@ class _AccountScreenState extends State<AccountScreen> {
               setState(() => _bedtimeNotifications = value);
             },
           ),
-          const Divider(color: AppColors.glassBorder, height: 1),
+          _buildDivider(),
           _buildToggleRow(
             icon: Icons.insights_rounded,
             title: 'Sleep Insights',
             subtitle: 'Receive personalized sleep insights',
+            iconColor: const Color(0xFF81C784),
             value: _insightsNotifications,
             onChanged: (value) async {
               await HapticHelper.lightImpact();
@@ -421,11 +507,12 @@ class _AccountScreenState extends State<AccountScreen> {
               setState(() => _insightsNotifications = value);
             },
           ),
-          const Divider(color: AppColors.glassBorder, height: 1),
+          _buildDivider(),
           _buildToggleRow(
             icon: Icons.auto_stories_rounded,
             title: 'Journal Prompts',
             subtitle: 'Daily journal writing reminders',
+            iconColor: const Color(0xFFFFD54F),
             value: _journalNotifications,
             onChanged: (value) async {
               await HapticHelper.lightImpact();
@@ -440,11 +527,11 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildDisplaySettings() {
     return GlassCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      borderRadius: 20,
+      padding: const EdgeInsets.all(8),
+      borderRadius: 24,
       color: AppColors.bgSecondary.withOpacity(0.3),
       border: Border.all(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.08),
       ),
       child: Column(
         children: [
@@ -452,6 +539,7 @@ class _AccountScreenState extends State<AccountScreen> {
             icon: Icons.vibration_rounded,
             title: 'Haptic Feedback',
             subtitle: 'Feel vibrations when interacting',
+            iconColor: const Color(0xFFBA68C8),
             value: _hapticsEnabled,
             onChanged: (value) async {
               if (value) await HapticHelper.lightImpact();
@@ -459,11 +547,12 @@ class _AccountScreenState extends State<AccountScreen> {
               setState(() => _hapticsEnabled = value);
             },
           ),
-          const Divider(color: AppColors.glassBorder, height: 1),
+          _buildDivider(),
           _buildToggleRow(
             icon: Icons.volume_up_rounded,
             title: 'Sound Effects',
             subtitle: 'Play sounds for interactions',
+            iconColor: const Color(0xFF4DB6AC),
             value: _soundEffectsEnabled,
             onChanged: (value) async {
               await HapticHelper.lightImpact();
@@ -471,11 +560,12 @@ class _AccountScreenState extends State<AccountScreen> {
               setState(() => _soundEffectsEnabled = value);
             },
           ),
-          const Divider(color: AppColors.glassBorder, height: 1),
+          _buildDivider(),
           _buildToggleRow(
             icon: Icons.auto_awesome_rounded,
             title: 'Auto-Start Tracking',
             subtitle: 'Automatically track sleep at bedtime',
+            iconColor: const Color(0xFF90A4AE),
             value: _autoStartTracking,
             onChanged: (value) async {
               await HapticHelper.lightImpact();
@@ -490,11 +580,11 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildDataPrivacy() {
     return GlassCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      borderRadius: 20,
+      padding: const EdgeInsets.all(8),
+      borderRadius: 24,
       color: AppColors.bgSecondary.withOpacity(0.3),
       border: Border.all(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.08),
       ),
       child: Column(
         children: [
@@ -502,52 +592,43 @@ class _AccountScreenState extends State<AccountScreen> {
             icon: Icons.download_rounded,
             title: 'Export Sleep Data',
             subtitle: 'Download your data as CSV',
+            iconColor: const Color(0xFF7986CB),
             trailing: const Icon(
               Icons.chevron_right_rounded,
               color: AppColors.textTertiary,
+              size: 20,
             ),
             onTap: () {
               HapticHelper.lightImpact();
               _showExportDialog();
             },
           ),
-          const Divider(color: AppColors.glassBorder, height: 1),
+          _buildDivider(),
           _buildSettingRow(
             icon: Icons.cleaning_services_rounded,
             title: 'Clear Cache',
             subtitle: 'Free up storage space',
+            iconColor: const Color(0xFFE57373),
             trailing: const Icon(
               Icons.chevron_right_rounded,
               color: AppColors.textTertiary,
+              size: 20,
             ),
             onTap: () {
               HapticHelper.lightImpact();
               _showClearCacheDialog();
             },
           ),
-          const Divider(color: AppColors.glassBorder, height: 1),
-          _buildSettingRow(
-            icon: Icons.privacy_tip_rounded,
-            title: 'Privacy Policy',
-            subtitle: 'How we protect your data',
-            trailing: const Icon(
-              Icons.open_in_new_rounded,
-              color: AppColors.textTertiary,
-              size: 18,
-            ),
-            onTap: () {
-              HapticHelper.lightImpact();
-              // TODO: Open privacy policy URL
-            },
-          ),
-          const Divider(color: AppColors.glassBorder, height: 1),
+          _buildDivider(),
           _buildSettingRow(
             icon: Icons.delete_forever_rounded,
             title: 'Delete Account',
             subtitle: 'Permanently delete your account',
+            iconColor: AppColors.accentError,
             trailing: const Icon(
               Icons.chevron_right_rounded,
               color: AppColors.accentError,
+              size: 20,
             ),
             titleColor: AppColors.accentError,
             onTap: () {
@@ -562,11 +643,11 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildSupportAbout() {
     return GlassCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      borderRadius: 20,
+      padding: const EdgeInsets.all(8),
+      borderRadius: 24,
       color: AppColors.bgSecondary.withOpacity(0.3),
       border: Border.all(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.08),
       ),
       child: Column(
         children: [
@@ -574,31 +655,35 @@ class _AccountScreenState extends State<AccountScreen> {
             icon: Icons.info_outline_rounded,
             title: 'App Version',
             subtitle: _appVersion,
+            iconColor: const Color(0xFFD4E157),
             trailing: const SizedBox.shrink(),
           ),
-          const Divider(color: AppColors.glassBorder, height: 1),
+          _buildDivider(),
           _buildSettingRow(
             icon: Icons.email_outlined,
             title: 'Contact Support',
             subtitle: 'naazimsnh02@gmail.com',
+            iconColor: const Color(0xFF4FC3F7),
             trailing: const Icon(
               Icons.open_in_new_rounded,
               color: AppColors.textTertiary,
-              size: 18,
+              size: 16,
             ),
             onTap: () {
               HapticHelper.lightImpact();
               _launchEmail();
             },
           ),
-          const Divider(color: AppColors.glassBorder, height: 1),
+          _buildDivider(),
           _buildSettingRow(
             icon: Icons.article_outlined,
             title: 'About Insomnia Butler',
             subtitle: 'Learn more about the app',
+            iconColor: const Color(0xFFF06292),
             trailing: const Icon(
               Icons.chevron_right_rounded,
               color: AppColors.textTertiary,
+              size: 20,
             ),
             onTap: () {
               HapticHelper.lightImpact();
@@ -612,11 +697,11 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildDevTools() {
     return GlassCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      borderRadius: 20,
+      padding: const EdgeInsets.all(8),
+      borderRadius: 24,
       color: AppColors.bgSecondary.withOpacity(0.3),
       border: Border.all(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.08),
       ),
       child: Column(
         children: [
@@ -624,23 +709,27 @@ class _AccountScreenState extends State<AccountScreen> {
             icon: Icons.analytics_rounded,
             title: 'Generate Realistic Data',
             subtitle: 'Last 30 days of sleep & journal data',
+            iconColor: AppColors.accentPrimary,
             trailing: const Icon(
               Icons.bolt_rounded,
               color: AppColors.accentPrimary,
+              size: 20,
             ),
             onTap: () {
               HapticHelper.heavyImpact();
               _showGenerateDataDialog();
             },
           ),
-          const Divider(color: AppColors.glassBorder, height: 1),
+          _buildDivider(),
           _buildSettingRow(
             icon: Icons.delete_forever_rounded,
             title: 'Clear All Data',
             subtitle: 'Delete all sleep & journal records',
+            iconColor: AppColors.accentError,
             trailing: const Icon(
               Icons.warning_amber_rounded,
               color: AppColors.accentError,
+              size: 20,
             ),
             onTap: () {
               HapticHelper.heavyImpact();
@@ -652,147 +741,60 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  void _showGenerateDataDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.bgPrimary,
-        title: const Text(
-          'Generate Data?',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'This will generate 30 days of realistic sleep sessions, journal entries, and thought logs. This is for testing purposes.',
-          style: TextStyle(color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _generateRealisticData();
-            },
-            child: const Text(
-              'Generate',
-              style: TextStyle(color: AppColors.accentPrimary),
-            ),
-          ),
-        ],
+  Widget _buildDivider() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 56, right: 16),
+      child: Divider(
+        color: Colors.white.withOpacity(0.05),
+        height: 1,
       ),
     );
   }
 
-  Future<void> _generateRealisticData() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final userId = await UserService.getCurrentUserId();
-      if (userId == null) throw Exception('User not logged in');
-
-      final success = await client.dev.generateRealisticData(userId);
-
-      if (success) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Realistic data generated successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          // Refresh screen data
-          _loadData();
-          widget.onDataChanged?.call();
-        }
-      }
-    } catch (e) {
-      debugPrint('Error generating data: $e');
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: AppColors.accentError,
-          ),
-        );
-      }
-    }
-  }
-
-  void _showClearDataDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.bgPrimary,
-        title: const Text(
-          'Clear All Data?',
-          style: TextStyle(color: AppColors.accentError),
+  Widget _buildLogoutButton() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.accentError.withOpacity(0.15),
+            AppColors.accentError.withOpacity(0.05),
+          ],
         ),
-        content: const Text(
-          'This will permanently delete ALL your sleep sessions, journal entries, and thought logs. This cannot be undone.',
-          style: TextStyle(color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _clearAllData();
-            },
-            child: const Text(
-              'Clear Everything',
-              style: TextStyle(color: AppColors.accentError),
-            ),
-          ),
-        ],
       ),
-    );
-  }
-
-  Future<void> _clearAllData() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final userId = await UserService.getCurrentUserId();
-      if (userId == null) throw Exception('User not logged in');
-
-      final success = await client.dev.clearUserData(userId);
-
-      if (success) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('All data cleared successfully!'),
-              backgroundColor: AppColors.accentSuccess,
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        borderRadius: 24,
+        color: Colors.transparent,
+        border: Border.all(
+          color: AppColors.accentError.withOpacity(0.2),
+        ),
+        onTap: () {
+          HapticHelper.mediumImpact();
+          _showLogoutDialog();
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.logout_rounded,
+              color: AppColors.accentError,
+              size: 22,
             ),
-          );
-          _loadData();
-          widget.onDataChanged?.call();
-        }
-      }
-    } catch (e) {
-      debugPrint('Error clearing data: $e');
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: AppColors.accentError,
-          ),
-        );
-      }
-    }
+            const SizedBox(width: 12),
+            Text(
+              'Logout Account',
+              style: AppTextStyles.labelLg.copyWith(
+                color: AppColors.accentError,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.2, end: 0);
   }
 
   Widget _buildSettingRow({
@@ -800,45 +802,48 @@ class _AccountScreenState extends State<AccountScreen> {
     required String title,
     required String subtitle,
     required Widget trailing,
+    required Color iconColor,
     Color? titleColor,
     VoidCallback? onTap,
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppBorderRadius.md),
+      borderRadius: BorderRadius.circular(20),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.glassBgElevated,
-                borderRadius: BorderRadius.circular(8),
+                color: iconColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
                 icon,
-                color: titleColor ?? AppColors.accentPrimary,
+                color: iconColor,
                 size: 20,
               ),
             ),
-            const SizedBox(width: AppSpacing.md),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: AppTextStyles.bodyLg.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: titleColor,
+                    style: AppTextStyles.body.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: titleColor ?? AppColors.textPrimary,
+                      fontSize: 15,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
                     subtitle,
                     style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textSecondary,
+                      color: AppColors.textTertiary,
+                      fontSize: 12,
                     ),
                   ),
                 ],
@@ -855,37 +860,40 @@ class _AccountScreenState extends State<AccountScreen> {
     required IconData icon,
     required String title,
     required String subtitle,
+    required Color iconColor,
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.glassBgElevated,
-              borderRadius: BorderRadius.circular(8),
+              color: iconColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: AppColors.accentPrimary, size: 20),
+            child: Icon(icon, color: iconColor, size: 20),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: AppTextStyles.bodyLg.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   subtitle,
                   style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textSecondary,
+                    color: AppColors.textTertiary,
+                    fontSize: 12,
                   ),
                 ),
               ],
@@ -894,43 +902,10 @@ class _AccountScreenState extends State<AccountScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: AppColors.accentPrimary,
-            activeTrackColor: AppColors.accentPrimary.withOpacity(0.5),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLogoutButton() {
-    return GlassCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      borderRadius: 20,
-      color: AppColors.bgSecondary.withOpacity(0.3),
-      border: Border.all(
-        color: Colors.white.withOpacity(0.1),
-      ),
-      onTap: () {
-        HapticHelper.mediumImpact();
-        _showLogoutDialog();
-      },
-      gradient: LinearGradient(
-        colors: [
-          AppColors.accentError.withOpacity(0.1),
-          AppColors.accentError.withOpacity(0.05),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.logout_rounded, color: AppColors.accentError),
-          const SizedBox(width: AppSpacing.sm),
-          Text(
-            'Logout',
-            style: AppTextStyles.labelLg.copyWith(
-              color: AppColors.accentError,
-              fontWeight: FontWeight.bold,
-            ),
+            activeColor: AppColors.accentPrimary,
+            activeTrackColor: AppColors.accentPrimary.withOpacity(0.2),
+            inactiveThumbColor: AppColors.textTertiary,
+            inactiveTrackColor: Colors.white.withOpacity(0.05),
           ),
         ],
       ),
@@ -1202,6 +1177,112 @@ class _AccountScreenState extends State<AccountScreen> {
         );
       }
     }
+  }
+
+  void _showGenerateDataDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.bgPrimary,
+        title: const Text('Generate Data?', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'This will generate 30 days of realistic sleep and journal data for your account. This is for testing only.',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              // Show loading
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(child: CircularProgressIndicator(color: AppColors.accentPrimary)),
+              );
+
+              try {
+                final userId = await UserService.getCurrentUserId();
+                if (userId != null) {
+                  await client.dev.generateRealisticData(userId);
+                  if (mounted) {
+                    Navigator.pop(context); // Close loading
+                    widget.onDataChanged?.call();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Realistic data generated successfully!')),
+                    );
+                  }
+                }
+              } catch (e) {
+                if (mounted) {
+                  Navigator.pop(context); // Close loading
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.accentError),
+                  );
+                }
+              }
+            },
+            child: const Text('Generate', style: TextStyle(color: AppColors.accentPrimary)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showClearDataDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.bgPrimary,
+        title: const Text('Clear All Data?', style: TextStyle(color: AppColors.accentError)),
+        content: const Text(
+          'This will permanently delete all your sleep sessions, journal entries, and chat history. This cannot be undone.',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              // Show loading
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(child: CircularProgressIndicator(color: AppColors.accentPrimary)),
+              );
+
+              try {
+                final userId = await UserService.getCurrentUserId();
+                if (userId != null) {
+                  await client.dev.clearUserData(userId);
+                  if (mounted) {
+                    Navigator.pop(context); // Close loading
+                    widget.onDataChanged?.call();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('All data cleared successfully.')),
+                    );
+                  }
+                }
+              } catch (e) {
+                if (mounted) {
+                  Navigator.pop(context); // Close loading
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.accentError),
+                  );
+                }
+              }
+            },
+            child: const Text('Clear All', style: TextStyle(color: AppColors.accentError)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showAboutDialog() {

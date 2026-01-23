@@ -27,9 +27,11 @@ import 'package:insomniabutler_client/src/protocol/journal_insight.dart'
 import 'package:insomniabutler_client/src/protocol/thought_response.dart'
     as _i12;
 import 'package:insomniabutler_client/src/protocol/chat_message.dart' as _i13;
-import 'package:insomniabutler_client/src/protocol/greetings/greeting.dart'
+import 'package:insomniabutler_client/src/protocol/chat_session_info.dart'
     as _i14;
-import 'protocol.dart' as _i15;
+import 'package:insomniabutler_client/src/protocol/greetings/greeting.dart'
+    as _i15;
+import 'protocol.dart' as _i16;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -800,11 +802,19 @@ class EndpointThoughtClearing extends _i2.EndpointRef {
   );
 
   /// Get conversation history for a session
-  _i3.Future<List<_i13.ChatMessage>> getSessionHistory(String sessionId) =>
+  _i3.Future<List<_i13.ChatMessage>> getChatSessionMessages(String sessionId) =>
       caller.callServerEndpoint<List<_i13.ChatMessage>>(
         'thoughtClearing',
-        'getSessionHistory',
+        'getChatSessionMessages',
         {'sessionId': sessionId},
+      );
+
+  /// Get list of all chat sessions for a user
+  _i3.Future<List<_i14.ChatSessionInfo>> getChatHistory(int userId) =>
+      caller.callServerEndpoint<List<_i14.ChatSessionInfo>>(
+        'thoughtClearing',
+        'getChatHistory',
+        {'userId': userId},
       );
 }
 
@@ -818,8 +828,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i14.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i14.Greeting>(
+  _i3.Future<_i15.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i15.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -857,7 +867,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i15.Protocol(),
+         _i16.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,

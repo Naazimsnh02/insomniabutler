@@ -97,7 +97,7 @@ class ThoughtClearingEndpoint extends Endpoint {
   }
 
   /// Get conversation history for a session
-  Future<List<ChatMessage>> getSessionHistory(
+  Future<List<ChatMessage>> getChatSessionMessages(
     Session session,
     String sessionId,
   ) async {
@@ -106,6 +106,43 @@ class ThoughtClearingEndpoint extends Endpoint {
       where: (t) => t.sessionId.equals(sessionId),
       orderBy: (t) => t.timestamp,
     );
+  }
+
+  /// Get list of all chat sessions for a user
+  Future<List<ChatSessionInfo>> getChatHistory(
+    Session session,
+    int userId,
+  ) async {
+    final messages = await ChatMessage.db.find(
+      session,
+      where: (t) => t.userId.equals(userId),
+      orderBy: (t) => t.timestamp,
+      orderDescending: true,
+    );
+
+    final Map<String, List<ChatMessage>> grouped = {};
+    for (var m in messages) {
+      grouped.putIfAbsent(m.sessionId, () => []).add(m);
+    }
+
+    final List<ChatSessionInfo> history = [];
+    grouped.forEach((sessionId, sessionMessages) {
+      // sessionMessages are sorted descending (latest first) due to the query
+      final latestMessage = sessionMessages.first;
+      final earliestMessage = sessionMessages.last;
+
+      history.add(ChatSessionInfo(
+        sessionId: sessionId,
+        startTime: earliestMessage.timestamp,
+        lastMessage: latestMessage.content,
+        messageCount: sessionMessages.length,
+      ));
+    });
+
+    // Sort history by startTime descending
+    history.sort((a, b) => b.startTime.compareTo(a.startTime));
+
+    return history;
   }
 
   /// Build CBT-I based system prompt

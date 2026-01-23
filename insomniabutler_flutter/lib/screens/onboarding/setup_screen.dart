@@ -75,6 +75,32 @@ class _SetupScreenState extends State<SetupScreen> {
             ),
           ),
 
+          // Decorative background elements
+          Positioned(
+            top: -50,
+            right: -30,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.accentPrimary.withOpacity(0.05),
+              ),
+            ).animate().fadeIn(duration: 1200.ms),
+          ),
+          Positioned(
+            bottom: 200,
+            left: -80,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.accentLavender.withOpacity(0.03),
+              ),
+            ).animate().fadeIn(delay: 400.ms, duration: 1200.ms),
+          ),
+
           // Content
           SafeArea(
             child: Padding(

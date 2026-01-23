@@ -53,6 +53,7 @@ sleepSession:
   - updateMoodForLatestSession:
 thoughtClearing:
   - processThought:
-  - getSessionHistory:
+  - getChatSessionMessages:
+  - getChatHistory:
 greeting:
   - hello:

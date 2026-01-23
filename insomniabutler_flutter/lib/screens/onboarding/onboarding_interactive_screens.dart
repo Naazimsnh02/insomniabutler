@@ -123,6 +123,32 @@ class _DemoScreenState extends State<DemoScreen> {
               ),
             ),
 
+            // Decorative background elements
+            Positioned(
+              top: -50,
+              right: -30,
+              child: Container(
+                width: 250,
+                height: 250,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.accentPrimary.withOpacity(0.04),
+                ),
+              ).animate().fadeIn(duration: 1200.ms).scale(begin: const Offset(0.8, 0.8)),
+            ),
+            Positioned(
+              bottom: 100,
+              left: -60,
+              child: Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.accentLavender.withOpacity(0.03),
+                ),
+              ).animate().fadeIn(delay: 400.ms, duration: 1200.ms).scale(begin: const Offset(0.8, 0.8)),
+            ),
+
             // Chat Messages
             SafeArea(
               bottom: false,
@@ -179,7 +205,14 @@ class _DemoScreenState extends State<DemoScreen> {
         margin: const EdgeInsets.only(bottom: 20, left: 40),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.accentPrimary.withOpacity(0.15),
+          gradient: LinearGradient(
+            colors: [
+              AppColors.accentPrimary.withOpacity(0.2),
+              AppColors.accentPrimary.withOpacity(0.1),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           border: Border.all(
             color: AppColors.accentPrimary.withOpacity(0.3),
             width: 1.2,
@@ -197,10 +230,13 @@ class _DemoScreenState extends State<DemoScreen> {
         ),
         child: Text(
           text,
-          style: AppTextStyles.body.copyWith(height: 1.5),
+          style: AppTextStyles.bodySm.copyWith(
+            height: 1.5,
+            color: AppColors.textPrimary.withOpacity(0.9),
+          ),
         ),
-      ),
-    ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.1, end: 0);
+      ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.1, end: 0),
+    );
   }
 
   Widget _buildButlerBubble(Map<String, dynamic> msg) {
@@ -218,12 +254,15 @@ class _DemoScreenState extends State<DemoScreen> {
                 bottomLeft: const Radius.circular(4),
               ),
               border: Border.all(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withOpacity(0.12),
               ),
             ),
             child: Text(
               msg['text'],
-              style: AppTextStyles.body.copyWith(height: 1.5),
+              style: AppTextStyles.bodySm.copyWith(
+                height: 1.5,
+                color: AppColors.textPrimary.withOpacity(0.9),
+              ),
             ),
           ),
           if (msg['type'] == 'closure') _buildSleepStats(),
@@ -474,6 +513,32 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                 gradient: AppColors.bgMainGradient,
               ),
             ),
+          ),
+
+          // Decorative background elements
+          Positioned(
+            top: -100,
+            left: -50,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.accentPrimary.withOpacity(0.04),
+              ),
+            ).animate().fadeIn(duration: 1200.ms),
+          ),
+          Positioned(
+            bottom: 150,
+            right: -80,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.accentLavender.withOpacity(0.03),
+              ),
+            ).animate().fadeIn(delay: 400.ms, duration: 1200.ms),
           ),
 
           // Content

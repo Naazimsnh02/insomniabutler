@@ -1,0 +1,6 @@
+class: ChatSessionInfo
+fields:
+  sessionId: String
+  startTime: DateTime
+  lastMessage: String
+  messageCount: int

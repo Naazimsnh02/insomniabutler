@@ -7,19 +7,17 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../main.dart';
 import '../../services/user_service.dart';
 import 'package:insomniabutler_client/insomniabutler_client.dart';
-import 'manual_log_screen.dart';
 
-class SleepHistoryScreen extends StatefulWidget {
-  const SleepHistoryScreen({super.key});
+class ChatHistoryScreen extends StatefulWidget {
+  const ChatHistoryScreen({super.key});
 
   @override
-  State<SleepHistoryScreen> createState() => _SleepHistoryScreenState();
+  State<ChatHistoryScreen> createState() => _ChatHistoryScreenState();
 }
 
-class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
-  List<SleepSession> _sessions = [];
+class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
+  List<ChatSessionInfo> _history = [];
   bool _isLoading = true;
-  bool _hasChanged = false;
 
   @override
   void initState() {
@@ -33,13 +31,13 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
       final userId = await UserService.getCurrentUserId();
       if (userId == null) throw Exception('User not logged in');
 
-      final sessions = await client.sleepSession.getUserSessions(userId, 50);
+      final history = await client.thoughtClearing.getChatHistory(userId);
       setState(() {
-        _sessions = sessions;
+        _history = history;
         _isLoading = false;
       });
     } catch (e) {
-      debugPrint('Error loading history: $e');
+      debugPrint('Error loading chat history: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -53,7 +51,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           // Decorative background elements
           Positioned(
             top: -100,
-            left: -50,
+            right: -50,
             child: Container(
               width: 300,
               height: 300,
@@ -65,7 +63,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           ),
           Positioned(
             bottom: 100,
-            right: -80,
+            left: -80,
             child: Container(
               width: 250,
               height: 250,
@@ -87,22 +85,22 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                             color: AppColors.accentPrimary,
                           ),
                         )
-                      : _sessions.isEmpty
-                      ? _buildEmptyState()
-                      : RefreshIndicator(
-                          onRefresh: _loadHistory,
-                          color: AppColors.accentPrimary,
-                          backgroundColor: AppColors.bgSecondary,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.all(
-                              AppSpacing.containerPadding,
+                      : _history.isEmpty
+                          ? _buildEmptyState()
+                          : RefreshIndicator(
+                              onRefresh: _loadHistory,
+                              color: AppColors.accentPrimary,
+                              backgroundColor: AppColors.bgSecondary,
+                              child: ListView.builder(
+                                padding: const EdgeInsets.all(
+                                  AppSpacing.containerPadding,
+                                ),
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: _history.length,
+                                itemBuilder: (context, index) =>
+                                    _buildHistoryCard(_history[index], index),
+                              ),
                             ),
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: _sessions.length,
-                            itemBuilder: (context, index) =>
-                                _buildSessionCard(_sessions[index], index),
-                          ),
-                        ),
                 ),
               ],
             ),
@@ -110,16 +108,9 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
         ],
       ),
       floatingActionButton: GestureDetector(
-        onTap: () async {
-          HapticHelper.mediumImpact();
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const ManualLogScreen()),
-          );
-          if (result == true) {
-            _hasChanged = true;
-            _loadHistory();
-          }
+        onTap: () {
+          HapticHelper.lightImpact();
+          Navigator.pop(context, "NEW_SESSION");
         },
         child: Container(
           width: 56,
@@ -154,12 +145,12 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
         children: [
           _buildIconButton(
             icon: Icons.arrow_back_ios_new_rounded,
-            onTap: () => Navigator.pop(context, _hasChanged),
+            onTap: () => Navigator.pop(context),
           ),
           Column(
             children: [
               Text(
-                'Sleep Journey',
+                'Conversation History',
                 style: AppTextStyles.h3.copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,
@@ -168,7 +159,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
               ),
               const SizedBox(height: 2),
               Text(
-                'History of your rest',
+                'Previous thought clearing sessions',
                 style: AppTextStyles.caption.copyWith(
                   color: AppColors.textTertiary,
                   fontWeight: FontWeight.w500,
@@ -219,14 +210,14 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.nightlight_outlined,
+              Icons.chat_bubble_outline_rounded,
               size: 48,
               color: AppColors.textTertiary.withOpacity(0.5),
             ),
           ),
           const SizedBox(height: 24),
           Text(
-            'No sleep data logged',
+            'No conversations yet',
             style: AppTextStyles.body.copyWith(
               color: AppColors.textSecondary,
               fontWeight: FontWeight.bold,
@@ -234,7 +225,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Your sleep sessions will appear here',
+            'Start a session to clear your mind',
             style: AppTextStyles.caption.copyWith(
               color: AppColors.textTertiary,
             ),
@@ -244,48 +235,18 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     ).animate().fadeIn();
   }
 
-  Widget _buildSessionCard(SleepSession session, int index) {
+  Widget _buildHistoryCard(ChatSessionInfo session, int index) {
     final dateStr = DateFormat(
-      'EEEE, MMM d',
-    ).format(session.sessionDate.toLocal());
-
-    final wakeTime = session.wakeTime ?? DateTime.now();
-    final duration = wakeTime.difference(session.bedTime);
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes.remainder(60);
-    final quality = session.sleepQuality ?? 3;
-    final qualityColor = _getQualityColor(quality);
+      'EEE, MMM d • HH:mm',
+    ).format(session.startTime.toLocal());
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: GlassCard(
         onTap: () async {
-          HapticHelper.lightImpact();
-          final editData = {
-            'id': session.id,
-            'sessionDate': session.sessionDate.toLocal(),
-            'bedTime': session.bedTime.toLocal(),
-            'wakeTime': wakeTime.toLocal(),
-            'sleepQuality': quality,
-            'deepSleepDuration': session.deepSleepDuration,
-            'lightSleepDuration': session.lightSleepDuration,
-            'remSleepDuration': session.remSleepDuration,
-            'awakeDuration': session.awakeDuration,
-            'hrv': session.hrv,
-            'restingHeartRate': session.restingHeartRate,
-            'respiratoryRate': session.respiratoryRate,
-            'interruptions': session.interruptions,
-          };
-
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ManualLogScreen(initialData: editData),
-            ),
-          );
-          if (result == true) {
-            _hasChanged = true;
-            _loadHistory();
+          await HapticHelper.lightImpact();
+          if (mounted) {
+            Navigator.pop(context, session.sessionId);
           }
         },
         padding: const EdgeInsets.all(16),
@@ -300,21 +261,18 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: qualityColor.withOpacity(0.1),
+                gradient: AppColors.gradientPrimary.withOpacity(0.1),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: qualityColor.withOpacity(0.3),
+                  color: AppColors.accentPrimary.withOpacity(0.2),
                   width: 1.5,
                 ),
               ),
-              child: Center(
-                child: Text(
-                  '$quality',
-                  style: AppTextStyles.h3.copyWith(
-                    color: qualityColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
+              child: const Center(
+                child: Icon(
+                  Icons.psychology_rounded,
+                  color: AppColors.accentPrimary,
+                  size: 26,
                 ),
               ),
             ),
@@ -331,22 +289,14 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.access_time_rounded,
-                        size: 12,
-                        color: AppColors.textTertiary.withOpacity(0.7),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${DateFormat.jm().format(session.bedTime.toLocal())} - ${DateFormat.jm().format(wakeTime.toLocal())}',
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textTertiary,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    session.lastMessage,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textTertiary,
+                      fontSize: 12,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -362,14 +312,14 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '${hours}h ${minutes}m',
+                    '${session.messageCount}',
                     style: AppTextStyles.caption.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppColors.accentPrimary,
                     ),
                   ),
                   Text(
-                    'SLEEP',
+                    'MSGS',
                     style: AppTextStyles.caption.copyWith(
                       fontSize: 8,
                       fontWeight: FontWeight.w800,
@@ -389,11 +339,5 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
         ),
       ),
     ).animate().fadeIn(delay: (index * 50).ms).slideX(begin: 0.1, end: 0);
-  }
-
-  Color _getQualityColor(int quality) {
-    if (quality >= 4) return AppColors.accentSuccess;
-    if (quality >= 3) return AppColors.accentAmber;
-    return AppColors.accentPrimary;
   }
 }

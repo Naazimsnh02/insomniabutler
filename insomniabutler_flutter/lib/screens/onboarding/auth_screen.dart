@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../widgets/primary_button.dart';
 import '../../main.dart';
@@ -93,6 +94,32 @@ class _AuthScreenState extends State<AuthScreen> {
                   gradient: AppColors.bgMainGradient,
                 ),
               ),
+            ),
+
+            // Decorative background elements
+            Positioned(
+              top: -80,
+              left: -40,
+              child: Container(
+                width: 280,
+                height: 280,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.accentPrimary.withOpacity(0.04),
+                ),
+              ).animate().fadeIn(duration: 1200.ms),
+            ),
+            Positioned(
+              bottom: 150,
+              right: -100,
+              child: Container(
+                width: 350,
+                height: 350,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.accentLavender.withOpacity(0.03),
+                ),
+              ).animate().fadeIn(delay: 400.ms, duration: 1200.ms),
             ),
 
             // Content
@@ -254,29 +281,32 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
         GlassCard(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          borderRadius: AppRadius.lg,
-          color: AppColors.bgSecondary.withOpacity(0.4),
+          borderRadius: 24,
+          color: AppColors.bgSecondary.withOpacity(0.3),
           border: Border.all(
-            color: AppColors.accentPrimary.withOpacity(0.3),
-            width: 1.5,
+            color: Colors.white.withOpacity(0.12),
+            width: 1.2,
           ),
           child: TextFormField(
             controller: controller,
             obscureText: obscureText,
             keyboardType: keyboardType,
             textCapitalization: textCapitalization,
-            style: AppTextStyles.body,
+            style: AppTextStyles.bodySm.copyWith(
+              color: AppColors.textPrimary,
+            ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: AppTextStyles.bodySm.copyWith(
-                color: AppColors.textTertiary.withOpacity(0.5),
+                color: AppColors.textTertiary.withOpacity(0.4),
               ),
               border: InputBorder.none,
               icon: Icon(
                 icon,
                 color: AppColors.accentPrimary.withOpacity(0.8),
-                size: 20,
+                size: 18,
               ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 16),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) return 'Required';

@@ -6,6 +6,7 @@ import '../../widgets/glass_card.dart';
 import '../../utils/haptic_helper.dart';
 import '../../main.dart';
 import '../../services/user_service.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:insomniabutler_client/insomniabutler_client.dart';
 
 class ManualLogScreen extends StatefulWidget {
@@ -129,61 +130,100 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
     bool isEdit = widget.initialData != null;
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgMainGradient),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildTopBar(isEdit),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(AppSpacing.containerPadding),
-                  child: Column(
-                    children: [
-                      _buildDatePicker(),
-                      const SizedBox(height: AppSpacing.lg),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildTimePicker(
-                              'In Bed',
-                              _bedtime,
-                              () => _selectTime(true),
+      backgroundColor: AppColors.bgPrimary,
+      body: Stack(
+        children: [
+          // Decorative background elements
+          Positioned(
+            top: -100,
+            left: -50,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.accentPrimary.withOpacity(0.04),
+              ),
+            ).animate().fadeIn(duration: 1200.ms),
+          ),
+          Positioned(
+            bottom: 100,
+            right: -80,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.accentLavender.withOpacity(0.03),
+              ),
+            ).animate().fadeIn(delay: 400.ms, duration: 1200.ms),
+          ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                _buildTopBar(isEdit),
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.all(AppSpacing.containerPadding),
+                    child: Column(
+                      children: [
+                        _buildDatePicker(),
+                        const SizedBox(height: AppSpacing.lg),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildTimePicker(
+                                'In Bed',
+                                _bedtime,
+                                () => _selectTime(true),
+                                Icons.bedtime_rounded,
+                                AppColors.accentPrimary,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: _buildTimePicker(
-                              'Woke Up',
-                              _waketime,
-                              () => _selectTime(false),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: _buildTimePicker(
+                                'Woke Up',
+                                _waketime,
+                                () => _selectTime(false),
+                                Icons.wb_sunny_rounded,
+                                AppColors.accentAmber,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      _buildDurationInfo(),
-                      const SizedBox(height: AppSpacing.xl),
-                      _buildQualityPicker(),
-                      const SizedBox(height: AppSpacing.xl),
-                      _buildInterruptionsPicker(),
-                      const SizedBox(height: AppSpacing.xl),
-                      _buildAdvancedSection(),
-                    ],
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        _buildDurationInfo(),
+                        const SizedBox(height: AppSpacing.xl),
+                        _buildQualityPicker(),
+                        const SizedBox(height: AppSpacing.xl),
+                        _buildInterruptionsPicker(),
+                        const SizedBox(height: AppSpacing.xl),
+                        _buildAdvancedSection(),
+                        const SizedBox(height: 40),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              _buildSaveButton(isEdit),
-            ],
+                _buildSaveButton(isEdit),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildTopBar(bool isEdit) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.containerPadding),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.containerPadding,
+        AppSpacing.lg,
+        AppSpacing.containerPadding,
+        AppSpacing.md,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -191,12 +231,25 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
             icon: Icons.arrow_back_ios_new_rounded,
             onTap: () => Navigator.pop(context),
           ),
-          Text(
-            isEdit ? 'Edit Session' : 'Manual Log',
-            style: AppTextStyles.h3.copyWith(
-              fontWeight: FontWeight.bold,
-              letterSpacing: -0.5,
-            ),
+          Column(
+            children: [
+              Text(
+                isEdit ? 'Update Session' : 'Log Sleep',
+                style: AppTextStyles.h3.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                isEdit ? 'Modify your sleep data' : 'Manually track your rest',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textTertiary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
           if (isEdit)
             _buildIconButton(
@@ -220,10 +273,10 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
       onTap: onTap,
       child: GlassCard(
         padding: const EdgeInsets.all(12),
-        borderRadius: 12,
+        borderRadius: 14,
         color: AppColors.bgSecondary.withOpacity(0.4),
         border: Border.all(
-          color: Colors.white.withOpacity(0.15),
+          color: Colors.white.withOpacity(0.1),
         ),
         child: Icon(
           icon,
@@ -238,17 +291,17 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
     return GlassCard(
       onTap: _selectDate,
       padding: const EdgeInsets.all(AppSpacing.lg),
-      borderRadius: 20,
+      borderRadius: 24,
       color: AppColors.bgSecondary.withOpacity(0.3),
       border: Border.all(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.08),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.accentPrimary.withOpacity(0.15),
+              color: AppColors.accentPrimary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -262,145 +315,177 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Session Date',
+                'SESSION DATE',
                 style: AppTextStyles.caption.copyWith(
                   color: AppColors.textTertiary,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.0,
+                  fontSize: 9,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 DateFormat('EEEE, MMM d, yyyy').format(_date),
-                style: AppTextStyles.bodyLg.copyWith(
+                style: AppTextStyles.body.copyWith(
                   fontWeight: FontWeight.bold,
+                  fontSize: 15,
                 ),
               ),
             ],
           ),
           const Spacer(),
-          const Icon(
+          Icon(
             Icons.chevron_right_rounded,
             size: 20,
-            color: AppColors.textTertiary,
+            color: Colors.white.withOpacity(0.2),
           ),
         ],
       ),
-    );
+    ).animate().fadeIn().slideY(begin: 0.1, end: 0);
   }
 
-  Widget _buildTimePicker(String label, TimeOfDay time, VoidCallback onTap) {
+  Widget _buildTimePicker(String label, TimeOfDay time, VoidCallback onTap, IconData icon, Color accentColor) {
     return GlassCard(
       onTap: onTap,
       padding: const EdgeInsets.all(AppSpacing.lg),
-      borderRadius: 20,
+      borderRadius: 24,
       color: AppColors.bgSecondary.withOpacity(0.3),
       border: Border.all(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.08),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.textTertiary,
-            ),
+          Row(
+            children: [
+              Icon(icon, size: 12, color: accentColor),
+              const SizedBox(width: 6),
+              Text(
+                label.toUpperCase(),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textTertiary,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.0,
+                  fontSize: 9,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             time.format(context),
             style: AppTextStyles.h3.copyWith(
               fontWeight: FontWeight.bold,
-              letterSpacing: 1,
+              letterSpacing: 0.5,
+              fontSize: 20,
             ),
           ),
         ],
       ),
-    );
+    ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1, end: 0);
   }
 
   Widget _buildDurationInfo() {
     return GlassCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      borderRadius: 20,
-      color: AppColors.accentPrimary.withOpacity(0.08),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      borderRadius: 24,
+      color: AppColors.accentPrimary.withOpacity(0.05),
       border: Border.all(
-        color: AppColors.accentPrimary.withOpacity(0.25),
+        color: AppColors.accentPrimary.withOpacity(0.2),
         width: 1.5,
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.timer_outlined,
-            color: AppColors.accentPrimary,
-            size: 20,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.accentPrimary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.timer_outlined,
+              color: AppColors.accentPrimary,
+              size: 18,
+            ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: 16),
           Text(
-            'Total Duration',
-            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+            'Total Sleep Duration',
+            style: AppTextStyles.bodySm.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary.withOpacity(0.9),
+            ),
           ),
           const Spacer(),
           Text(
             _calculateDuration(),
-            style: AppTextStyles.h2.copyWith(
+            style: AppTextStyles.h3.copyWith(
               color: AppColors.accentPrimary,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w900,
+              fontSize: 22,
             ),
           ),
         ],
       ),
-    );
+    ).animate().fadeIn(delay: 200.ms).scale(begin: const Offset(0.95, 0.95));
   }
 
   Widget _buildQualityPicker() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Sleep Quality',
-              style: AppTextStyles.labelLg.copyWith(
-                fontWeight: FontWeight.bold,
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'SLEEP QUALITY',
+                style: AppTextStyles.label.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.5,
+                  fontSize: 11,
+                  color: AppColors.textTertiary,
+                ),
               ),
-            ),
-            const Icon(
-              Icons.auto_awesome,
-              size: 16,
-              color: AppColors.accentPrimary,
-            ),
-          ],
+              const Icon(
+                Icons.auto_awesome_rounded,
+                size: 14,
+                color: AppColors.accentPrimary,
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: AppSpacing.lg),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(5, (i) {
             final val = i + 1;
             final isSelected = _quality == val;
             return GestureDetector(
-              onTap: () => setState(() => _quality = val),
+              onTap: () {
+                HapticHelper.lightImpact();
+                setState(() => _quality = val);
+              },
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 48,
-                height: 48,
+                duration: const Duration(milliseconds: 300),
+                width: 54,
+                height: 54,
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.accentPrimary.withOpacity(0.3)
-                      : AppColors.bgSecondary.withOpacity(0.3),
+                  gradient: isSelected ? AppColors.gradientPrimary : null,
+                  color: isSelected ? null : AppColors.bgSecondary.withOpacity(0.4),
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: isSelected
-                        ? AppColors.accentPrimary.withOpacity(0.6)
-                        : Colors.white.withOpacity(0.1),
-                    width: isSelected ? 2 : 1.5,
+                        ? AppColors.accentPrimary.withOpacity(0.5)
+                        : Colors.white.withOpacity(0.05),
+                    width: isSelected ? 2 : 1.2,
                   ),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: AppColors.accentPrimary.withOpacity(0.2),
+                            color: AppColors.accentPrimary.withOpacity(0.3),
                             blurRadius: 12,
-                            spreadRadius: 2,
+                            offset: const Offset(0, 4),
                           ),
                         ]
                       : null,
@@ -408,9 +493,9 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
                 child: Center(
                   child: Text(
                     '$val',
-                    style: AppTextStyles.h4.copyWith(
+                    style: AppTextStyles.h3.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
+                      color: isSelected ? Colors.white : AppColors.textSecondary,
                     ),
                   ),
                 ),
@@ -418,68 +503,79 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
             );
           }),
         ),
-        const SizedBox(height: AppSpacing.md),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Poor', style: AppTextStyles.caption),
-            Text('Excellent', style: AppTextStyles.caption),
-          ],
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('RESTORATIVE', style: AppTextStyles.caption.copyWith(fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+              Text('EXCELLENT', style: AppTextStyles.caption.copyWith(fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+            ],
+          ),
         ),
       ],
-    );
+    ).animate().fadeIn(delay: 300.ms);
   }
 
   Widget _buildInterruptionsPicker() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Wake Ups (Interruptions)',
-              style: AppTextStyles.labelLg.copyWith(
-                fontWeight: FontWeight.bold,
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'WAKE UPS / INTERRUPTIONS',
+                style: AppTextStyles.label.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.5,
+                  fontSize: 11,
+                  color: AppColors.textTertiary,
+                ),
               ),
-            ),
-            const Icon(
-              Icons.bedtime_rounded,
-              size: 16,
-              color: AppColors.accentSkyBlue,
-            ),
-          ],
+              const Icon(
+                Icons.bedtime_rounded,
+                size: 14,
+                color: AppColors.accentSkyBlue,
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: AppSpacing.lg),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(6, (i) {
             final val = i;
             final isSelected = _interruptions == val;
             return GestureDetector(
-              onTap: () => setState(() => _interruptions = val),
+              onTap: () {
+                HapticHelper.lightImpact();
+                setState(() => _interruptions = val);
+              },
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 44,
-                height: 44,
+                duration: const Duration(milliseconds: 300),
+                width: 46,
+                height: 46,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.accentSkyBlue.withOpacity(0.3)
-                      : AppColors.bgSecondary.withOpacity(0.3),
+                      ? AppColors.accentSkyBlue.withOpacity(0.2)
+                      : AppColors.bgSecondary.withOpacity(0.4),
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: isSelected
-                        ? AppColors.accentSkyBlue.withOpacity(0.6)
-                        : Colors.white.withOpacity(0.1),
-                    width: isSelected ? 2 : 1.5,
+                        ? AppColors.accentSkyBlue.withOpacity(0.5)
+                        : Colors.white.withOpacity(0.05),
+                    width: isSelected ? 2 : 1.2,
                   ),
                 ),
                 child: Center(
                   child: Text(
                     '$val',
-                    style: AppTextStyles.labelLg.copyWith(
+                    style: AppTextStyles.label.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
+                      color: isSelected ? Colors.white : AppColors.textSecondary,
                     ),
                   ),
                 ),
@@ -488,7 +584,7 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
           }),
         ),
       ],
-    );
+    ).animate().fadeIn(delay: 400.ms);
   }
 
   Widget _buildAdvancedSection() {
@@ -500,16 +596,16 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
             setState(() => _showAdvanced = !_showAdvanced);
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
             decoration: BoxDecoration(
               color: _showAdvanced
                   ? AppColors.accentPrimary.withOpacity(0.1)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
+                  : AppColors.bgSecondary.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: _showAdvanced
                     ? AppColors.accentPrimary.withOpacity(0.3)
-                    : Colors.white.withOpacity(0.1),
+                    : Colors.white.withOpacity(0.05),
               ),
             ),
             child: Row(
@@ -524,19 +620,21 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
                       ? AppColors.accentPrimary
                       : AppColors.textTertiary,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Text(
                   _showAdvanced
-                      ? 'Hide Advanced Metrics'
-                      : 'Add Recovery Metrics',
+                      ? 'HIDE PERFORMANCE METRICS'
+                      : 'ADD PERFORMANCE METRICS',
                   style: AppTextStyles.label.copyWith(
                     color: _showAdvanced
                         ? AppColors.accentPrimary
                         : AppColors.textTertiary,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 10,
+                    letterSpacing: 1.0,
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 6),
                 Icon(
                   _showAdvanced
                       ? Icons.keyboard_arrow_up_rounded
@@ -557,14 +655,15 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
           _buildRecoveryInputs(),
         ],
       ],
-    );
+    ).animate().fadeIn(delay: 500.ms);
   }
 
   Widget _buildSleepStructureInputs() {
     return GlassCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(20),
       color: AppColors.bgSecondary.withOpacity(0.2),
-      borderRadius: 24,
+      borderRadius: 28,
+      border: Border.all(color: Colors.white.withOpacity(0.05)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -572,63 +671,52 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
             children: [
               const Icon(
                 Icons.pie_chart_outline_rounded,
-                size: 18,
+                size: 16,
                 color: AppColors.accentPrimary,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Text(
-                'Sleep Architecture (mins)',
-                style: AppTextStyles.labelLg.copyWith(
-                  fontWeight: FontWeight.bold,
+                'SLEEP STAGES (MINS)',
+                style: AppTextStyles.label.copyWith(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 11,
+                  letterSpacing: 1.2,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Column(
+          const SizedBox(height: 20),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 2.2,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildMetricInput(
-                      'Deep',
-                      _deepSleep,
-                      (v) => setState(() => _deepSleep = v),
-                      AppColors.accentPrimary,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildMetricInput(
-                      'REM',
-                      _remSleep,
-                      (v) => setState(() => _remSleep = v),
-                      AppColors.accentSkyBlue,
-                    ),
-                  ),
-                ],
+              _buildMetricInput(
+                'Deep',
+                _deepSleep,
+                (v) => setState(() => _deepSleep = v),
+                AppColors.accentPrimary,
               ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildMetricInput(
-                      'Light',
-                      _lightSleep,
-                      (v) => setState(() => _lightSleep = v),
-                      AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildMetricInput(
-                      'Awake',
-                      _awake,
-                      (v) => setState(() => _awake = v),
-                      AppColors.accentAmber,
-                    ),
-                  ),
-                ],
+              _buildMetricInput(
+                'REM',
+                _remSleep,
+                (v) => setState(() => _remSleep = v),
+                AppColors.accentSkyBlue,
+              ),
+              _buildMetricInput(
+                'Light',
+                _lightSleep,
+                (v) => setState(() => _lightSleep = v),
+                AppColors.textSecondary,
+              ),
+              _buildMetricInput(
+                'Awake',
+                _awake,
+                (v) => setState(() => _awake = v),
+                AppColors.accentAmber,
               ),
             ],
           ),
@@ -639,9 +727,10 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
 
   Widget _buildRecoveryInputs() {
     return GlassCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(20),
       color: AppColors.bgSecondary.withOpacity(0.2),
-      borderRadius: 24,
+      borderRadius: 28,
+      border: Border.all(color: Colors.white.withOpacity(0.05)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -649,19 +738,21 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
             children: [
               const Icon(
                 Icons.favorite_outline_rounded,
-                size: 18,
+                size: 16,
                 color: AppColors.accentError,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Text(
-                'Vitals & Recovery',
-                style: AppTextStyles.labelLg.copyWith(
-                  fontWeight: FontWeight.bold,
+                'RECOVERY VITALS',
+                style: AppTextStyles.label.copyWith(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 11,
+                  letterSpacing: 1.2,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
@@ -706,10 +797,10 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
     IconData? icon,
   }) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.03),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: Colors.white.withOpacity(0.05)),
       ),
       child: Column(
@@ -719,14 +810,16 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
           Row(
             children: [
               if (icon != null) ...[
-                Icon(icon, size: 12, color: themeColor.withOpacity(0.7)),
+                Icon(icon, size: 10, color: themeColor.withOpacity(0.7)),
                 const SizedBox(width: 4),
               ],
               Text(
-                label,
+                label.toUpperCase(),
                 style: AppTextStyles.caption.copyWith(
-                  fontSize: 10,
-                  color: AppColors.textSecondary,
+                  fontSize: 8,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textTertiary,
+                  letterSpacing: 0.5,
                 ),
               ),
             ],
@@ -738,16 +831,17 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
                 TextPosition(offset: (value?.toString() ?? '').length),
               ),
             keyboardType: TextInputType.number,
-            style: AppTextStyles.h4.copyWith(
-              fontWeight: FontWeight.bold,
+            style: AppTextStyles.body.copyWith(
+              fontWeight: FontWeight.w900,
               color: themeColor,
+              fontSize: 16,
             ),
             decoration: InputDecoration(
               isDense: true,
               contentPadding: EdgeInsets.zero,
               border: InputBorder.none,
-              hintText: '--',
-              hintStyle: TextStyle(color: Colors.white.withOpacity(0.1)),
+              hintText: '00',
+              hintStyle: TextStyle(color: Colors.white.withOpacity(0.05)),
             ),
             onChanged: (val) {
               onChanged(int.tryParse(val));
@@ -759,8 +853,19 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
   }
 
   Widget _buildSaveButton(bool isEdit) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.all(AppSpacing.containerPadding),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.bgPrimary.withOpacity(0),
+            AppColors.bgPrimary.withOpacity(0.8),
+            AppColors.bgPrimary,
+          ],
+        ),
+      ),
       child: PrimaryButton(
         text: _isLoading
             ? (isEdit ? 'Updating...' : 'Saving...')
