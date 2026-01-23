@@ -1,3 +1,4 @@
+import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:ui';
@@ -47,6 +48,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   int _streakDays = 0;
   int _totalSessions = 0;
   bool _isLoadingInsights = true;
+  bool _showFullCalendar = false;
 
   // Last night's sleep data
   Duration? _lastNightDuration;
@@ -177,23 +179,35 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         }
       }
 
-      // Get last night's session
-      final lastNight = await client.sleepSession.getLastNightSession(userId);
-      if (lastNight != null && lastNight.wakeTime != null) {
-        final duration = lastNight.wakeTime!.difference(lastNight.bedTime);
+      // Get target session based on selected date
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final selectedDayOnly = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+      
+      dynamic targetSession;
+      if (selectedDayOnly.isAtSameMomentAs(today)) {
+        // For today, we usually want to see the most recent finished session (last night's)
+        targetSession = await client.sleepSession.getLastNightSession(userId);
+      } else {
+        // For other days, find the session that STARTED on that day
+        targetSession = await client.sleepSession.getSessionForDate(userId, _selectedDate);
+      }
+
+      if (targetSession != null && targetSession.wakeTime != null) {
+        final duration = targetSession.wakeTime!.difference(targetSession.bedTime);
         final tibMinutes = duration.inMinutes;
         
         // Robust Sleep Efficiency Calculation:
         // SE = (Actual Sleep Time / Total Time in Bed) * 100
         // Actual Sleep Time = TIB - Sleep Latency - Awake Time
         
-        final latency = lastNight.sleepLatencyMinutes ?? 0;
-        final awake = lastNight.awakeDuration ?? 0;
+        final latency = targetSession.sleepLatencyMinutes ?? 0;
+        final awake = targetSession.awakeDuration ?? 0;
         
         // If we don't have awakeDuration but have interruptions, estimate it (e.g., 10 mins per interruption)
         int estimatedAwake = awake;
-        if (awake == 0 && (lastNight.interruptions ?? 0) > 0) {
-          estimatedAwake = (lastNight.interruptions ?? 0) * 10;
+        if (awake == 0 && (targetSession.interruptions ?? 0) > 0) {
+          estimatedAwake = (targetSession.interruptions ?? 0) * 10;
         }
 
         final actualSleepMinutes = (tibMinutes - latency - estimatedAwake).clamp(0, tibMinutes);
@@ -203,18 +217,25 @@ class _NewHomeScreenState extends State<NewHomeScreen>
 
         setState(() {
           _lastNightDuration = duration;
-          _lastNightQuality = lastNight.sleepQuality;
+          _lastNightQuality = targetSession.sleepQuality;
           _sleepEfficiency = efficiency.toDouble();
           _hasLastNightData = true;
-          _lastNightInterruptions = lastNight.interruptions ?? 0;
+          _lastNightInterruptions = targetSession.interruptions ?? 0;
+          _selectedMood = targetSession.morningMood;
 
-          _deepMinutes = lastNight.deepSleepDuration;
-          _lightMinutes = lastNight.lightSleepDuration;
-          _remMinutes = lastNight.remSleepDuration;
-          _awakeMinutes = lastNight.awakeDuration;
-          _rhr = lastNight.restingHeartRate;
-          _hrv = lastNight.hrv;
-          _respiratoryRate = lastNight.respiratoryRate;
+          _deepMinutes = targetSession.deepSleepDuration;
+          _lightMinutes = targetSession.lightSleepDuration;
+          _remMinutes = targetSession.remSleepDuration;
+          _awakeMinutes = targetSession.awakeDuration;
+          _rhr = targetSession.restingHeartRate;
+          _hrv = targetSession.hrv;
+          _respiratoryRate = targetSession.respiratoryRate;
+        });
+      } else {
+        setState(() {
+          _hasLastNightData = false;
+          _lastNightDuration = null;
+          _selectedMood = null;
         });
       }
 
@@ -339,6 +360,8 @@ class _NewHomeScreenState extends State<NewHomeScreen>
     super.dispose();
   }
 
+  bool get _isTodaySelected => isSameDay(_selectedDate, DateTime.now());
+
   String _getQualityText() {
     if (_latencyImprovement >= 80) return 'Excellent!';
     if (_latencyImprovement >= 60) return 'Very Good';
@@ -457,9 +480,11 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               const SizedBox(height: AppSpacing.xl),
               _buildControlPanel(),
               const SizedBox(height: AppSpacing.xl),
-              _buildStartTrackingButton(),
-              const SizedBox(height: AppSpacing.xl),
-              if (_timerService.isRunning) ...[
+              if (_isTodaySelected) ...[
+                _buildStartTrackingButton(),
+                const SizedBox(height: AppSpacing.xl),
+              ],
+              if (_isTodaySelected && _timerService.isRunning) ...[
                 _buildActiveTimerCard(),
                 const SizedBox(height: AppSpacing.xl),
               ],
@@ -515,10 +540,12 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                 ),
                 const SizedBox(width: 12),
                 _buildIconButton(
-                  icon: Icons.calendar_today_rounded,
+                  icon: _showFullCalendar ? Icons.view_week_rounded : Icons.calendar_today_rounded,
                   onTap: () {
                     HapticHelper.lightImpact();
-                    // TODO: Implement full calendar history
+                    setState(() {
+                      _showFullCalendar = !_showFullCalendar;
+                    });
                   },
                 ),
               ],
@@ -530,10 +557,66 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   }
 
   Widget _buildCalendarStrip() {
+    if (_showFullCalendar) {
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
+          child: GlassCard(
+            padding: const EdgeInsets.all(12),
+            color: AppColors.bgSecondary.withOpacity(0.3),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+            child: TableCalendar(
+              firstDay: DateTime.now().subtract(const Duration(days: 365)),
+              lastDay: DateTime.now().add(const Duration(days: 1)),
+              focusedDay: _selectedDate,
+              currentDay: DateTime.now(),
+              selectedDayPredicate: (day) => isSameDay(_selectedDate, day),
+              calendarFormat: CalendarFormat.month,
+              onDaySelected: (selectedDay, focusedDay) {
+                HapticHelper.lightImpact();
+                setState(() {
+                  _selectedDate = selectedDay;
+                });
+                _loadInsights();
+              },
+              headerStyle: HeaderStyle(
+                formatButtonVisible: false,
+                titleCentered: true,
+                titleTextStyle: AppTextStyles.bodyLg.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+                leftChevronIcon: const Icon(Icons.chevron_left, color: AppColors.accentSkyBlue),
+                rightChevronIcon: const Icon(Icons.chevron_right, color: AppColors.accentSkyBlue),
+              ),
+              daysOfWeekStyle: DaysOfWeekStyle(
+                weekdayStyle: AppTextStyles.label.copyWith(color: AppColors.textTertiary),
+                weekendStyle: AppTextStyles.label.copyWith(color: AppColors.accentPrimary.withOpacity(0.7)),
+              ),
+              calendarStyle: CalendarStyle(
+                defaultTextStyle: AppTextStyles.bodySm.copyWith(color: AppColors.textPrimary),
+                weekendTextStyle: AppTextStyles.bodySm.copyWith(color: AppColors.textPrimary.withOpacity(0.8)),
+                outsideTextStyle: AppTextStyles.bodySm.copyWith(color: AppColors.textTertiary.withOpacity(0.3)),
+                selectedDecoration: const BoxDecoration(
+                  gradient: AppColors.gradientPrimary,
+                  shape: BoxShape.circle,
+                ),
+                todayDecoration: BoxDecoration(
+                  border: Border.all(color: AppColors.accentPrimary.withOpacity(0.5)),
+                  shape: BoxShape.circle,
+                ),
+                markersMaxCount: 1,
+              ),
+            ),
+          ).animate().fadeIn().slideY(begin: -0.1, end: 0),
+        ),
+      );
+    }
+
     final now = DateTime.now();
     final days = List.generate(
       7,
-      (index) => now.subtract(Duration(days: 3 - index)),
+      (index) => now.subtract(Duration(days: 6 - index)), // Show last 7 days including today
     );
 
     return SliverToBoxAdapter(
@@ -545,15 +628,14 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           itemCount: days.length,
           itemBuilder: (context, index) {
             final date = days[index];
-            final isSelected =
-                date.day == _selectedDate.day &&
-                date.month == _selectedDate.month;
-            final isToday = date.day == now.day && date.month == now.month;
+            final isSelected = isSameDay(date, _selectedDate);
+            final isToday = isSameDay(date, now);
 
             return GestureDetector(
               onTap: () {
                 HapticHelper.lightImpact();
                 setState(() => _selectedDate = date);
+                _loadInsights();
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
@@ -1412,10 +1494,15 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                 try {
                   final userId = await UserService.getCurrentUserId();
                   if (userId != null) {
-                    await client.sleepSession.updateMoodForLatestSession(
-                      userId,
-                      mood['label']!,
-                    );
+                    if (_isTodaySelected) {
+                      await client.sleepSession.updateMoodForLatestSession(
+                        userId,
+                        mood['label']!,
+                      );
+                    } else {
+                      // Optionally update mood for specific session if we have sessionId
+                      // For now, only allow updating for today or most recent
+                    }
                   }
                 } catch (e) {
                   debugPrint('Error saving mood: $e');

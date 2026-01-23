@@ -104,6 +104,31 @@ class SleepSessionEndpoint extends Endpoint {
     return sessions.isNotEmpty ? sessions.first : null;
   }
 
+  /// Get session for a specific date
+  Future<SleepSession?> getSessionForDate(
+    Session session,
+    int userId,
+    DateTime date,
+  ) async {
+    // We search for a session where sessionDate is on the given date (ignoring time)
+    // Adjust to local time of the request if needed, but here we assume the date passed is the "target" day
+    final startOfDay = DateTime.utc(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    final sessions = await SleepSession.db.find(
+      session,
+      where: (t) =>
+          t.userId.equals(userId) &
+          (t.sessionDate >= startOfDay) &
+          (t.sessionDate < endOfDay),
+      orderBy: (t) => t.sessionDate,
+      orderDescending: true,
+      limit: 1,
+    );
+
+    return sessions.isNotEmpty ? sessions.first : null;
+  }
+
   /// Update sleep latency for a session
   Future<SleepSession?> updateSleepLatency(
     Session session,

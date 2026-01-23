@@ -656,6 +656,19 @@ class EndpointSleepSession extends _i2.EndpointRef {
         {'userId': userId},
       );
 
+  /// Get session for a specific date
+  _i3.Future<_i7.SleepSession?> getSessionForDate(
+    int userId,
+    DateTime date,
+  ) => caller.callServerEndpoint<_i7.SleepSession?>(
+    'sleepSession',
+    'getSessionForDate',
+    {
+      'userId': userId,
+      'date': date,
+    },
+  );
+
   /// Update sleep latency for a session
   _i3.Future<_i7.SleepSession?> updateSleepLatency(
     int sessionId,

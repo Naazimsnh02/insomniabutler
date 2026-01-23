@@ -45,6 +45,7 @@ sleepSession:
   - getUserSessions:
   - getActiveSession:
   - getLastNightSession:
+  - getSessionForDate:
   - updateSleepLatency:
   - logManualSession:
   - updateSession:

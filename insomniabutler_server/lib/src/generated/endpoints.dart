@@ -1099,6 +1099,31 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['userId'],
                   ),
         ),
+        'getSessionForDate': _i1.MethodConnector(
+          name: 'getSessionForDate',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'date': _i1.ParameterDescription(
+              name: 'date',
+              type: _i1.getType<DateTime>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['sleepSession'] as _i8.SleepSessionEndpoint)
+                  .getSessionForDate(
+                    session,
+                    params['userId'],
+                    params['date'],
+                  ),
+        ),
         'updateSleepLatency': _i1.MethodConnector(
           name: 'updateSleepLatency',
           params: {
