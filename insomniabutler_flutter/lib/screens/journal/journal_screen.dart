@@ -271,9 +271,11 @@ class JournalScreenState extends State<JournalScreen>
       color: AppColors.accentPrimary,
       backgroundColor: AppColors.glassBgElevated,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.containerPadding,
-          vertical: AppSpacing.md,
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.containerPadding,
+          AppSpacing.md,
+          AppSpacing.containerPadding,
+          140, // Space for floating bottom tab bar
         ),
         itemCount: _entries.length,
         itemBuilder: (context, index) {
@@ -384,7 +386,12 @@ class JournalScreenState extends State<JournalScreen>
 
   Widget _buildCalendarTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.containerPadding),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.containerPadding,
+        AppSpacing.containerPadding,
+        AppSpacing.containerPadding,
+        140,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

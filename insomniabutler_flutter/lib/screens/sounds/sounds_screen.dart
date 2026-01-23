@@ -600,22 +600,21 @@ class _SoundsScreenState extends State<SoundsScreen> {
 
         return Container(
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 110),
-          child:
-              GlassCard(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                borderRadius: 24,
-                color: AppColors.bgSecondary.withOpacity(0.9),
-                border: Border.all(
-                  color: AppColors.accentPrimary.withOpacity(0.4),
-                ),
-                child: Row(
+          child: GlassCard(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            borderRadius: 24,
+            color: AppColors.bgSecondary.withOpacity(0.95),
+            border: Border.all(
+              color: AppColors.accentPrimary.withOpacity(0.4),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
                   children: [
                     Container(
-                      width: 44,
-                      height: 44,
+                      width: 48,
+                      height: 48,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         image: currentSound.imagePath != null
@@ -630,7 +629,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
                           ? const Icon(
                               Icons.music_note_rounded,
                               color: AppColors.accentPrimary,
-                              size: 20,
+                              size: 24,
                             )
                           : null,
                     ),
@@ -642,7 +641,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
                         children: [
                           Text(
                             currentSound.title,
-                            style: AppTextStyles.bodySm.copyWith(
+                            style: AppTextStyles.body.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -650,7 +649,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            'Now Playing',
+                            _getCategoryName(currentSound.category),
                             style: AppTextStyles.caption.copyWith(
                               fontSize: 10,
                               color: Colors.white70,
@@ -665,14 +664,16 @@ class _SoundsScreenState extends State<SoundsScreen> {
                       builder: (context, playingSnapshot) {
                         final isPlaying = playingSnapshot.data ?? false;
                         return Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
+                              padding: EdgeInsets.zero,
                               icon: Icon(
                                 isPlaying
                                     ? Icons.pause_circle_filled_rounded
                                     : Icons.play_circle_filled_rounded,
                                 color: Colors.white,
-                                size: 32,
+                                size: 40,
                               ),
                               onPressed: () {
                                 if (isPlaying) {
@@ -683,10 +684,11 @@ class _SoundsScreenState extends State<SoundsScreen> {
                               },
                             ),
                             IconButton(
+                              padding: EdgeInsets.zero,
                               icon: const Icon(
                                 Icons.close_rounded,
                                 color: Colors.white70,
-                                size: 20,
+                                size: 24,
                               ),
                               onPressed: () => _audioService.stop(),
                             ),
@@ -696,7 +698,75 @@ class _SoundsScreenState extends State<SoundsScreen> {
                     ),
                   ],
                 ),
-              ).animate().slideY(
+                const SizedBox(height: 8),
+                StreamBuilder<Duration?>(
+                  stream: _audioService.durationStream,
+                  builder: (context, durationSnapshot) {
+                    final duration = durationSnapshot.data ?? Duration.zero;
+                    return StreamBuilder<Duration?>(
+                      stream: _audioService.positionStream,
+                      builder: (context, positionSnapshot) {
+                        var position = positionSnapshot.data ?? Duration.zero;
+                        if (position > duration) position = duration;
+
+                        return Column(
+                          children: [
+                            SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                trackHeight: 4,
+                                thumbShape: const RoundSliderThumbShape(
+                                  enabledThumbRadius: 6,
+                                ),
+                                overlayShape: const RoundSliderOverlayShape(
+                                  overlayRadius: 14,
+                                ),
+                                activeTrackColor: AppColors.accentPrimary,
+                                inactiveTrackColor: Colors.white24,
+                                thumbColor: Colors.white,
+                              ),
+                              child: Slider(
+                                value: position.inMilliseconds.toDouble(),
+                                max: duration.inMilliseconds.toDouble() > 0 
+                                    ? duration.inMilliseconds.toDouble() 
+                                    : 1.0,
+                                onChanged: (value) {
+                                  _audioService.seek(
+                                    Duration(milliseconds: value.toInt()),
+                                  );
+                                },
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    _formatDuration(position),
+                                    style: AppTextStyles.caption.copyWith(
+                                      fontSize: 10,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                  Text(
+                                    _formatDuration(duration),
+                                    style: AppTextStyles.caption.copyWith(
+                                      fontSize: 10,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ).animate().slideY(
                 begin: 1,
                 end: 0,
                 duration: 400.ms,
@@ -705,6 +775,13 @@ class _SoundsScreenState extends State<SoundsScreen> {
         );
       },
     );
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
   }
 }
 

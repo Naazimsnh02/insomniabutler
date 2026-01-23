@@ -57,6 +57,10 @@ class AudioPlayerService {
     await _player.play();
   }
 
+  Future<void> seek(Duration position) async {
+    await _player.seek(position);
+  }
+
   Future<void> stop() async {
     await _player.stop();
     _currentSound = null;

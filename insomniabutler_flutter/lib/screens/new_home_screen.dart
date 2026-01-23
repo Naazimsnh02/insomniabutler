@@ -514,14 +514,17 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _getGreeting(),
+                  DateFormat('EEEE, MMM d').format(DateTime.now()),
                   style: AppTextStyles.bodySm.copyWith(
-                    color: AppColors.textSecondary,
+                    color: AppColors.accentSkyBlue,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  'Home',
-                  style: AppTextStyles.h1.copyWith(fontWeight: FontWeight.bold),
+                  _getGreeting(),
+                  style: AppTextStyles.h2.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -769,15 +772,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildMicroAction(Icons.favorite_outline_rounded),
-              const SizedBox(width: 24),
-              _buildMicroAction(Icons.share_rounded),
-            ],
-          ),
+          const SizedBox(height: 12),
         ],
       ),
     );
@@ -1339,12 +1334,6 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               Text(dateStr, style: AppTextStyles.h4),
               Row(
                 children: [
-                  Icon(
-                    Icons.auto_awesome_rounded,
-                    size: 14,
-                    color: AppColors.accentPrimary.withOpacity(0.7),
-                  ),
-                  const SizedBox(width: 4),
                   Text(
                     'Tonight\'s Goal',
                     style: AppTextStyles.caption.copyWith(
