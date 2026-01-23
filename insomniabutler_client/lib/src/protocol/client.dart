@@ -342,6 +342,12 @@ class EndpointDev extends _i2.EndpointRef {
         'generateRealisticData',
         {'userId': userId},
       );
+
+  _i3.Future<bool> clearUserData(int userId) => caller.callServerEndpoint<bool>(
+    'dev',
+    'clearUserData',
+    {'userId': userId},
+  );
 }
 
 /// Analytics and insights endpoint for sleep intelligence
@@ -594,8 +600,9 @@ class EndpointSleepSession extends _i2.EndpointRef {
     int sessionId,
     int sleepQuality,
     String morningMood,
-    int? sleepLatencyMinutes,
-  ) => caller.callServerEndpoint<_i7.SleepSession?>(
+    int? sleepLatencyMinutes, {
+    int? interruptions,
+  }) => caller.callServerEndpoint<_i7.SleepSession?>(
     'sleepSession',
     'endSession',
     {
@@ -603,6 +610,7 @@ class EndpointSleepSession extends _i2.EndpointRef {
       'sleepQuality': sleepQuality,
       'morningMood': morningMood,
       'sleepLatencyMinutes': sleepLatencyMinutes,
+      'interruptions': interruptions,
     },
   );
 
@@ -675,6 +683,7 @@ class EndpointSleepSession extends _i2.EndpointRef {
     int? restingHeartRate,
     int? hrv,
     int? respiratoryRate,
+    int? interruptions,
   }) => caller.callServerEndpoint<_i7.SleepSession>(
     'sleepSession',
     'logManualSession',
@@ -691,6 +700,7 @@ class EndpointSleepSession extends _i2.EndpointRef {
       'restingHeartRate': restingHeartRate,
       'hrv': hrv,
       'respiratoryRate': respiratoryRate,
+      'interruptions': interruptions,
     },
   );
 
@@ -708,6 +718,7 @@ class EndpointSleepSession extends _i2.EndpointRef {
     int? restingHeartRate,
     int? hrv,
     int? respiratoryRate,
+    int? interruptions,
   }) => caller.callServerEndpoint<_i7.SleepSession?>(
     'sleepSession',
     'updateSession',
@@ -724,6 +735,7 @@ class EndpointSleepSession extends _i2.EndpointRef {
       'restingHeartRate': restingHeartRate,
       'hrv': hrv,
       'respiratoryRate': respiratoryRate,
+      'interruptions': interruptions,
     },
   );
 

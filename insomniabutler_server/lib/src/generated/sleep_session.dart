@@ -32,6 +32,7 @@ abstract class SleepSession
     this.restingHeartRate,
     this.hrv,
     this.respiratoryRate,
+    this.interruptions,
   });
 
   factory SleepSession({
@@ -52,6 +53,7 @@ abstract class SleepSession
     int? restingHeartRate,
     int? hrv,
     int? respiratoryRate,
+    int? interruptions,
   }) = _SleepSessionImpl;
 
   factory SleepSession.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -77,6 +79,7 @@ abstract class SleepSession
       restingHeartRate: jsonSerialization['restingHeartRate'] as int?,
       hrv: jsonSerialization['hrv'] as int?,
       respiratoryRate: jsonSerialization['respiratoryRate'] as int?,
+      interruptions: jsonSerialization['interruptions'] as int?,
     );
   }
 
@@ -119,6 +122,8 @@ abstract class SleepSession
 
   int? respiratoryRate;
 
+  int? interruptions;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -143,6 +148,7 @@ abstract class SleepSession
     int? restingHeartRate,
     int? hrv,
     int? respiratoryRate,
+    int? interruptions,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -166,6 +172,7 @@ abstract class SleepSession
       if (restingHeartRate != null) 'restingHeartRate': restingHeartRate,
       if (hrv != null) 'hrv': hrv,
       if (respiratoryRate != null) 'respiratoryRate': respiratoryRate,
+      if (interruptions != null) 'interruptions': interruptions,
     };
   }
 
@@ -191,6 +198,7 @@ abstract class SleepSession
       if (restingHeartRate != null) 'restingHeartRate': restingHeartRate,
       if (hrv != null) 'hrv': hrv,
       if (respiratoryRate != null) 'respiratoryRate': respiratoryRate,
+      if (interruptions != null) 'interruptions': interruptions,
     };
   }
 
@@ -245,6 +253,7 @@ class _SleepSessionImpl extends SleepSession {
     int? restingHeartRate,
     int? hrv,
     int? respiratoryRate,
+    int? interruptions,
   }) : super._(
          id: id,
          userId: userId,
@@ -263,6 +272,7 @@ class _SleepSessionImpl extends SleepSession {
          restingHeartRate: restingHeartRate,
          hrv: hrv,
          respiratoryRate: respiratoryRate,
+         interruptions: interruptions,
        );
 
   /// Returns a shallow copy of this [SleepSession]
@@ -287,6 +297,7 @@ class _SleepSessionImpl extends SleepSession {
     Object? restingHeartRate = _Undefined,
     Object? hrv = _Undefined,
     Object? respiratoryRate = _Undefined,
+    Object? interruptions = _Undefined,
   }) {
     return SleepSession(
       id: id is int? ? id : this.id,
@@ -318,6 +329,7 @@ class _SleepSessionImpl extends SleepSession {
       respiratoryRate: respiratoryRate is int?
           ? respiratoryRate
           : this.respiratoryRate,
+      interruptions: interruptions is int? ? interruptions : this.interruptions,
     );
   }
 }
@@ -407,6 +419,11 @@ class SleepSessionUpdateTable extends _i1.UpdateTable<SleepSessionTable> {
     table.respiratoryRate,
     value,
   );
+
+  _i1.ColumnValue<int, int> interruptions(int? value) => _i1.ColumnValue(
+    table.interruptions,
+    value,
+  );
 }
 
 class SleepSessionTable extends _i1.Table<int?> {
@@ -477,6 +494,10 @@ class SleepSessionTable extends _i1.Table<int?> {
       'respiratoryRate',
       this,
     );
+    interruptions = _i1.ColumnInt(
+      'interruptions',
+      this,
+    );
   }
 
   late final SleepSessionUpdateTable updateTable;
@@ -513,6 +534,8 @@ class SleepSessionTable extends _i1.Table<int?> {
 
   late final _i1.ColumnInt respiratoryRate;
 
+  late final _i1.ColumnInt interruptions;
+
   @override
   List<_i1.Column> get columns => [
     id,
@@ -532,6 +555,7 @@ class SleepSessionTable extends _i1.Table<int?> {
     restingHeartRate,
     hrv,
     respiratoryRate,
+    interruptions,
   ];
 }
 

@@ -32,6 +32,7 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
   int? _hrv;
   int? _rhr;
   int? _respiratoryRate;
+  int? _interruptions;
 
   bool _isLoading = false;
 
@@ -61,13 +62,15 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
       _hrv = d['hrv'];
       _rhr = d['restingHeartRate'];
       _respiratoryRate = d['respiratoryRate'];
+      _interruptions = d['interruptions'];
       if (_deepSleep != null || 
           _lightSleep != null || 
           _remSleep != null || 
           _awake != null || 
           _hrv != null || 
           _rhr != null || 
-          _respiratoryRate != null) {
+          _respiratoryRate != null ||
+          _interruptions != null) {
         _showAdvanced = true;
       }
     }
@@ -161,6 +164,8 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
                       _buildDurationInfo(),
                       const SizedBox(height: AppSpacing.xl),
                       _buildQualityPicker(),
+                      const SizedBox(height: AppSpacing.xl),
+                      _buildInterruptionsPicker(),
                       const SizedBox(height: AppSpacing.xl),
                       _buildAdvancedSection(),
                     ],
@@ -419,6 +424,67 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
             Text('Poor', style: AppTextStyles.caption),
             Text('Excellent', style: AppTextStyles.caption),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInterruptionsPicker() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Wake Ups (Interruptions)',
+              style: AppTextStyles.labelLg.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Icon(
+              Icons.bedtime_rounded,
+              size: 16,
+              color: AppColors.accentSkyBlue,
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(6, (i) {
+            final val = i;
+            final isSelected = _interruptions == val;
+            return GestureDetector(
+              onTap: () => setState(() => _interruptions = val),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColors.accentSkyBlue.withOpacity(0.3)
+                      : AppColors.bgSecondary.withOpacity(0.3),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.accentSkyBlue.withOpacity(0.6)
+                        : Colors.white.withOpacity(0.1),
+                    width: isSelected ? 2 : 1.5,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    '$val',
+                    style: AppTextStyles.labelLg.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.white : AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
         ),
       ],
     );
@@ -691,6 +757,7 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
           restingHeartRate: _rhr,
           hrv: _hrv,
           respiratoryRate: _respiratoryRate,
+          interruptions: _interruptions,
         );
       } else {
         await client.sleepSession.logManualSession(
@@ -705,6 +772,7 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
           restingHeartRate: _rhr,
           hrv: _hrv,
           respiratoryRate: _respiratoryRate,
+          interruptions: _interruptions,
         );
       }
 

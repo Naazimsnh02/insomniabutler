@@ -31,6 +31,7 @@ abstract class SleepSession implements _i1.SerializableModel {
     this.restingHeartRate,
     this.hrv,
     this.respiratoryRate,
+    this.interruptions,
   });
 
   factory SleepSession({
@@ -51,6 +52,7 @@ abstract class SleepSession implements _i1.SerializableModel {
     int? restingHeartRate,
     int? hrv,
     int? respiratoryRate,
+    int? interruptions,
   }) = _SleepSessionImpl;
 
   factory SleepSession.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -76,6 +78,7 @@ abstract class SleepSession implements _i1.SerializableModel {
       restingHeartRate: jsonSerialization['restingHeartRate'] as int?,
       hrv: jsonSerialization['hrv'] as int?,
       respiratoryRate: jsonSerialization['respiratoryRate'] as int?,
+      interruptions: jsonSerialization['interruptions'] as int?,
     );
   }
 
@@ -116,6 +119,8 @@ abstract class SleepSession implements _i1.SerializableModel {
 
   int? respiratoryRate;
 
+  int? interruptions;
+
   /// Returns a shallow copy of this [SleepSession]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -137,6 +142,7 @@ abstract class SleepSession implements _i1.SerializableModel {
     int? restingHeartRate,
     int? hrv,
     int? respiratoryRate,
+    int? interruptions,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -160,6 +166,7 @@ abstract class SleepSession implements _i1.SerializableModel {
       if (restingHeartRate != null) 'restingHeartRate': restingHeartRate,
       if (hrv != null) 'hrv': hrv,
       if (respiratoryRate != null) 'respiratoryRate': respiratoryRate,
+      if (interruptions != null) 'interruptions': interruptions,
     };
   }
 
@@ -190,6 +197,7 @@ class _SleepSessionImpl extends SleepSession {
     int? restingHeartRate,
     int? hrv,
     int? respiratoryRate,
+    int? interruptions,
   }) : super._(
          id: id,
          userId: userId,
@@ -208,6 +216,7 @@ class _SleepSessionImpl extends SleepSession {
          restingHeartRate: restingHeartRate,
          hrv: hrv,
          respiratoryRate: respiratoryRate,
+         interruptions: interruptions,
        );
 
   /// Returns a shallow copy of this [SleepSession]
@@ -232,6 +241,7 @@ class _SleepSessionImpl extends SleepSession {
     Object? restingHeartRate = _Undefined,
     Object? hrv = _Undefined,
     Object? respiratoryRate = _Undefined,
+    Object? interruptions = _Undefined,
   }) {
     return SleepSession(
       id: id is int? ? id : this.id,
@@ -263,6 +273,7 @@ class _SleepSessionImpl extends SleepSession {
       respiratoryRate: respiratoryRate is int?
           ? respiratoryRate
           : this.respiratoryRate,
+      interruptions: interruptions is int? ? interruptions : this.interruptions,
     );
   }
 }

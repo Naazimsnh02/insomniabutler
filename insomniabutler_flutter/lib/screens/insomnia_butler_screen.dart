@@ -257,7 +257,7 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
           // Back button with glass effect
           _buildIconButton(
                 icon: Icons.arrow_back_ios_new_rounded,
-                onTap: () => Navigator.pop(context),
+                onTap: () => Navigator.pop(context, true),
               )
               .animate(key: const ValueKey('chat_back_btn'))
               .fadeIn(duration: 300.ms)

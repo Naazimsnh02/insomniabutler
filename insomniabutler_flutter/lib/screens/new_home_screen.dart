@@ -41,9 +41,11 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   int? _userId;
 
   // Insights data - Initialized with premium demo values
-  int _latencyImprovement = 82;
-  double _avgSleep = 7.5;
-  int _streakDays = 5;
+  // Insights data - Initialized to 0 to indicate no data
+  int _latencyImprovement = 0;
+  double _avgSleep = 0;
+  int _streakDays = 0;
+  int _totalSessions = 0;
   bool _isLoadingInsights = true;
 
   // Last night's sleep data
@@ -80,7 +82,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   void initState() {
     super.initState();
     _loadUserData();
-    _loadInsights();
+    _refreshAllData();
 
     // Listen to timer ticks and status changes
     _timerService.onTick.listen((_) {
@@ -113,21 +115,64 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         return;
       }
 
+      // Reset data before loading new ones
+      setState(() {
+        _lastNightDuration = null;
+        _lastNightQuality = null;
+        _sleepEfficiency = null;
+        _hasLastNightData = false;
+        _lastNightInterruptions = 0;
+        _deepMinutes = null;
+        _lightMinutes = null;
+        _remMinutes = null;
+        _awakeMinutes = null;
+        _rhr = null;
+        _hrv = null;
+        _respiratoryRate = null;
+        _consistencyScore = null;
+        _latencyImprovement = 0;
+        _avgSleep = 0;
+        _streakDays = 0;
+        _totalSessions = 0;
+      });
+
       final insights = await client.insights.getUserInsights(userId);
 
-      // Calculate streak (simplified)
+      // Calculate streak (consecutive days tracked)
       final sessions = await client.insights.getSleepTrend(userId, 30);
       int streak = 0;
       DateTime? lastDate;
 
-      for (var session in sessions.reversed) {
-        if (session.usedButler) {
-          if (lastDate == null ||
-              lastDate.difference(session.sessionDate.toLocal()).inDays == 1) {
-            streak++;
-            lastDate = session.sessionDate.toLocal();
+      // sessions is ordered ascending by date (oldest first)
+      final reversedSessions = sessions.reversed.toList();
+      for (var session in reversedSessions) {
+        final sessionDate = DateTime(
+          session.sessionDate.toLocal().year,
+          session.sessionDate.toLocal().month,
+          session.sessionDate.toLocal().day,
+        );
+
+        if (lastDate == null) {
+          // Check if the most recent session is from today or yesterday
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          final diff = today.difference(sessionDate).inDays;
+          
+          if (diff <= 1) {
+            streak = 1;
+            lastDate = sessionDate;
           } else {
-            break;
+            break; // Streak already broken
+          }
+        } else {
+          final diff = lastDate.difference(sessionDate).inDays;
+          if (diff == 1) {
+            streak++;
+            lastDate = sessionDate;
+          } else if (diff == 0) {
+            continue; // Same day, ignore
+          } else {
+            break; // Gap found
           }
         }
       }
@@ -136,26 +181,33 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       final lastNight = await client.sleepSession.getLastNightSession(userId);
       if (lastNight != null && lastNight.wakeTime != null) {
         final duration = lastNight.wakeTime!.difference(lastNight.bedTime);
-        final timeInBed = duration;
+        final tibMinutes = duration.inMinutes;
+        
+        // Robust Sleep Efficiency Calculation:
+        // SE = (Actual Sleep Time / Total Time in Bed) * 100
+        // Actual Sleep Time = TIB - Sleep Latency - Awake Time
+        
+        final latency = lastNight.sleepLatencyMinutes ?? 0;
+        final awake = lastNight.awakeDuration ?? 0;
+        
+        // If we don't have awakeDuration but have interruptions, estimate it (e.g., 10 mins per interruption)
+        int estimatedAwake = awake;
+        if (awake == 0 && (lastNight.interruptions ?? 0) > 0) {
+          estimatedAwake = (lastNight.interruptions ?? 0) * 10;
+        }
 
-        // Calculate sleep efficiency (assuming minimal interruptions for now)
-        // In a real app, this would come from accelerometer data
-        final efficiency = (duration.inMinutes / timeInBed.inMinutes * 100)
-            .clamp(0, 100);
+        final actualSleepMinutes = (tibMinutes - latency - estimatedAwake).clamp(0, tibMinutes);
+        final efficiency = tibMinutes > 0 
+            ? (actualSleepMinutes / tibMinutes * 100) 
+            : 0.0;
 
         setState(() {
           _lastNightDuration = duration;
           _lastNightQuality = lastNight.sleepQuality;
           _sleepEfficiency = efficiency.toDouble();
           _hasLastNightData = true;
-          // Estimate interruptions based on efficiency (demo logic)
-          _lastNightInterruptions = efficiency > 90
-              ? 0
-              : efficiency > 80
-              ? 1
-              : 2;
+          _lastNightInterruptions = lastNight.interruptions ?? 0;
 
-          // Populate advanced metrics
           _deepMinutes = lastNight.deepSleepDuration;
           _lightMinutes = lastNight.lightSleepDuration;
           _remMinutes = lastNight.remSleepDuration;
@@ -166,15 +218,14 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         });
       }
 
-      // Calculate 7-day consistency metric
+      // Calculate 7-day consistency metric (using latest sessions)
       int? calculatedConsistency;
       if (sessions.isNotEmpty) {
-        final recentSessions = sessions.take(7).toList();
+        final recentSessions = sessions.reversed.take(7).toList();
         if (recentSessions.length >= 2) {
           double totalBedtimeDev = 0;
           double totalWakeDev = 0;
           
-          // Calculate mean bedtime and wake time in minutes from midnight
           double meanBedtime = 0;
           double meanWake = 0;
           int sessionsWithWake = 0;
@@ -208,20 +259,18 @@ class _NewHomeScreenState extends State<NewHomeScreen>
             avgDev = (avgDev + (totalWakeDev / sessionsWithWake)) / 2;
           }
           
-          // 100% consistency = 0 min deviation. 0% = 120 min deviation (2 hours)
           calculatedConsistency = (100 - (avgDev / 1.2)).clamp(0, 100).toInt();
         }
       }
 
       setState(() {
         _consistencyScore = calculatedConsistency;
-        if (insights.latencyImprovement > 0)
-          _latencyImprovement = insights.latencyImprovement;
-        if (insights.avgLatencyWithButler > 0)
-          _avgSleep = (insights.avgLatencyWithButler / 60)
-              .clamp(0, 12)
-              .toDouble();
-        if (streak > 0) _streakDays = streak;
+        _latencyImprovement = insights.latencyImprovement;
+        _avgSleep = insights.avgLatencyWithButler > 0 
+            ? (insights.avgLatencyWithButler / 60).clamp(0, 12).toDouble()
+            : 0;
+        _streakDays = streak;
+        _totalSessions = insights.totalSessions;
         _isLoadingInsights = false;
       });
 
@@ -232,6 +281,11 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       setState(() => _isLoadingInsights = false);
       // Keep demo data on error
     }
+  }
+
+  Future<void> _refreshAllData() async {
+    await _loadInsights();
+    _journalKey.currentState?.loadData();
   }
 
   void _updateAffirmationForTime() {
@@ -371,7 +425,10 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       case 2:
         return JournalScreen(isTab: true, key: _journalKey);
       case 3:
-        return const AccountScreen(isTab: true);
+        return AccountScreen(
+          isTab: true,
+          onDataChanged: _refreshAllData,
+        );
       default:
         return const SizedBox.shrink();
     }
@@ -390,12 +447,10 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               const SizedBox(height: AppSpacing.lg),
-              if (_hasLastNightData) ...[
-                _buildLastNightSummary(),
-                const SizedBox(height: AppSpacing.xl),
-                _buildAdvancedMetrics(),
-                const SizedBox(height: AppSpacing.xl),
-              ],
+              _buildLastNightSummary(),
+              const SizedBox(height: AppSpacing.xl),
+              _buildAdvancedMetrics(),
+              const SizedBox(height: AppSpacing.xl),
               _buildDailyAffirmation(),
               const SizedBox(height: AppSpacing.xl),
               _buildSleepGauge(),
@@ -445,14 +500,17 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               children: [
                 _buildIconButton(
                   icon: Icons.history_rounded,
-                  onTap: () {
+                  onTap: () async {
                     HapticHelper.lightImpact();
-                    Navigator.push(
+                    final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => const SleepHistoryScreen(),
                       ),
                     );
+                    if (result == true || result == null) {
+                      _refreshAllData();
+                    }
                   },
                 ),
                 const SizedBox(width: 12),
@@ -616,7 +674,31 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   }
 
   Widget _buildLastNightSummary() {
-    if (_lastNightDuration == null) return const SizedBox.shrink();
+    if (_lastNightDuration == null) {
+      return GlassCard(
+        padding: const EdgeInsets.all(20),
+        color: AppColors.bgSecondary.withOpacity(0.3),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.1),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.bedtime_outlined, color: AppColors.textTertiary, size: 32),
+            const SizedBox(height: 12),
+            Text(
+              'No sleep data yet',
+              style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Your last night\'s sleep summary will appear here.',
+              style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
 
     final hours = _lastNightDuration!.inHours;
     final minutes = _lastNightDuration!.inMinutes.remainder(60);
@@ -1254,7 +1336,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => _TrackingSelectorSheet(),
+      builder: (context) => _TrackingSelectorSheet(onRefresh: _refreshAllData),
     );
   }
 
@@ -1411,7 +1493,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                 children: [
                   _buildSimpleStat(
                     '⚡',
-                    '${_latencyImprovement}%',
+                    _totalSessions > 0 ? '${_latencyImprovement}%' : '--',
                     'Faster Sleep',
                     color: AppColors.accentPrimary,
                   ),
@@ -1423,7 +1505,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                   ),
                   _buildSimpleStat(
                     '🎯',
-                    _consistencyScore != null ? '${_consistencyScore}%' : '--',
+                    (_totalSessions > 0 && _consistencyScore != null) ? '${_consistencyScore}%' : '--',
                     'Consistency',
                     color: AppColors.accentSuccess,
                   ),
@@ -1435,7 +1517,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                   ),
                   _buildSimpleStat(
                     '🔥',
-                    '${_streakDays}d',
+                    _totalSessions > 0 ? '${_streakDays}d' : '--',
                     'Streak',
                     color: AppColors.accentAmber,
                   ),
@@ -1574,7 +1656,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           context,
           MaterialPageRoute(builder: (_) => JournalEditorScreen()),
         );
-        _journalKey.currentState?.loadData();
+        _refreshAllData();
       },
       child:
           Container(
@@ -1650,11 +1732,12 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         color: AppColors.accentSuccess.withOpacity(0.2),
         width: 1.5,
       ),
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        final result = await Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const SleepTimerScreen()),
         );
+        if (result == true) _refreshAllData();
       },
       child: Row(
         children: [
@@ -1817,6 +1900,9 @@ class _GaugePainter extends CustomPainter {
 }
 
 class _TrackingSelectorSheet extends StatelessWidget {
+  final VoidCallback onRefresh;
+  const _TrackingSelectorSheet({required this.onRefresh});
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -1859,14 +1945,15 @@ class _TrackingSelectorSheet extends StatelessWidget {
               'Let Butler clear your thoughts for better sleep.',
               assetPath: 'assets/logo/butler_logo.png',
               AppColors.gradientPrimary,
-              () {
+              () async {
                 Navigator.pop(context);
-                Navigator.push(
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => const InsomniaButlerScreen(),
                   ),
                 );
+                if (result == true) onRefresh();
               },
             ),
             const SizedBox(height: AppSpacing.md),
@@ -1875,12 +1962,13 @@ class _TrackingSelectorSheet extends StatelessWidget {
               'Silent Timer',
               'Start a quiet timer for sleep and wake up to Butler.',
               AppColors.gradientCalm,
-              () {
+              () async {
                 Navigator.pop(context);
-                Navigator.push(
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const SleepTimerScreen()),
                 );
+                if (result == true) onRefresh();
               },
               icon: Icons.timer_outlined,
             ),
@@ -1890,12 +1978,13 @@ class _TrackingSelectorSheet extends StatelessWidget {
               'Manual Log',
               'Retroactively log sleep duration and quality.',
               AppColors.gradientLavender,
-              () {
+              () async {
                 Navigator.pop(context);
-                Navigator.push(
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const ManualLogScreen()),
                 );
+                if (result == true) onRefresh();
               },
               icon: Icons.history_edu_rounded,
             ),

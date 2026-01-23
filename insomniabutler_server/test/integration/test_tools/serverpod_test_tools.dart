@@ -773,6 +773,37 @@ class _DevEndpoint {
       }
     });
   }
+
+  _i3.Future<bool> clearUserData(
+    _i1.TestSessionBuilder sessionBuilder,
+    int userId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'dev',
+            method: 'clearUserData',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'dev',
+          methodName: 'clearUserData',
+          parameters: _i1.testObjectToJson({'userId': userId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _InsightsEndpoint {
@@ -1434,8 +1465,9 @@ class _SleepSessionEndpoint {
     int sessionId,
     int sleepQuality,
     String morningMood,
-    int? sleepLatencyMinutes,
-  ) async {
+    int? sleepLatencyMinutes, {
+    int? interruptions,
+  }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
@@ -1452,6 +1484,7 @@ class _SleepSessionEndpoint {
             'sleepQuality': sleepQuality,
             'morningMood': morningMood,
             'sleepLatencyMinutes': sleepLatencyMinutes,
+            'interruptions': interruptions,
           }),
           serializationManager: _serializationManager,
         );
@@ -1649,6 +1682,7 @@ class _SleepSessionEndpoint {
     int? restingHeartRate,
     int? hrv,
     int? respiratoryRate,
+    int? interruptions,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1674,6 +1708,7 @@ class _SleepSessionEndpoint {
             'restingHeartRate': restingHeartRate,
             'hrv': hrv,
             'respiratoryRate': respiratoryRate,
+            'interruptions': interruptions,
           }),
           serializationManager: _serializationManager,
         );
@@ -1704,6 +1739,7 @@ class _SleepSessionEndpoint {
     int? restingHeartRate,
     int? hrv,
     int? respiratoryRate,
+    int? interruptions,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1729,6 +1765,7 @@ class _SleepSessionEndpoint {
             'restingHeartRate': restingHeartRate,
             'hrv': hrv,
             'respiratoryRate': respiratoryRate,
+            'interruptions': interruptions,
           }),
           serializationManager: _serializationManager,
         );

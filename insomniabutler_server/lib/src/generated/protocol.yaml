@@ -18,6 +18,7 @@ auth:
   - getUserStats:
 dev:
   - generateRealisticData:
+  - clearUserData:
 insights:
   - getUserInsights:
   - getWeeklyInsights:

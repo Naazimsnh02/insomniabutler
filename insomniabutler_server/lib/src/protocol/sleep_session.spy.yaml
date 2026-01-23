@@ -22,4 +22,6 @@ fields:
   hrv: int?
   respiratoryRate: int?
   
+  # New Metrics
+  interruptions: int?
 

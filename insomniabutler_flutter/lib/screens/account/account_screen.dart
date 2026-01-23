@@ -16,8 +16,9 @@ import '../new_home_screen.dart';
 /// Provides comprehensive account management, app settings, and user preferences
 class AccountScreen extends StatefulWidget {
   final bool isTab;
+  final VoidCallback? onDataChanged;
 
-  const AccountScreen({Key? key, this.isTab = true}) : super(key: key);
+  const AccountScreen({Key? key, this.isTab = true, this.onDataChanged}) : super(key: key);
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
@@ -633,6 +634,20 @@ class _AccountScreenState extends State<AccountScreen> {
               _showGenerateDataDialog();
             },
           ),
+          const Divider(color: AppColors.glassBorder, height: 1),
+          _buildSettingRow(
+            icon: Icons.delete_forever_rounded,
+            title: 'Clear All Data',
+            subtitle: 'Delete all sleep & journal records',
+            trailing: const Icon(
+              Icons.warning_amber_rounded,
+              color: AppColors.accentError,
+            ),
+            onTap: () {
+              HapticHelper.heavyImpact();
+              _showClearDataDialog();
+            },
+          ),
         ],
       ),
     );
@@ -684,10 +699,73 @@ class _AccountScreenState extends State<AccountScreen> {
           );
           // Refresh screen data
           _loadData();
+          widget.onDataChanged?.call();
         }
       }
     } catch (e) {
       debugPrint('Error generating data: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.accentError,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showClearDataDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.bgPrimary,
+        title: const Text('Clear All Data?', style: TextStyle(color: AppColors.accentError)),
+        content: const Text(
+          'This will permanently delete ALL your sleep sessions, journal entries, and thought logs. This cannot be undone.',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _clearAllData();
+            },
+            child: const Text('Clear Everything', style: TextStyle(color: AppColors.accentError)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _clearAllData() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final userId = await UserService.getCurrentUserId();
+      if (userId == null) throw Exception('User not logged in');
+
+      final success = await client.dev.clearUserData(userId);
+
+      if (success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('All data cleared successfully!'),
+              backgroundColor: AppColors.accentSuccess,
+            ),
+          );
+          _loadData();
+          widget.onDataChanged?.call();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error clearing data: $e');
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(

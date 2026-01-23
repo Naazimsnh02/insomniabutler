@@ -19,6 +19,7 @@ class SleepHistoryScreen extends StatefulWidget {
 class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
   List<SleepSession> _sessions = [];
   bool _isLoading = true;
+  bool _hasChanged = false;
 
   @override
   void initState() {
@@ -85,7 +86,10 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             context,
             MaterialPageRoute(builder: (_) => const ManualLogScreen()),
           );
-          if (result == true) _loadHistory();
+          if (result == true) {
+            _hasChanged = true;
+            _loadHistory();
+          }
         },
         backgroundColor: AppColors.accentPrimary,
         child: const Icon(Icons.add_rounded, color: Colors.white),
@@ -101,7 +105,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
         children: [
           _buildIconButton(
             icon: Icons.arrow_back_ios_new_rounded,
-            onTap: () => Navigator.pop(context),
+            onTap: () => Navigator.pop(context, _hasChanged),
           ),
           Text(
             'Sleep History',
@@ -194,6 +198,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             'hrv': session.hrv,
             'restingHeartRate': session.restingHeartRate,
             'respiratoryRate': session.respiratoryRate,
+            'interruptions': session.interruptions,
           };
 
           final result = await Navigator.push(
@@ -202,7 +207,10 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
               builder: (_) => ManualLogScreen(initialData: editData),
             ),
           );
-          if (result == true) _loadHistory();
+          if (result == true) {
+            _hasChanged = true;
+            _loadHistory();
+          }
         },
         padding: const EdgeInsets.all(20),
         borderRadius: 20,

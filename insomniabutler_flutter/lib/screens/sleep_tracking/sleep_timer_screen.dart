@@ -268,6 +268,7 @@ class _WakeUpFeedbackSheet extends StatefulWidget {
 class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
   final _timerService = SleepTimerService();
   int _quality = 3;
+  int _interruptions = 0;
   String _mood = '😊';
   bool _isSaving = false;
 
@@ -285,16 +286,17 @@ class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
 
       await client.sleepSession.logManualSession(
         userId,
-        bedTime,
-        wakeTime,
+        bedTime.toUtc(),
+        wakeTime.toUtc(),
         _quality,
+        interruptions: _interruptions,
       );
 
       HapticHelper.success();
       if (mounted) {
         _timerService.reset();
         Navigator.pop(context); // Close sheet
-        Navigator.pop(context); // Close timer
+        Navigator.pop(context, true); // Close timer with result
       }
     } catch (e) {
       debugPrint('Error saving timer session: $e');
@@ -412,6 +414,8 @@ class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
               );
             }),
           ),
+           const SizedBox(height: AppSpacing.xl),
+          _buildInterruptionsPicker(),
           const SizedBox(height: AppSpacing.xl),
           PrimaryButton(
             text: _isSaving ? 'Saving...' : 'Complete Entry',
@@ -421,6 +425,67 @@ class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
           const SizedBox(height: AppSpacing.xxl),
         ],
       ),
+    );
+  }
+
+  Widget _buildInterruptionsPicker() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Wake Ups (Interruptions)',
+              style: AppTextStyles.labelLg.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Icon(
+              Icons.bedtime_rounded,
+              size: 16,
+              color: AppColors.accentSkyBlue,
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(6, (i) {
+            final val = i;
+            final isSelected = _interruptions == val;
+            return GestureDetector(
+              onTap: () => setState(() => _interruptions = val),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColors.accentSkyBlue.withOpacity(0.3)
+                      : AppColors.bgSecondary.withOpacity(0.3),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.accentSkyBlue.withOpacity(0.6)
+                        : Colors.white.withOpacity(0.1),
+                    width: isSelected ? 2 : 1.5,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    '$val',
+                    style: AppTextStyles.labelLg.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.white : AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ],
     );
   }
 }

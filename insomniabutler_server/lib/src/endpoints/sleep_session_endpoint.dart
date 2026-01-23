@@ -22,8 +22,9 @@ class SleepSessionEndpoint extends Endpoint {
     int sessionId,
     int sleepQuality,
     String morningMood,
-    int? sleepLatencyMinutes,
-  ) async {
+    int? sleepLatencyMinutes, {
+    int? interruptions,
+  }) async {
     final sleepSession = await SleepSession.db.findById(session, sessionId);
 
     if (sleepSession == null) {
@@ -37,6 +38,7 @@ class SleepSessionEndpoint extends Endpoint {
       sleepQuality: sleepQuality,
       morningMood: morningMood,
       sleepLatencyMinutes: sleepLatencyMinutes,
+      interruptions: interruptions,
     );
 
     return await SleepSession.db.updateRow(session, updated);
@@ -134,6 +136,7 @@ class SleepSessionEndpoint extends Endpoint {
     int? restingHeartRate,
     int? hrv,
     int? respiratoryRate,
+    int? interruptions,
   }) async {
     final sleepSession = SleepSession(
       userId: userId,
@@ -151,6 +154,7 @@ class SleepSessionEndpoint extends Endpoint {
       restingHeartRate: restingHeartRate,
       hrv: hrv,
       respiratoryRate: respiratoryRate,
+      interruptions: interruptions,
     );
 
     return await SleepSession.db.insertRow(session, sleepSession);
@@ -171,6 +175,7 @@ class SleepSessionEndpoint extends Endpoint {
     int? restingHeartRate,
     int? hrv,
     int? respiratoryRate,
+    int? interruptions,
   }) async {
     final sleepSession = await SleepSession.db.findById(session, sessionId);
     if (sleepSession == null) return null;
@@ -187,6 +192,7 @@ class SleepSessionEndpoint extends Endpoint {
       restingHeartRate: restingHeartRate,
       hrv: hrv,
       respiratoryRate: respiratoryRate,
+      interruptions: interruptions,
     );
 
     return await SleepSession.db.updateRow(session, updated);

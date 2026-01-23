@@ -36,8 +36,18 @@ class DevEndpoint extends Endpoint {
       final awakeMinutes = (sleepDurationMinutes * (0.05 + random.nextDouble() * 0.05)).round();
       final lightMinutes = sleepDurationMinutes - deepMinutes - remMinutes - awakeMinutes;
       
-      final sleepQuality = 60 + random.nextInt(35); // 60-95
-      final moods = ['Refreshed', 'Calm', 'A bit tired', 'Energetic', 'Restored'];
+      final usedButler = random.nextDouble() < 0.6; // 60% chance to use Butler
+      
+      // IMPROVEMENT LOGIC: Latency is much lower when Butler is used
+      final sleepLatency = usedButler 
+          ? 5 + random.nextInt(10)  // 5 to 15 mins with Butler
+          : 25 + random.nextInt(25); // 25 to 50 mins without Butler
+
+      final sleepQuality = usedButler 
+          ? 4 + random.nextInt(2)   // 4 or 5 quality with Butler
+          : 2 + random.nextInt(3);  // 2, 3, or 4 without Butler
+
+      final moods = ['Happy', 'Calm', 'Tired', 'Blah', 'Sad'];
       final morningMood = moods[random.nextInt(moods.length)];
       
       final sessionRecord = SleepSession(
@@ -46,24 +56,52 @@ class DevEndpoint extends Endpoint {
         wakeTime: wakeTime,
         sleepQuality: sleepQuality,
         morningMood: morningMood,
-        sleepLatencyMinutes: 10 + random.nextInt(20),
-        usedButler: random.nextBool(),
-        thoughtsProcessed: random.nextInt(5),
+        sleepLatencyMinutes: sleepLatency,
+        usedButler: usedButler,
+        thoughtsProcessed: usedButler ? 1 + random.nextInt(4) : 0,
         sessionDate: bedtime,
         deepSleepDuration: deepMinutes,
         lightSleepDuration: lightMinutes,
         remSleepDuration: remMinutes,
         awakeDuration: awakeMinutes,
-        restingHeartRate: 55 + random.nextInt(15), // 55-70
-        hrv: 40 + random.nextInt(40), // 40-80
-        respiratoryRate: 12 + random.nextInt(6), // 12-18
+        restingHeartRate: 50 + random.nextInt(20),
+        hrv: 30 + random.nextInt(70),
+        respiratoryRate: 12 + random.nextInt(6),
+        interruptions: sleepQuality >= 4 ? random.nextInt(2) : random.nextInt(4),
       );
       
       final savedSession = await SleepSession.db.insertRow(session, sessionRecord);
       
+      // 2. Generate Chat History for Butler sessions
+      if (usedButler) {
+        final messages = [
+          {"user": "I can't stop thinking about my presentation.", "ai": "It's natural to feel that way. Let's break down that worry. What's the specific part bothering you?"},
+          {"user": "Too much to do tomorrow.", "ai": "Let's capture those tasks in a list so your brain can let go for tonight. What's first?"},
+          {"user": "Just feeling restless.", "ai": "I understand. Let's try some progressive muscle relaxation together."}
+        ];
+        
+        final set = messages[random.nextInt(messages.length)];
+        
+        await ChatMessage.db.insertRow(session, ChatMessage(
+          userId: userId,
+          sessionId: savedSession.id.toString(),
+          role: 'user',
+          content: set['user']!,
+          timestamp: bedtime.subtract(const Duration(minutes: 5)),
+        ));
+        
+        await ChatMessage.db.insertRow(session, ChatMessage(
+          userId: userId,
+          sessionId: savedSession.id.toString(),
+          role: 'ai',
+          content: set['ai']!,
+          timestamp: bedtime.subtract(const Duration(minutes: 4)),
+        ));
+      }
+      
       // 2. Generate Journal Entry for ~70% of days
       if (random.nextDouble() < 0.7) {
-        final journalMoods = ['Great', 'Good', 'Neutral', 'Anxious', 'Tired'];
+        final journalMoods = ['Happy', 'Calm', 'Tired', 'Blah', 'Sad'];
         final mood = journalMoods[random.nextInt(journalMoods.length)];
         
         final contents = [
@@ -117,6 +155,15 @@ class DevEndpoint extends Endpoint {
       }
     }
     
+    return true;
+  }
+
+  Future<bool> clearUserData(Session session, int userId) async {
+    // Delete all user data in order to avoid foreign key issues
+    await ChatMessage.db.deleteWhere(session, where: (t) => t.userId.equals(userId));
+    await ThoughtLog.db.deleteWhere(session, where: (t) => t.userId.equals(userId));
+    await JournalEntry.db.deleteWhere(session, where: (t) => t.userId.equals(userId));
+    await SleepSession.db.deleteWhere(session, where: (t) => t.userId.equals(userId));
     return true;
   }
 }
