@@ -10,7 +10,7 @@ import 'package:insomniabutler_client/insomniabutler_client.dart';
 import 'manual_log_screen.dart';
 
 class SleepHistoryScreen extends StatefulWidget {
-  const SleepHistoryScreen({Key? key}) : super(key: key);
+  const SleepHistoryScreen({super.key});
 
   @override
   State<SleepHistoryScreen> createState() => _SleepHistoryScreenState();

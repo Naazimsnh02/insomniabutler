@@ -16,7 +16,7 @@ class GlassCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const GlassCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.margin,
@@ -26,7 +26,7 @@ class GlassCard extends StatelessWidget {
     this.color,
     this.border,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

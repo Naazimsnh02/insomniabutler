@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
-import 'screens/home_screen.dart';
 import 'screens/new_home_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'core/theme.dart';
@@ -52,22 +51,27 @@ void main() async {
     ..authSessionManager = FlutterAuthSessionManager();
 
   // Try to load custom config asynchronously without blocking main flow
-  unawaited(rootBundle.loadString('assets/config.json').then((configString) {
-    try {
-      final config = json.decode(configString);
-      if (config['apiUrl'] != null) {
-        String newUrl = config['apiUrl'];
-        if (!newUrl.endsWith('/')) newUrl += '/';
-        // Note: client.host or similar might need updating if serverpod client supports it
-        // For now we just print it. Usually serverUrl is set at creation.
-        debugPrint('Config loaded. API URL: $newUrl');
-      }
-    } catch (e) {
-      debugPrint('Error parsing config: $e');
-    }
-  }).catchError((e) {
-    debugPrint('Config not found or error loading: $e');
-  }));
+  unawaited(
+    rootBundle
+        .loadString('assets/config.json')
+        .then((configString) {
+          try {
+            final config = json.decode(configString);
+            if (config['apiUrl'] != null) {
+              String newUrl = config['apiUrl'];
+              if (!newUrl.endsWith('/')) newUrl += '/';
+              // Note: client.host or similar might need updating if serverpod client supports it
+              // For now we just print it. Usually serverUrl is set at creation.
+              debugPrint('Config loaded. API URL: $newUrl');
+            }
+          } catch (e) {
+            debugPrint('Error parsing config: $e');
+          }
+        })
+        .catchError((e) {
+          debugPrint('Config not found or error loading: $e');
+        }),
+  );
 
   // Remove splash as soon as basic initialization is done
   FlutterNativeSplash.remove();
@@ -91,7 +95,7 @@ class MyApp extends StatelessWidget {
 
 /// Determines whether to show onboarding or home screen
 class AppInitializer extends StatefulWidget {
-  const AppInitializer({Key? key}) : super(key: key);
+  const AppInitializer({super.key});
 
   @override
   State<AppInitializer> createState() => _AppInitializerState();

@@ -8,7 +8,7 @@ import '../../widgets/glass_card.dart';
 class SetupScreen extends StatefulWidget {
   final VoidCallback onComplete;
 
-  const SetupScreen({Key? key, required this.onComplete}) : super(key: key);
+  const SetupScreen({super.key, required this.onComplete});
 
   @override
   State<SetupScreen> createState() => _SetupScreenState();

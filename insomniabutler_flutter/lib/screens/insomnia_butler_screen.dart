@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'dart:ui';
 import 'dart:async';
 import 'dart:io';
 import '../core/theme.dart';
@@ -13,7 +12,7 @@ import '../utils/haptic_helper.dart';
 /// Thought Clearing Chat UI - CORE FEATURE
 /// Premium glassmorphic chat interface for processing anxious thoughts
 class InsomniaButlerScreen extends StatefulWidget {
-  const InsomniaButlerScreen({Key? key}) : super(key: key);
+  const InsomniaButlerScreen({super.key});
 
   @override
   State<InsomniaButlerScreen> createState() => _InsomniaButlerScreenState();

@@ -4,12 +4,11 @@ import '../../widgets/glass_card.dart';
 import '../../widgets/primary_button.dart';
 
 import 'package:flutter_animate/flutter_animate.dart';
-import 'dart:ui';
 
 class DemoScreen extends StatefulWidget {
   final VoidCallback onNext;
 
-  const DemoScreen({Key? key, required this.onNext}) : super(key: key);
+  const DemoScreen({super.key, required this.onNext});
 
   @override
   State<DemoScreen> createState() => _DemoScreenState();
@@ -450,10 +449,10 @@ class PermissionsScreen extends StatefulWidget {
   final VoidCallback onSkip;
 
   const PermissionsScreen({
-    Key? key,
+    super.key,
     required this.onNext,
     required this.onSkip,
-  }) : super(key: key);
+  });
 
   @override
   State<PermissionsScreen> createState() => _PermissionsScreenState();
@@ -745,7 +744,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
               child: Switch(
                 value: value,
                 onChanged: onChanged,
-                activeColor: Colors.white,
+                activeThumbColor: Colors.white,
                 activeTrackColor: AppColors.accentPrimary,
                 inactiveThumbColor: AppColors.textDisabled,
                 inactiveTrackColor: Colors.white.withOpacity(0.1),

@@ -36,7 +36,9 @@ class AudioPlayerService {
             id: sound.id,
             album: "Sleep Sounds",
             title: sound.title,
-            artUri: sound.imagePath != null ? Uri.parse(sound.imagePath!) : null,
+            artUri: sound.imagePath != null
+                ? Uri.parse(sound.imagePath!)
+                : null,
           ),
         ),
       );
@@ -82,7 +84,10 @@ class AudioPlayerService {
 
     for (var i = 0; i < steps; i++) {
       await Future.delayed(interval);
-      final newVolume = (initialVolume - (stepVolume * (i + 1))).clamp(0.0, 1.0);
+      final newVolume = (initialVolume - (stepVolume * (i + 1))).clamp(
+        0.0,
+        1.0,
+      );
       await _player.setVolume(newVolume);
     }
 

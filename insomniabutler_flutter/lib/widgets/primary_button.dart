@@ -10,13 +10,13 @@ class PrimaryButton extends StatelessWidget {
   final Gradient? gradient;
 
   const PrimaryButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.isLoading = false,
     this.icon,
     this.gradient,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -78,11 +78,11 @@ class GlassButton extends StatelessWidget {
   final IconData? icon;
 
   const GlassButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

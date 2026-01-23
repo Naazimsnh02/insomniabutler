@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
 
 /// Insomnia Butler Design System
 /// Reference-matched night UI (Ink Blue + Soft Violet + Warm Amber)
@@ -274,12 +273,10 @@ class AppTheme {
         primary: AppColors.accentPrimary,
         secondary: AppColors.accentSecondary,
         surface: AppColors.surfaceBase,
-        background: AppColors.bgPrimary,
         error: AppColors.error,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimary,
-        onBackground: AppColors.textPrimary,
       ),
       textTheme: TextTheme(
         headlineLarge: AppTextStyles.h1,

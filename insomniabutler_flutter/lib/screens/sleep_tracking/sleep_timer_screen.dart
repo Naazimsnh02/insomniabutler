@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'dart:ui';
 import 'dart:async';
 import '../../core/theme.dart';
 import '../../widgets/primary_button.dart';
@@ -11,7 +10,7 @@ import '../../services/user_service.dart';
 import '../../services/sleep_timer_service.dart';
 
 class SleepTimerScreen extends StatefulWidget {
-  const SleepTimerScreen({Key? key}) : super(key: key);
+  const SleepTimerScreen({super.key});
 
   @override
   State<SleepTimerScreen> createState() => _SleepTimerScreenState();
@@ -258,8 +257,7 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
 
 class _WakeUpFeedbackSheet extends StatefulWidget {
   final Duration duration;
-  const _WakeUpFeedbackSheet({Key? key, required this.duration})
-    : super(key: key);
+  const _WakeUpFeedbackSheet({required this.duration});
 
   @override
   State<_WakeUpFeedbackSheet> createState() => _WakeUpFeedbackSheetState();
@@ -269,7 +267,7 @@ class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
   final _timerService = SleepTimerService();
   int _quality = 3;
   int _interruptions = 0;
-  String _mood = '😊';
+  final String _mood = '😊';
   bool _isSaving = false;
 
   Future<void> _saveSession() async {
@@ -414,7 +412,7 @@ class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
               );
             }),
           ),
-           const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.xl),
           _buildInterruptionsPicker(),
           const SizedBox(height: AppSpacing.xl),
           PrimaryButton(

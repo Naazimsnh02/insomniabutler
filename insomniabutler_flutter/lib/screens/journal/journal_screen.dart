@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'dart:ui';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
@@ -14,7 +12,7 @@ import 'journal_detail_screen.dart';
 /// Features: Timeline, Calendar, Insights tabs with glassmorphic design
 class JournalScreen extends StatefulWidget {
   final bool isTab;
-  const JournalScreen({Key? key, this.isTab = false}) : super(key: key);
+  const JournalScreen({super.key, this.isTab = false});
 
   @override
   State<JournalScreen> createState() => JournalScreenState();
@@ -193,7 +191,6 @@ class JournalScreenState extends State<JournalScreen>
   Widget _buildIconButton({
     required IconData icon,
     required VoidCallback onTap,
-    Color? iconColor,
   }) {
     return GestureDetector(
       onTap: onTap,

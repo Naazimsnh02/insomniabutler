@@ -9,7 +9,7 @@ import '../../widgets/glass_card.dart';
 import '../../utils/haptic_helper.dart';
 
 class SoundsScreen extends StatefulWidget {
-  const SoundsScreen({Key? key}) : super(key: key);
+  const SoundsScreen({super.key});
 
   @override
   State<SoundsScreen> createState() => _SoundsScreenState();
@@ -59,7 +59,8 @@ class _SoundsScreenState extends State<SoundsScreen> {
     SleepSound(
       id: '2',
       title: 'Soft Ambient Rain',
-      assetPath: 'assets/sounds/sleep/relaxing-sleep-music-with-soft-ambient-rain-369762.mp3',
+      assetPath:
+          'assets/sounds/sleep/relaxing-sleep-music-with-soft-ambient-rain-369762.mp3',
       category: SoundCategory.nature,
       description: 'Gentle rain falling on a quiet evening.',
       imagePath: 'assets/images/sounds/Soft Ambient Rain.png',
@@ -169,8 +170,12 @@ class _SoundsScreenState extends State<SoundsScreen> {
                 style: AppTextStyles.h1.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
-                _showFavoritesOnly ? 'Your favorite sounds' : 'Curated for your deep rest',
-                style: AppTextStyles.bodySm.copyWith(color: AppColors.textSecondary),
+                _showFavoritesOnly
+                    ? 'Your favorite sounds'
+                    : 'Curated for your deep rest',
+                style: AppTextStyles.bodySm.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
@@ -206,7 +211,9 @@ class _SoundsScreenState extends State<SoundsScreen> {
           ),
         ),
         child: Icon(
-          _showFavoritesOnly ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
+          _showFavoritesOnly
+              ? Icons.favorite_rounded
+              : Icons.favorite_outline_rounded,
           color: _showFavoritesOnly ? AppColors.accentError : Colors.white,
           size: 20,
         ),
@@ -263,7 +270,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
           final isAllChip = index == 0;
           final category = isAllChip ? null : SoundCategory.values[index - 1];
           final isSelected = _selectedCategory == category;
-          
+
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: ChoiceChip(
@@ -319,14 +326,20 @@ class _SoundsScreenState extends State<SoundsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              _showFavoritesOnly ? Icons.favorite_border_rounded : Icons.music_note_outlined,
+              _showFavoritesOnly
+                  ? Icons.favorite_border_rounded
+                  : Icons.music_note_outlined,
               size: 64,
               color: AppColors.textTertiary.withOpacity(0.3),
             ),
             const SizedBox(height: 16),
             Text(
-              _showFavoritesOnly ? 'No favorites yet' : 'No sounds in this category',
-              style: AppTextStyles.bodySm.copyWith(color: AppColors.textTertiary),
+              _showFavoritesOnly
+                  ? 'No favorites yet'
+                  : 'No sounds in this category',
+              style: AppTextStyles.bodySm.copyWith(
+                color: AppColors.textTertiary,
+              ),
             ),
           ],
         ),
@@ -363,170 +376,209 @@ class _SoundsScreenState extends State<SoundsScreen> {
             final isFavorite = _favoriteIds.contains(sound.id);
 
             return Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: isCurrent ? AppShadows.selectionGlow : null,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Stack(
-                  children: [
-                    // Clear Image Background
-                    if (sound.imagePath != null)
-                      Positioned.fill(
-                        child: Image.asset(
-                          sound.imagePath!,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    
-                    // Gradient Overlay for readability
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.black.withOpacity(0.1),
-                              Colors.black.withOpacity(0.6),
-                            ],
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: isCurrent ? AppShadows.selectionGlow : null,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Stack(
+                      children: [
+                        // Clear Image Background
+                        if (sound.imagePath != null)
+                          Positioned.fill(
+                            child: Image.asset(
+                              sound.imagePath!,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+
+                        // Gradient Overlay for readability
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.black.withOpacity(0.1),
+                                  Colors.black.withOpacity(0.6),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
 
-                    // Card Content
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          HapticHelper.mediumImpact();
-                          if (isCurrent && isPlaying) {
-                            _audioService.pause();
-                          } else {
-                            _audioService.play(sound);
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        // Card Content
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              HapticHelper.mediumImpact();
+                              if (isCurrent && isPlaying) {
+                                _audioService.pause();
+                              } else {
+                                _audioService.play(sound);
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Glassy Play Button
-                                  ClipOval(
-                                    child: BackdropFilter(
-                                      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                                      child: Container(
-                                        width: 44,
-                                        height: 44,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.2),
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: Colors.white.withOpacity(0.2),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      // Glassy Play Button
+                                      ClipOval(
+                                        child: BackdropFilter(
+                                          filter: ImageFilter.blur(
+                                            sigmaX: 8,
+                                            sigmaY: 8,
                                           ),
-                                        ),
-                                        child: Icon(
-                                          isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                                          color: Colors.white,
-                                          size: 24,
+                                          child: Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withOpacity(
+                                                0.2,
+                                              ),
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: Colors.white.withOpacity(
+                                                  0.2,
+                                                ),
+                                              ),
+                                            ),
+                                            child: Icon(
+                                              isPlaying
+                                                  ? Icons.pause_rounded
+                                                  : Icons.play_arrow_rounded,
+                                              color: Colors.white,
+                                              size: 24,
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                  
-                                  // Glassy Favorite Button
-                                  ClipOval(
-                                    child: BackdropFilter(
-                                      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.2),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: IconButton(
-                                          icon: Icon(
-                                            isFavorite ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-                                            color: isFavorite ? AppColors.accentError : Colors.white,
-                                            size: 20,
+
+                                      // Glassy Favorite Button
+                                      ClipOval(
+                                        child: BackdropFilter(
+                                          filter: ImageFilter.blur(
+                                            sigmaX: 8,
+                                            sigmaY: 8,
                                           ),
-                                          onPressed: () => _toggleFavorite(sound.id),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withOpacity(
+                                                0.2,
+                                              ),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: IconButton(
+                                              icon: Icon(
+                                                isFavorite
+                                                    ? Icons.favorite_rounded
+                                                    : Icons
+                                                          .favorite_outline_rounded,
+                                                color: isFavorite
+                                                    ? AppColors.accentError
+                                                    : Colors.white,
+                                                size: 20,
+                                              ),
+                                              onPressed: () =>
+                                                  _toggleFavorite(sound.id),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Spacer(),
+
+                                  // Glassy Text Area
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: BackdropFilter(
+                                      filter: ImageFilter.blur(
+                                        sigmaX: 10,
+                                        sigmaY: 10,
+                                      ),
+                                      child: Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.white.withOpacity(
+                                              0.1,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              sound.title,
+                                              style: AppTextStyles.bodySm
+                                                  .copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                    fontSize: 13,
+                                                  ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text(
+                                              _getCategoryName(sound.category),
+                                              style: AppTextStyles.caption
+                                                  .copyWith(
+                                                    color: Colors.white
+                                                        .withOpacity(0.7),
+                                                    fontSize: 10,
+                                                  ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const Spacer(),
-                              
-                              // Glassy Text Area
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                                  child: Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: Colors.white.withOpacity(0.1),
-                                      ),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          sound.title,
-                                          style: AppTextStyles.bodySm.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                            fontSize: 13,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        Text(
-                                          _getCategoryName(sound.category),
-                                          style: AppTextStyles.caption.copyWith(
-                                            color: Colors.white.withOpacity(0.7),
-                                            fontSize: 10,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Active Border
-                    if (isCurrent)
-                      Positioned.fill(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: AppColors.accentPrimary.withOpacity(0.8),
-                              width: 2.5,
                             ),
                           ),
                         ),
-                      ),
-                  ],
-                ),
-              ),
-            ).animate(target: isCurrent ? 1 : 0).scale(
+
+                        // Active Border
+                        if (isCurrent)
+                          Positioned.fill(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(
+                                  color: AppColors.accentPrimary.withOpacity(
+                                    0.8,
+                                  ),
+                                  width: 2.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                )
+                .animate(target: isCurrent ? 1 : 0)
+                .scale(
                   begin: const Offset(1, 1),
                   end: const Offset(1.04, 1.04),
                   duration: 200.ms,
@@ -548,88 +600,108 @@ class _SoundsScreenState extends State<SoundsScreen> {
 
         return Container(
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 110),
-          child: GlassCard(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            borderRadius: 24,
-            color: AppColors.bgSecondary.withOpacity(0.9),
-            border: Border.all(color: AppColors.accentPrimary.withOpacity(0.4)),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    image: currentSound.imagePath != null
-                        ? DecorationImage(
-                            image: AssetImage(currentSound.imagePath!),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
-                    color: AppColors.accentPrimary.withOpacity(0.2),
-                  ),
-                  child: currentSound.imagePath == null
-                      ? const Icon(Icons.music_note_rounded,
-                          color: AppColors.accentPrimary, size: 20)
-                      : null,
+          child:
+              GlassCard(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        currentSound.title,
-                        style: AppTextStyles.bodySm.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        'Now Playing',
-                        style: AppTextStyles.caption.copyWith(
-                          fontSize: 10,
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
-                  ),
+                borderRadius: 24,
+                color: AppColors.bgSecondary.withOpacity(0.9),
+                border: Border.all(
+                  color: AppColors.accentPrimary.withOpacity(0.4),
                 ),
-                StreamBuilder<bool>(
-                  stream: _audioService.isPlayingStream,
-                  initialData: _audioService.isPlaying,
-                  builder: (context, playingSnapshot) {
-                    final isPlaying = playingSnapshot.data ?? false;
-                    return Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            isPlaying ? Icons.pause_circle_filled_rounded : Icons.play_circle_filled_rounded,
-                            color: Colors.white,
-                            size: 32,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        image: currentSound.imagePath != null
+                            ? DecorationImage(
+                                image: AssetImage(currentSound.imagePath!),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
+                        color: AppColors.accentPrimary.withOpacity(0.2),
+                      ),
+                      child: currentSound.imagePath == null
+                          ? const Icon(
+                              Icons.music_note_rounded,
+                              color: AppColors.accentPrimary,
+                              size: 20,
+                            )
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            currentSound.title,
+                            style: AppTextStyles.bodySm.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          onPressed: () {
-                            if (isPlaying) {
-                              _audioService.pause();
-                            } else {
-                              _audioService.resume();
-                            }
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close_rounded, color: Colors.white70, size: 20),
-                          onPressed: () => _audioService.stop(),
-                        ),
-                      ],
-                    );
-                  },
+                          Text(
+                            'Now Playing',
+                            style: AppTextStyles.caption.copyWith(
+                              fontSize: 10,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    StreamBuilder<bool>(
+                      stream: _audioService.isPlayingStream,
+                      initialData: _audioService.isPlaying,
+                      builder: (context, playingSnapshot) {
+                        final isPlaying = playingSnapshot.data ?? false;
+                        return Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                isPlaying
+                                    ? Icons.pause_circle_filled_rounded
+                                    : Icons.play_circle_filled_rounded,
+                                color: Colors.white,
+                                size: 32,
+                              ),
+                              onPressed: () {
+                                if (isPlaying) {
+                                  _audioService.pause();
+                                } else {
+                                  _audioService.resume();
+                                }
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.close_rounded,
+                                color: Colors.white70,
+                                size: 20,
+                              ),
+                              onPressed: () => _audioService.stop(),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ).animate().slideY(begin: 1, end: 0, duration: 400.ms, curve: Curves.easeOutBack),
+              ).animate().slideY(
+                begin: 1,
+                end: 0,
+                duration: 400.ms,
+                curve: Curves.easeOutBack,
+              ),
         );
       },
     );
@@ -662,21 +734,33 @@ class _TimerPickerSheet extends StatelessWidget {
         children: [
           Text('Set Sleep Timer', style: AppTextStyles.h3),
           const SizedBox(height: 8),
-          Text('Audio will slowly fade out and stop',
-              style: AppTextStyles.bodySm.copyWith(color: AppColors.textSecondary)),
+          Text(
+            'Audio will slowly fade out and stop',
+            style: AppTextStyles.bodySm.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
           const SizedBox(height: 24),
-          ...times.map((time) => ListTile(
-                title: Text(time['label'] as String,
-                    textAlign: TextAlign.center, style: AppTextStyles.bodyLg),
-                onTap: () {
-                  onTimerSelected(Duration(minutes: time['value'] as int));
-                  Navigator.pop(context);
-                },
-              )),
+          ...times.map(
+            (time) => ListTile(
+              title: Text(
+                time['label'] as String,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.bodyLg,
+              ),
+              onTap: () {
+                onTimerSelected(Duration(minutes: time['value'] as int));
+                Navigator.pop(context);
+              },
+            ),
+          ),
           const SizedBox(height: 16),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: AppColors.accentError)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.accentError),
+            ),
           ),
         ],
       ),

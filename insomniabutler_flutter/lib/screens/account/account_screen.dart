@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme.dart';
@@ -18,7 +17,7 @@ class AccountScreen extends StatefulWidget {
   final bool isTab;
   final VoidCallback? onDataChanged;
 
-  const AccountScreen({Key? key, this.isTab = true, this.onDataChanged}) : super(key: key);
+  const AccountScreen({super.key, this.isTab = true, this.onDataChanged});
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
@@ -658,7 +657,10 @@ class _AccountScreenState extends State<AccountScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.bgPrimary,
-        title: const Text('Generate Data?', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Generate Data?',
+          style: TextStyle(color: Colors.white),
+        ),
         content: const Text(
           'This will generate 30 days of realistic sleep sessions, journal entries, and thought logs. This is for testing purposes.',
           style: TextStyle(color: AppColors.textSecondary),
@@ -666,14 +668,20 @@ class _AccountScreenState extends State<AccountScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _generateRealisticData();
             },
-            child: const Text('Generate', style: TextStyle(color: AppColors.accentPrimary)),
+            child: const Text(
+              'Generate',
+              style: TextStyle(color: AppColors.accentPrimary),
+            ),
           ),
         ],
       ),
@@ -721,7 +729,10 @@ class _AccountScreenState extends State<AccountScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.bgPrimary,
-        title: const Text('Clear All Data?', style: TextStyle(color: AppColors.accentError)),
+        title: const Text(
+          'Clear All Data?',
+          style: TextStyle(color: AppColors.accentError),
+        ),
         content: const Text(
           'This will permanently delete ALL your sleep sessions, journal entries, and thought logs. This cannot be undone.',
           style: TextStyle(color: AppColors.textSecondary),
@@ -729,14 +740,20 @@ class _AccountScreenState extends State<AccountScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _clearAllData();
             },
-            child: const Text('Clear Everything', style: TextStyle(color: AppColors.accentError)),
+            child: const Text(
+              'Clear Everything',
+              style: TextStyle(color: AppColors.accentError),
+            ),
           ),
         ],
       ),
@@ -877,7 +894,7 @@ class _AccountScreenState extends State<AccountScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.accentPrimary,
+            activeThumbColor: AppColors.accentPrimary,
             activeTrackColor: AppColors.accentPrimary.withOpacity(0.5),
           ),
         ],

@@ -11,7 +11,7 @@ import 'package:insomniabutler_client/insomniabutler_client.dart';
 class ManualLogScreen extends StatefulWidget {
   final Map<String, dynamic>? initialData; // Pass if editing
 
-  const ManualLogScreen({Key? key, this.initialData}) : super(key: key);
+  const ManualLogScreen({super.key, this.initialData});
 
   @override
   State<ManualLogScreen> createState() => _ManualLogScreenState();
@@ -63,12 +63,12 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
       _rhr = d['restingHeartRate'];
       _respiratoryRate = d['respiratoryRate'];
       _interruptions = d['interruptions'];
-      if (_deepSleep != null || 
-          _lightSleep != null || 
-          _remSleep != null || 
-          _awake != null || 
-          _hrv != null || 
-          _rhr != null || 
+      if (_deepSleep != null ||
+          _lightSleep != null ||
+          _remSleep != null ||
+          _awake != null ||
+          _hrv != null ||
+          _rhr != null ||
           _respiratoryRate != null ||
           _interruptions != null) {
         _showAdvanced = true;
@@ -95,10 +95,11 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
     );
     if (picked != null) {
       setState(() {
-        if (isBedtime)
+        if (isBedtime) {
           _bedtime = picked;
-        else
+        } else {
           _waketime = picked;
+        }
       });
     }
   }
@@ -501,13 +502,13 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             decoration: BoxDecoration(
-              color: _showAdvanced 
-                  ? AppColors.accentPrimary.withOpacity(0.1) 
+              color: _showAdvanced
+                  ? AppColors.accentPrimary.withOpacity(0.1)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _showAdvanced 
-                    ? AppColors.accentPrimary.withOpacity(0.3) 
+                color: _showAdvanced
+                    ? AppColors.accentPrimary.withOpacity(0.3)
                     : Colors.white.withOpacity(0.1),
               ),
             ),
@@ -515,15 +516,23 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  _showAdvanced ? Icons.insights_rounded : Icons.add_chart_rounded,
+                  _showAdvanced
+                      ? Icons.insights_rounded
+                      : Icons.add_chart_rounded,
                   size: 18,
-                  color: _showAdvanced ? AppColors.accentPrimary : AppColors.textTertiary,
+                  color: _showAdvanced
+                      ? AppColors.accentPrimary
+                      : AppColors.textTertiary,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _showAdvanced ? 'Hide Advanced Metrics' : 'Add Recovery Metrics',
+                  _showAdvanced
+                      ? 'Hide Advanced Metrics'
+                      : 'Add Recovery Metrics',
                   style: AppTextStyles.label.copyWith(
-                    color: _showAdvanced ? AppColors.accentPrimary : AppColors.textTertiary,
+                    color: _showAdvanced
+                        ? AppColors.accentPrimary
+                        : AppColors.textTertiary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -533,7 +542,9 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
                       ? Icons.keyboard_arrow_up_rounded
                       : Icons.keyboard_arrow_down_rounded,
                   size: 18,
-                  color: _showAdvanced ? AppColors.accentPrimary : AppColors.textTertiary,
+                  color: _showAdvanced
+                      ? AppColors.accentPrimary
+                      : AppColors.textTertiary,
                 ),
               ],
             ),
@@ -559,11 +570,17 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.pie_chart_outline_rounded, size: 18, color: AppColors.accentPrimary),
+              const Icon(
+                Icons.pie_chart_outline_rounded,
+                size: 18,
+                color: AppColors.accentPrimary,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Sleep Architecture (mins)',
-                style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.bold),
+                style: AppTextStyles.labelLg.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -572,17 +589,45 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
             children: [
               Row(
                 children: [
-                  Expanded(child: _buildMetricInput('Deep', _deepSleep, (v) => setState(() => _deepSleep = v), AppColors.accentPrimary)),
+                  Expanded(
+                    child: _buildMetricInput(
+                      'Deep',
+                      _deepSleep,
+                      (v) => setState(() => _deepSleep = v),
+                      AppColors.accentPrimary,
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(child: _buildMetricInput('REM', _remSleep, (v) => setState(() => _remSleep = v), AppColors.accentSkyBlue)),
+                  Expanded(
+                    child: _buildMetricInput(
+                      'REM',
+                      _remSleep,
+                      (v) => setState(() => _remSleep = v),
+                      AppColors.accentSkyBlue,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(child: _buildMetricInput('Light', _lightSleep, (v) => setState(() => _lightSleep = v), AppColors.textSecondary)),
+                  Expanded(
+                    child: _buildMetricInput(
+                      'Light',
+                      _lightSleep,
+                      (v) => setState(() => _lightSleep = v),
+                      AppColors.textSecondary,
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(child: _buildMetricInput('Awake', _awake, (v) => setState(() => _awake = v), AppColors.accentAmber)),
+                  Expanded(
+                    child: _buildMetricInput(
+                      'Awake',
+                      _awake,
+                      (v) => setState(() => _awake = v),
+                      AppColors.accentAmber,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -602,11 +647,17 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.favorite_outline_rounded, size: 18, color: AppColors.accentError),
+              const Icon(
+                Icons.favorite_outline_rounded,
+                size: 18,
+                color: AppColors.accentError,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Vitals & Recovery',
-                style: AppTextStyles.labelLg.copyWith(fontWeight: FontWeight.bold),
+                style: AppTextStyles.labelLg.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -615,9 +666,9 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
             children: [
               Expanded(
                 child: _buildMetricInput(
-                  'HRV (ms)', 
-                  _hrv, 
-                  (v) => setState(() => _hrv = v), 
+                  'HRV (ms)',
+                  _hrv,
+                  (v) => setState(() => _hrv = v),
                   AppColors.accentSuccess,
                   icon: Icons.bolt_rounded,
                 ),
@@ -625,9 +676,9 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildMetricInput(
-                  'RHR (bpm)', 
-                  _rhr, 
-                  (v) => setState(() => _rhr = v), 
+                  'RHR (bpm)',
+                  _rhr,
+                  (v) => setState(() => _rhr = v),
                   AppColors.accentError,
                   icon: Icons.favorite_rounded,
                 ),
@@ -636,9 +687,9 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
           ),
           const SizedBox(height: 12),
           _buildMetricInput(
-            'Respiratory Rate (br/m)', 
-            _respiratoryRate, 
-            (v) => setState(() => _respiratoryRate = v), 
+            'Respiratory Rate (br/m)',
+            _respiratoryRate,
+            (v) => setState(() => _respiratoryRate = v),
             AppColors.accentSkyBlue,
             icon: Icons.air_rounded,
           ),
@@ -648,12 +699,12 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
   }
 
   Widget _buildMetricInput(
-    String label, 
-    int? value, 
-    Function(int?) onChanged, 
-    Color themeColor,
-    {IconData? icon}
-  ) {
+    String label,
+    int? value,
+    Function(int?) onChanged,
+    Color themeColor, {
+    IconData? icon,
+  }) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -682,9 +733,15 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
           ),
           const SizedBox(height: 4),
           TextField(
-            controller: TextEditingController(text: value?.toString() ?? '')..selection = TextSelection.fromPosition(TextPosition(offset: (value?.toString() ?? '').length)),
+            controller: TextEditingController(text: value?.toString() ?? '')
+              ..selection = TextSelection.fromPosition(
+                TextPosition(offset: (value?.toString() ?? '').length),
+              ),
             keyboardType: TextInputType.number,
-            style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold, color: themeColor),
+            style: AppTextStyles.h4.copyWith(
+              fontWeight: FontWeight.bold,
+              color: themeColor,
+            ),
             decoration: InputDecoration(
               isDense: true,
               contentPadding: EdgeInsets.zero,

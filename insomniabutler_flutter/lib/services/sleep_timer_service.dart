@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 
 /// Singleton service to manage sleep timer state across screens
 class SleepTimerService {

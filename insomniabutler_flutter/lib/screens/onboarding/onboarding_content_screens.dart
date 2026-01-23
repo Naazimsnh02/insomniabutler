@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../core/theme.dart';
-import '../../widgets/glass_card.dart';
 import '../../widgets/primary_button.dart';
 
 /// Onboarding Screen 1: Welcome
 class WelcomeScreen extends StatelessWidget {
   final VoidCallback onNext;
 
-  const WelcomeScreen({Key? key, required this.onNext}) : super(key: key);
+  const WelcomeScreen({super.key, required this.onNext});
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +84,7 @@ class WelcomeScreen extends StatelessWidget {
 class ProblemScreen extends StatelessWidget {
   final VoidCallback onNext;
 
-  const ProblemScreen({Key? key, required this.onNext}) : super(key: key);
+  const ProblemScreen({super.key, required this.onNext});
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +162,7 @@ class ProblemScreen extends StatelessWidget {
 class SolutionScreen extends StatelessWidget {
   final VoidCallback onNext;
 
-  const SolutionScreen({Key? key, required this.onNext}) : super(key: key);
+  const SolutionScreen({super.key, required this.onNext});
 
   @override
   Widget build(BuildContext context) {

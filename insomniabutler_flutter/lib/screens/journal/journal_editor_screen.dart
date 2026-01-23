@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'dart:ui';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
@@ -14,7 +12,7 @@ import '../../utils/haptic_helper.dart';
 class JournalEditorScreen extends StatefulWidget {
   final int? entryId; // null for new entry
 
-  const JournalEditorScreen({Key? key, this.entryId}) : super(key: key);
+  const JournalEditorScreen({super.key, this.entryId});
 
   @override
   State<JournalEditorScreen> createState() => _JournalEditorScreenState();

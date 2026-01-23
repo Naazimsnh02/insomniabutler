@@ -9,8 +9,7 @@ import 'auth_screen.dart';
 class OnboardingScreen extends StatefulWidget {
   final VoidCallback onComplete;
 
-  const OnboardingScreen({Key? key, required this.onComplete})
-    : super(key: key);
+  const OnboardingScreen({super.key, required this.onComplete});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();

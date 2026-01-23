@@ -1,10 +1,4 @@
-enum SoundCategory {
-  melodic,
-  ambient,
-  nature,
-  lullaby,
-  meditative
-}
+enum SoundCategory { melodic, ambient, nature, lullaby, meditative }
 
 class SleepSound {
   final String id;

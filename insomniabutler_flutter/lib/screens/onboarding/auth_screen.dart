@@ -9,7 +9,7 @@ import '../../widgets/glass_card.dart';
 class AuthScreen extends StatefulWidget {
   final VoidCallback onComplete;
 
-  const AuthScreen({Key? key, required this.onComplete}) : super(key: key);
+  const AuthScreen({super.key, required this.onComplete});
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();

@@ -1,7 +1,6 @@
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'dart:ui';
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
 import '../core/theme.dart';
@@ -23,7 +22,7 @@ import 'sounds/sounds_screen.dart';
 /// Home Dashboard - Main app screen
 /// Redesigned with premium high-fidelity UI inspired by modern sleep trackers
 class NewHomeScreen extends StatefulWidget {
-  const NewHomeScreen({Key? key}) : super(key: key);
+  const NewHomeScreen({super.key});
 
   @override
   State<NewHomeScreen> createState() => _NewHomeScreenState();
@@ -159,7 +158,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           final now = DateTime.now();
           final today = DateTime(now.year, now.month, now.day);
           final diff = today.difference(sessionDate).inDays;
-          
+
           if (diff <= 1) {
             streak = 1;
             lastDate = sessionDate;
@@ -182,37 +181,47 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       // Get target session based on selected date
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
-      final selectedDayOnly = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
-      
+      final selectedDayOnly = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+      );
+
       dynamic targetSession;
       if (selectedDayOnly.isAtSameMomentAs(today)) {
         // For today, we usually want to see the most recent finished session (last night's)
         targetSession = await client.sleepSession.getLastNightSession(userId);
       } else {
         // For other days, find the session that STARTED on that day
-        targetSession = await client.sleepSession.getSessionForDate(userId, _selectedDate);
+        targetSession = await client.sleepSession.getSessionForDate(
+          userId,
+          _selectedDate,
+        );
       }
 
       if (targetSession != null && targetSession.wakeTime != null) {
-        final duration = targetSession.wakeTime!.difference(targetSession.bedTime);
+        final duration = targetSession.wakeTime!.difference(
+          targetSession.bedTime,
+        );
         final tibMinutes = duration.inMinutes;
-        
+
         // Robust Sleep Efficiency Calculation:
         // SE = (Actual Sleep Time / Total Time in Bed) * 100
         // Actual Sleep Time = TIB - Sleep Latency - Awake Time
-        
+
         final latency = targetSession.sleepLatencyMinutes ?? 0;
         final awake = targetSession.awakeDuration ?? 0;
-        
+
         // If we don't have awakeDuration but have interruptions, estimate it (e.g., 10 mins per interruption)
         int estimatedAwake = awake;
         if (awake == 0 && (targetSession.interruptions ?? 0) > 0) {
           estimatedAwake = (targetSession.interruptions ?? 0) * 10;
         }
 
-        final actualSleepMinutes = (tibMinutes - latency - estimatedAwake).clamp(0, tibMinutes);
-        final efficiency = tibMinutes > 0 
-            ? (actualSleepMinutes / tibMinutes * 100) 
+        final actualSleepMinutes = (tibMinutes - latency - estimatedAwake)
+            .clamp(0, tibMinutes);
+        final efficiency = tibMinutes > 0
+            ? (actualSleepMinutes / tibMinutes * 100)
             : 0.0;
 
         setState(() {
@@ -246,7 +255,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         if (recentSessions.length >= 2) {
           double totalBedtimeDev = 0;
           double totalWakeDev = 0;
-          
+
           double meanBedtime = 0;
           double meanWake = 0;
           int sessionsWithWake = 0;
@@ -254,32 +263,32 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           for (var s in recentSessions) {
             final bt = s.bedTime.toLocal();
             meanBedtime += (bt.hour * 60 + bt.minute);
-            
+
             if (s.wakeTime != null) {
               final wt = s.wakeTime!.toLocal();
               meanWake += (wt.hour * 60 + wt.minute);
               sessionsWithWake++;
             }
           }
-          
+
           meanBedtime /= recentSessions.length;
           if (sessionsWithWake > 0) meanWake /= sessionsWithWake;
-          
+
           for (var s in recentSessions) {
             final bt = s.bedTime.toLocal();
             totalBedtimeDev += (bt.hour * 60 + bt.minute - meanBedtime).abs();
-            
+
             if (s.wakeTime != null) {
               final wt = s.wakeTime!.toLocal();
               totalWakeDev += (wt.hour * 60 + wt.minute - meanWake).abs();
             }
           }
-          
+
           double avgDev = totalBedtimeDev / recentSessions.length;
           if (sessionsWithWake > 0) {
             avgDev = (avgDev + (totalWakeDev / sessionsWithWake)) / 2;
           }
-          
+
           calculatedConsistency = (100 - (avgDev / 1.2)).clamp(0, 100).toInt();
         }
       }
@@ -287,7 +296,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       setState(() {
         _consistencyScore = calculatedConsistency;
         _latencyImprovement = insights.latencyImprovement;
-        _avgSleep = insights.avgLatencyWithButler > 0 
+        _avgSleep = insights.avgLatencyWithButler > 0
             ? (insights.avgLatencyWithButler / 60).clamp(0, 12).toDouble()
             : 0;
         _streakDays = streak;
@@ -353,11 +362,6 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         }
       });
     }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   bool get _isTodaySelected => isSameDay(_selectedDate, DateTime.now());
@@ -540,7 +544,9 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                 ),
                 const SizedBox(width: 12),
                 _buildIconButton(
-                  icon: _showFullCalendar ? Icons.view_week_rounded : Icons.calendar_today_rounded,
+                  icon: _showFullCalendar
+                      ? Icons.view_week_rounded
+                      : Icons.calendar_today_rounded,
                   onTap: () {
                     HapticHelper.lightImpact();
                     setState(() {
@@ -560,7 +566,9 @@ class _NewHomeScreenState extends State<NewHomeScreen>
     if (_showFullCalendar) {
       return SliverToBoxAdapter(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.containerPadding,
+          ),
           child: GlassCard(
             padding: const EdgeInsets.all(12),
             color: AppColors.bgSecondary.withOpacity(0.3),
@@ -586,23 +594,41 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
-                leftChevronIcon: const Icon(Icons.chevron_left, color: AppColors.accentSkyBlue),
-                rightChevronIcon: const Icon(Icons.chevron_right, color: AppColors.accentSkyBlue),
+                leftChevronIcon: const Icon(
+                  Icons.chevron_left,
+                  color: AppColors.accentSkyBlue,
+                ),
+                rightChevronIcon: const Icon(
+                  Icons.chevron_right,
+                  color: AppColors.accentSkyBlue,
+                ),
               ),
               daysOfWeekStyle: DaysOfWeekStyle(
-                weekdayStyle: AppTextStyles.label.copyWith(color: AppColors.textTertiary),
-                weekendStyle: AppTextStyles.label.copyWith(color: AppColors.accentPrimary.withOpacity(0.7)),
+                weekdayStyle: AppTextStyles.label.copyWith(
+                  color: AppColors.textTertiary,
+                ),
+                weekendStyle: AppTextStyles.label.copyWith(
+                  color: AppColors.accentPrimary.withOpacity(0.7),
+                ),
               ),
               calendarStyle: CalendarStyle(
-                defaultTextStyle: AppTextStyles.bodySm.copyWith(color: AppColors.textPrimary),
-                weekendTextStyle: AppTextStyles.bodySm.copyWith(color: AppColors.textPrimary.withOpacity(0.8)),
-                outsideTextStyle: AppTextStyles.bodySm.copyWith(color: AppColors.textTertiary.withOpacity(0.3)),
+                defaultTextStyle: AppTextStyles.bodySm.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+                weekendTextStyle: AppTextStyles.bodySm.copyWith(
+                  color: AppColors.textPrimary.withOpacity(0.8),
+                ),
+                outsideTextStyle: AppTextStyles.bodySm.copyWith(
+                  color: AppColors.textTertiary.withOpacity(0.3),
+                ),
                 selectedDecoration: const BoxDecoration(
                   gradient: AppColors.gradientPrimary,
                   shape: BoxShape.circle,
                 ),
                 todayDecoration: BoxDecoration(
-                  border: Border.all(color: AppColors.accentPrimary.withOpacity(0.5)),
+                  border: Border.all(
+                    color: AppColors.accentPrimary.withOpacity(0.5),
+                  ),
                   shape: BoxShape.circle,
                 ),
                 markersMaxCount: 1,
@@ -616,7 +642,9 @@ class _NewHomeScreenState extends State<NewHomeScreen>
     final now = DateTime.now();
     final days = List.generate(
       7,
-      (index) => now.subtract(Duration(days: 6 - index)), // Show last 7 days including today
+      (index) => now.subtract(
+        Duration(days: 6 - index),
+      ), // Show last 7 days including today
     );
 
     return SliverToBoxAdapter(
@@ -765,16 +793,25 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         ),
         child: Column(
           children: [
-            const Icon(Icons.bedtime_outlined, color: AppColors.textTertiary, size: 32),
+            const Icon(
+              Icons.bedtime_outlined,
+              color: AppColors.textTertiary,
+              size: 32,
+            ),
             const SizedBox(height: 12),
             Text(
               'No sleep data yet',
-              style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+              style: AppTextStyles.body.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               'Your last night\'s sleep summary will appear here.',
-              style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textTertiary,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -959,7 +996,11 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   }
 
   Widget _buildAdvancedMetrics() {
-    bool hasStructure = _deepMinutes != null || _remMinutes != null || _lightMinutes != null || _awakeMinutes != null;
+    bool hasStructure =
+        _deepMinutes != null ||
+        _remMinutes != null ||
+        _lightMinutes != null ||
+        _awakeMinutes != null;
     bool hasRecovery = _rhr != null || _hrv != null;
 
     return Column(
@@ -1041,11 +1082,16 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Sleep Architecture', style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+              Text(
+                'Sleep Architecture',
+                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+              ),
               if (total > 0)
                 Text(
-                  '${(deep / total * 100).toStringAsFixed(0)}% Deep', 
-                  style: AppTextStyles.caption.copyWith(color: AppColors.accentPrimary)
+                  '${(deep / total * 100).toStringAsFixed(0)}% Deep',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.accentPrimary,
+                  ),
                 ),
             ],
           ),
@@ -1057,42 +1103,70 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                 height: 12,
                 child: Row(
                   children: [
-                    if (deep > 0) Expanded(flex: deep, child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [AppColors.accentPrimary, AppColors.accentPrimary.withOpacity(0.7)],
+                    if (deep > 0)
+                      Expanded(
+                        flex: deep,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.accentPrimary,
+                                AppColors.accentPrimary.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    )),
-                    if (rem > 0) Expanded(flex: rem, child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [AppColors.accentSkyBlue, AppColors.accentSkyBlue.withOpacity(0.7)],
+                    if (rem > 0)
+                      Expanded(
+                        flex: rem,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.accentSkyBlue,
+                                AppColors.accentSkyBlue.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    )),
-                    if (light > 0) Expanded(flex: light, child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [AppColors.textSecondary.withOpacity(0.4), AppColors.textSecondary.withOpacity(0.6)],
+                    if (light > 0)
+                      Expanded(
+                        flex: light,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.textSecondary.withOpacity(0.4),
+                                AppColors.textSecondary.withOpacity(0.6),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    )),
-                    if (awake > 0) Expanded(flex: awake, child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [AppColors.accentAmber, AppColors.accentAmber.withOpacity(0.7)],
+                    if (awake > 0)
+                      Expanded(
+                        flex: awake,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.accentAmber,
+                                AppColors.accentAmber.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    )),
                   ],
                 ),
               ),
@@ -1113,7 +1187,9 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
                   'No sleep architecture data logged',
-                  style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
                 ),
               ),
             ),
@@ -1131,8 +1207,20 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(height: 4),
-        Text(value, style: AppTextStyles.bodySm.copyWith(fontWeight: FontWeight.bold, fontSize: 12)),
-        Text(label, style: AppTextStyles.caption.copyWith(fontSize: 10, color: AppColors.textTertiary)),
+        Text(
+          value,
+          style: AppTextStyles.bodySm.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+        ),
+        Text(
+          label,
+          style: AppTextStyles.caption.copyWith(
+            fontSize: 10,
+            color: AppColors.textTertiary,
+          ),
+        ),
       ],
     );
   }
@@ -1173,7 +1261,13 @@ class _NewHomeScreenState extends State<NewHomeScreen>
     );
   }
 
-  Widget _buildRecoveryCard(String title, String value, String unit, IconData icon, Color color) {
+  Widget _buildRecoveryCard(
+    String title,
+    String value,
+    String unit,
+    IconData icon,
+    Color color,
+  ) {
     return GlassCard(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       color: AppColors.bgSecondary.withOpacity(0.3),
@@ -1185,10 +1279,11 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         children: [
           Icon(icon, color: color, size: 16),
           const SizedBox(height: 8),
-          Text(title, 
+          Text(
+            title,
             style: AppTextStyles.caption.copyWith(
               fontSize: 10,
-              color: AppColors.textSecondary, 
+              color: AppColors.textSecondary,
               fontWeight: FontWeight.w600,
             ),
             textAlign: TextAlign.center,
@@ -1200,9 +1295,20 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                Text(value, style: AppTextStyles.bodyLg.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  value,
+                  style: AppTextStyles.bodyLg.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(width: 2),
-                Text(unit, style: AppTextStyles.caption.copyWith(fontSize: 8, color: AppColors.textTertiary)),
+                Text(
+                  unit,
+                  style: AppTextStyles.caption.copyWith(
+                    fontSize: 8,
+                    color: AppColors.textTertiary,
+                  ),
+                ),
               ],
             ),
           ),
@@ -1213,7 +1319,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
 
   Widget _buildSleepGauge() {
     final dateStr = DateFormat('EEE, dd MMMM').format(_selectedDate);
-    
+
     // The gauge now strictly represents the goal/plan for the upcoming sleep
     final displayDuration = _calculateDuration();
     const scoreText = 'Target Score';
@@ -1233,7 +1339,11 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               Text(dateStr, style: AppTextStyles.h4),
               Row(
                 children: [
-                  Icon(Icons.auto_awesome_rounded, size: 14, color: AppColors.accentPrimary.withOpacity(0.7)),
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 14,
+                    color: AppColors.accentPrimary.withOpacity(0.7),
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     'Tonight\'s Goal',
@@ -1286,11 +1396,12 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(
-                      Icons.nights_stay_rounded, 
-                      color: AppColors.accentPrimary, 
-                      size: 48
-                    ).animate(onPlay: (c) => c.repeat(reverse: true))
-                     .shimmer(duration: 3.seconds, color: Colors.white24),
+                          Icons.nights_stay_rounded,
+                          color: AppColors.accentPrimary,
+                          size: 48,
+                        )
+                        .animate(onPlay: (c) => c.repeat(reverse: true))
+                        .shimmer(duration: 3.seconds, color: Colors.white24),
                     const SizedBox(height: 8),
                     Text(
                       scoreText,
@@ -1580,7 +1691,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                 children: [
                   _buildSimpleStat(
                     '⚡',
-                    _totalSessions > 0 ? '${_latencyImprovement}%' : '--',
+                    _totalSessions > 0 ? '$_latencyImprovement%' : '--',
                     'Faster Sleep',
                     color: AppColors.accentPrimary,
                   ),
@@ -1592,7 +1703,9 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                   ),
                   _buildSimpleStat(
                     '🎯',
-                    (_totalSessions > 0 && _consistencyScore != null) ? '${_consistencyScore}%' : '--',
+                    (_totalSessions > 0 && _consistencyScore != null)
+                        ? '$_consistencyScore%'
+                        : '--',
                     'Consistency',
                     color: AppColors.accentSuccess,
                   ),

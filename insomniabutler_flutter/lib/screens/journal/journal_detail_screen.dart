@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'dart:ui';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
@@ -13,8 +11,7 @@ import 'journal_editor_screen.dart';
 class JournalDetailScreen extends StatefulWidget {
   final int entryId;
 
-  const JournalDetailScreen({Key? key, required this.entryId})
-    : super(key: key);
+  const JournalDetailScreen({super.key, required this.entryId});
 
   @override
   State<JournalDetailScreen> createState() => _JournalDetailScreenState();
