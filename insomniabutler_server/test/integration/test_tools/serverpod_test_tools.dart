@@ -1931,8 +1931,9 @@ class _ThoughtClearingEndpoint {
     int userId,
     String userMessage,
     String sessionId,
-    int currentReadiness,
-  ) async {
+    int currentReadiness, {
+    DateTime? userLocalTime,
+  }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
@@ -1949,6 +1950,7 @@ class _ThoughtClearingEndpoint {
             'userMessage': userMessage,
             'sessionId': sessionId,
             'currentReadiness': currentReadiness,
+            'userLocalTime': userLocalTime,
           }),
           serializationManager: _serializationManager,
         );

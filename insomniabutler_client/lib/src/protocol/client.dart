@@ -797,8 +797,9 @@ class EndpointThoughtClearing extends _i2.EndpointRef {
     int userId,
     String userMessage,
     String sessionId,
-    int currentReadiness,
-  ) => caller.callServerEndpoint<_i12.ThoughtResponse>(
+    int currentReadiness, {
+    DateTime? userLocalTime,
+  }) => caller.callServerEndpoint<_i12.ThoughtResponse>(
     'thoughtClearing',
     'processThought',
     {
@@ -806,6 +807,7 @@ class EndpointThoughtClearing extends _i2.EndpointRef {
       'userMessage': userMessage,
       'sessionId': sessionId,
       'currentReadiness': currentReadiness,
+      'userLocalTime': userLocalTime,
     },
   );
 

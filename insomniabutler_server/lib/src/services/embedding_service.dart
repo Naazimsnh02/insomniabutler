@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:google_generative_ai/google_generative_ai.dart';
 
-/// Service for generating embeddings using Gemini's gemini-embedding-1.0 model
+/// Service for generating embeddings using Gemini's text-embedding-004 model
 class EmbeddingService {
   final GenerativeModel _embeddingModel;
   final String _apiKey;
@@ -13,7 +13,7 @@ class EmbeddingService {
   EmbeddingService(String apiKey)
       : _apiKey = apiKey,
         _embeddingModel = GenerativeModel(
-          model: 'gemini-embedding-1.0',
+          model: 'text-embedding-004',
           apiKey: apiKey,
         );
 

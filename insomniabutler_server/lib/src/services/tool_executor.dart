@@ -101,14 +101,13 @@ class ToolExecutor {
     final embeddingStr = '[${queryEmbedding.join(',')}]';
 
     // Search journal entries using vector similarity
-    // Note: This requires pgvector extension and proper indexing
     final journalResults = await session.db.unsafeQuery(
       '''
-      SELECT id, user_id, title, content, mood, entry_date, tags,
-             (embedding <=> '$embeddingStr'::vector) as distance
-      FROM journal_entries
-      WHERE user_id = $userId AND embedding IS NOT NULL
-      ORDER BY embedding <=> '$embeddingStr'::vector
+      SELECT "id", "userId", "title", "content", "mood", "entryDate", "tags",
+             ("embedding" <=> '$embeddingStr'::vector) as "distance"
+      FROM "journal_entries"
+      WHERE "userId" = $userId AND "embedding" IS NOT NULL
+      ORDER BY "embedding" <=> '$embeddingStr'::vector
       LIMIT $limit
       ''',
     );
@@ -116,37 +115,50 @@ class ToolExecutor {
     // Search chat messages using vector similarity
     final chatResults = await session.db.unsafeQuery(
       '''
-      SELECT session_id, role, content, timestamp,
-             (embedding <=> '$embeddingStr'::vector) as distance
-      FROM chat_messages
-      WHERE user_id = $userId AND embedding IS NOT NULL AND role = 'user'
-      ORDER BY embedding <=> '$embeddingStr'::vector
+      SELECT "sessionId", "role", "content", "timestamp",
+             ("embedding" <=> '$embeddingStr'::vector) as "distance"
+      FROM "chat_messages"
+      WHERE "userId" = $userId AND "embedding" IS NOT NULL AND "role" = 'user'
+      ORDER BY "embedding" <=> '$embeddingStr'::vector
       LIMIT $limit
       ''',
     );
 
-    final memories = {
-      'query': query,
-      'journal_entries': journalResults.map((row) {
+    // Debug logging for rows
+    try {
+      final journalMapped = journalResults.map((row) {
+        // print('Journal Row: $row');
         return {
-          'date': row[5], // entry_date
+          'date': (row[5] as DateTime).toIso8601String(),
           'title': row[2],
           'content': row[3],
           'mood': row[4],
           'tags': row[6],
           'relevance': (1 - (row[7] as double)).toStringAsFixed(2),
         };
-      }).toList(),
-      'past_conversations': chatResults.map((row) {
+      }).toList();
+
+      final chatMapped = chatResults.map((row) {
+        // print('Chat Row: $row');
         return {
-          'timestamp': row[3],
+          'timestamp': (row[3] as DateTime).toIso8601String(),
           'content': row[2],
           'relevance': (1 - (row[4] as double)).toStringAsFixed(2),
         };
-      }).toList(),
-    };
+      }).toList();
 
-    return jsonEncode(memories);
+      final memories = {
+        'query': query,
+        'journal_entries': journalMapped,
+        'past_conversations': chatMapped,
+      };
+      
+      return jsonEncode(memories);
+    } catch (e, st) {
+      print('ERROR encoding memories: $e');
+      print('Stack trace: $st');
+      rethrow;
+    }
   }
 
   /// Execute an action (returns action object for client to handle)

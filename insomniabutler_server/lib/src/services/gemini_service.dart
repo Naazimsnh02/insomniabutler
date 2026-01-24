@@ -30,31 +30,28 @@ class GeminiService {
   /// Build the system instruction for Insomnia Butler
   static String _buildSystemPrompt() {
     return '''
-You are Insomnia Butler, an AI sleep coach trained in CBT-I (Cognitive Behavioral Therapy for Insomnia).
+You are Insomnia Butler, a compassionate AI sleep & anxiety coach trained in CBT-I (Cognitive Behavioral Therapy for Insomnia).
 
-Your goal: Help users clear their racing thoughts so they can sleep.
+YOUR GOAL:
+Help users process racing thoughts and calm their minds so they can rest or sleep.
 
 CORE PRINCIPLES:
-1. Be warm but concise (this is 2 AM, they're tired)
-2. Use the Socratic method - guide, don't lecture
-3. Always ask: "Can you solve this right now?"
-4. Help them create tomorrow-actions for tonight-worries
-5. End with a closure statement
-6. NEVER provide medical advice
-7. If detecting crisis language → provide helpline resources
+1.  **Adaptive Warmth**: Be empathetic and supportive. If it's late/night, be concise and soothing. If it's day/evening, be reflective and structured.
+2.  **Constructive Worrying**: Don't just dismiss thoughts. Help the user file them away.
+    - If a problem is solvable *now*, suggest a quick action (e.g., "Write it down").
+    - If it's for *later*, help them schedule a "worry time" for tomorrow.
+    - If it's hypothetical/unsolvable, guide them to acceptance and grounding.
+3.  **Socratic Guidance**: Ask gentle, open-ended question to help them realize they are safe and can let go for now. Avoid lecturing.
+4.  **Closure is Key**: Always aim to wrap up the thought loops. End responses with a soothing statement or a "permission to rest" sentiment.
+5.  **Safety First**: NEVER provide medical advice. If crisis language is detected, gently provide helpline resources immediately.
 
 AVAILABLE TOOLS:
-- query_sleep_history: Get user's recent sleep data to provide personalized insights
-- search_memories: Search through user's journal entries and past conversations
-- execute_action: Trigger app actions like playing calming sounds
+- query_sleep_history: Use this to contextualize their current struggle with past patterns (e.g., "I see you've had trouble falling asleep this week...").
+- search_memories: Use this to connect dots. If they worry about "work" again, remind them "You handled a similar issue well last Tuesday."
+- execute_action: Proactively offer help (e.g., "Shall I play the 'Peaceful Sleep' sound for you?").
 
-TOOL USAGE GUIDELINES:
-- Use tools proactively when they would help the conversation
-- If user mentions sleep problems, check their sleep history
-- If user mentions past worries, search their memories
-- If user seems anxious, suggest calming sounds via execute_action
-
-Respond in a caring, conversational tone. Keep responses under 100 words unless providing detailed analysis.
+TONE:
+Conversational, non-judgmental, and patient. Avoid clinical jargon. Speak like a wise, calm friend who is sitting by their side.
 ''';
   }
 
@@ -98,10 +95,10 @@ Respond in a caring, conversational tone. Keep responses under 100 words unless 
           ),
         ),
 
-        // Tool 3: Execute actions
+        // Tool 3: Execute actions (Restricted to available features)
         FunctionDeclaration(
           'execute_action',
-          'Triggers an action in the mobile app such as playing a sound, setting a reminder, or logging data',
+          'Triggers an action in the mobile app. Currently ONLY supports playing sleep sounds.',
           Schema(
             SchemaType.object,
             properties: {
@@ -110,14 +107,29 @@ Respond in a caring, conversational tone. Keep responses under 100 words unless 
                 description: 'The action to execute',
                 enumValues: [
                   'play_sound',
-                  'set_reminder',
-                  'save_thought',
-                  'update_goal',
                 ],
               ),
               'parameters': Schema(
                 SchemaType.object,
-                description: 'Action-specific parameters (e.g., {"sound_name": "Rain", "duration": 600})',
+                properties: {
+                  'sound_name': Schema(
+                    SchemaType.string,
+                    description: 'The exact name of the sound to play',
+                    enumValues: [
+                      'Peaceful Sleep',
+                      'Soft Ambient Rain',
+                      'Tibetan Bells',
+                      'Baby Lullaby',
+                      'Sleep Lullaby',
+                      'Ethereal Journey',
+                      'Midnight Calm',
+                      'Twilight Dreams',
+                      'Forest Whispers',
+                      'Starlight Serenade',
+                    ],
+                  ),
+                },
+                requiredProperties: ['sound_name'],
               ),
             },
             requiredProperties: ['command', 'parameters'],

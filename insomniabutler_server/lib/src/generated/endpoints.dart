@@ -1414,6 +1414,11 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<int>(),
               nullable: false,
             ),
+            'userLocalTime': _i1.ParameterDescription(
+              name: 'userLocalTime',
+              type: _i1.getType<DateTime?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -1427,6 +1432,7 @@ class Endpoints extends _i1.EndpointDispatch {
                         params['userMessage'],
                         params['sessionId'],
                         params['currentReadiness'],
+                        userLocalTime: params['userLocalTime'],
                       ),
         ),
         'getChatSessionMessages': _i1.MethodConnector(

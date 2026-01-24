@@ -55,8 +55,9 @@ class ThoughtClearingEndpoint extends Endpoint {
     int userId,
     String userMessage,
     String sessionId,
-    int currentReadiness,
-  ) async {
+    int currentReadiness, {
+    DateTime? userLocalTime,
+  }) async {
     final gemini = _getGeminiService(session);
     final embeddingService = _getEmbeddingService(session);
     final toolExecutor = ToolExecutor(
@@ -67,6 +68,16 @@ class ThoughtClearingEndpoint extends Endpoint {
 
     // 1. Fetch conversation history
     final history = await _buildConversationHistory(session, sessionId);
+    
+    // Contextualize message with time if available
+    String messageToSend = userMessage;
+    if (userLocalTime != null) {
+      final hour = userLocalTime.hour;
+      final minute = userLocalTime.minute.toString().padLeft(2, '0');
+      final period = hour >= 12 ? 'PM' : 'AM';
+      final formattedHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+      messageToSend = "[User Local Time: $formattedHour:$minute $period]\n$userMessage";
+    }
 
     // 2. Generate embedding for user message (semantic memory)
     List<double>? userEmbedding;
@@ -92,7 +103,7 @@ class ThoughtClearingEndpoint extends Endpoint {
     // 4. Send to Gemini with history and tools
     final response = await gemini.sendMessageWithHistory(
       history: history,
-      userMessage: userMessage,
+      userMessage: messageToSend,
     );
 
     // 5. Tool execution loop
@@ -113,7 +124,7 @@ class ThoughtClearingEndpoint extends Endpoint {
           
           // Send tool result back to model for final response
           final followUp = await chat.sendMessage(
-            ai.Content('model', [ai.FunctionResponse(part.name, jsonDecode(result) as Map<String, dynamic>)]),
+            ai.Content('function', [ai.FunctionResponse(part.name, jsonDecode(result) as Map<String, dynamic>)]),
           );
           
           finalMessage = followUp.text ?? '';
