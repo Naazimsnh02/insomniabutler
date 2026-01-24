@@ -1,4 +1,20 @@
-enum SoundCategory { melodic, ambient, nature, lullaby, meditative }
+enum SoundCategory {
+  melodic,
+  ambient,
+  nature,
+  lullaby,
+  meditative;
+
+  String get displayName {
+    switch (this) {
+      case SoundCategory.melodic: return 'Melodic';
+      case SoundCategory.ambient: return 'Ambient';
+      case SoundCategory.nature: return 'Nature';
+      case SoundCategory.lullaby: return 'Lullaby';
+      case SoundCategory.meditative: return 'Meditative';
+    }
+  }
+}
 
 class SleepSound {
   final String id;

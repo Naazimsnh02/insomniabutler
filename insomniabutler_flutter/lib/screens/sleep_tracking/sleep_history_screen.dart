@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../utils/haptic_helper.dart';
@@ -8,6 +10,7 @@ import '../../main.dart';
 import '../../services/user_service.dart';
 import 'package:insomniabutler_client/insomniabutler_client.dart';
 import 'manual_log_screen.dart';
+import 'widgets/history_skeleton.dart';
 
 class SleepHistoryScreen extends StatefulWidget {
   const SleepHistoryScreen({super.key});
@@ -24,23 +27,51 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
   @override
   void initState() {
     super.initState();
+    _loadFromCache();
     _loadHistory();
   }
 
+  Future<void> _loadFromCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedJson = prefs.getString('sleep_sessions_history');
+      if (cachedJson != null) {
+        final List<dynamic> decoded = jsonDecode(cachedJson);
+        final sessions = decoded.map((item) => SleepSession.fromJson(item)).toList();
+        setState(() {
+          _sessions = sessions;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading sleep cache: $e');
+    }
+  }
+
   Future<void> _loadHistory() async {
-    setState(() => _isLoading = true);
+    if (_sessions.isEmpty) {
+      setState(() => _isLoading = true);
+    }
     try {
       final userId = await UserService.getCurrentUserId();
       if (userId == null) throw Exception('User not logged in');
 
       final sessions = await client.sleepSession.getUserSessions(userId, 50);
-      setState(() {
-        _sessions = sessions;
-        _isLoading = false;
-      });
+      
+      if (mounted) {
+        setState(() {
+          _sessions = sessions;
+          _isLoading = false;
+        });
+        
+        // Save to cache
+        final prefs = await SharedPreferences.getInstance();
+        final jsonStr = jsonEncode(sessions.map((s) => s.toJson()).toList());
+        prefs.setString('sleep_sessions_history', jsonStr);
+      }
     } catch (e) {
       debugPrint('Error loading history: $e');
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -81,12 +112,8 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
               children: [
                 _buildTopBar(),
                 Expanded(
-                  child: _isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.accentPrimary,
-                          ),
-                        )
+                  child: _isLoading && _sessions.isEmpty
+                      ? const HistorySkeleton()
                       : _sessions.isEmpty
                       ? _buildEmptyState()
                       : RefreshIndicator(

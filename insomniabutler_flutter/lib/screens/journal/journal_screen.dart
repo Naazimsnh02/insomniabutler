@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../main.dart';
@@ -8,6 +10,7 @@ import '../../services/user_service.dart';
 import '../../utils/haptic_helper.dart';
 import 'journal_editor_screen.dart';
 import 'journal_detail_screen.dart';
+import 'widgets/journal_skeleton.dart';
 
 /// Journal Screen - Main hub for journaling
 /// Features: Timeline, Calendar, Insights tabs with premium glassmorphic design
@@ -22,12 +25,19 @@ class JournalScreen extends StatefulWidget {
 class JournalScreenState extends State<JournalScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late ScrollController _timelineScrollController;
   int _selectedTabIndex = 0;
 
   List<dynamic> _entries = [];
+  List<dynamic> _calendarEntries = [];
   Map<String, dynamic>? _stats;
   List<dynamic> _insights = [];
   bool _isLoading = true;
+  bool _isLoadingCalendar = false;
+  bool _isFetchingMore = false;
+  bool _hasMore = true;
+  int _currentOffset = 0;
+  static const int _pageSize = 20;
 
   DateTime _currentMonth = DateTime.now();
   DateTime? _selectedDate;
@@ -38,47 +48,186 @@ class JournalScreenState extends State<JournalScreen>
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       setState(() => _selectedTabIndex = _tabController.index);
+      if (_selectedTabIndex == 1 && _calendarEntries.isEmpty) {
+        _loadCalendarData();
+      }
     });
+    _timelineScrollController = ScrollController();
+    _timelineScrollController.addListener(_onScroll);
+    _loadFromCache();
     loadData();
+  }
+
+  void _onScroll() {
+    if (_timelineScrollController.position.pixels >=
+            _timelineScrollController.position.maxScrollExtent - 200 &&
+        !_isFetchingMore &&
+        _hasMore &&
+        !_isLoading) {
+      loadMoreEntries();
+    }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _timelineScrollController.dispose();
     super.dispose();
   }
 
-  Future<void> loadData() async {
-    setState(() => _isLoading = true);
+  Future<void> _loadFromCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final statsJson = prefs.getString('journal_stats');
+      final insightsJson = prefs.getString('journal_insights');
+
+      if (statsJson != null) {
+        setState(() => _stats = jsonDecode(statsJson));
+      }
+      if (insightsJson != null) {
+        setState(() => _insights = jsonDecode(insightsJson));
+      }
+    } catch (e) {
+      debugPrint('Error loading journal cache: $e');
+    }
+  }
+
+  Future<void> _saveToCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (_stats != null) {
+        prefs.setString('journal_stats', jsonEncode(_stats));
+      }
+      if (_insights.isNotEmpty) {
+        prefs.setString('journal_insights', jsonEncode(_insights));
+      }
+    } catch (e) {
+      debugPrint('Error saving journal cache: $e');
+    }
+  }
+
+  Future<void> _loadCalendarData() async {
+    setState(() => _isLoadingCalendar = true);
 
     try {
       final userId = await UserService.getCurrentUserId();
       if (userId == null) return;
 
-      // Load entries, stats, and insights
-      final entries = await client.journal.getUserEntries(
+      final startOfMonth = DateTime(_currentMonth.year, _currentMonth.month, 1);
+      final endOfMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 0, 23, 59, 59);
+
+      final calendarEntries = await client.journal.getUserEntries(
         userId,
-        limit: 50,
+        limit: 100, // Sufficient for a month
         offset: 0,
+        startDate: startOfMonth.toUtc(),
+        endDate: endOfMonth.toUtc(),
       );
-      final stats = await client.journal.getJournalStats(userId);
-      final insights = await client.journal.getJournalInsights(userId);
 
       setState(() {
-        _entries = entries;
-        _stats = {
-          'totalEntries': stats.totalEntries,
-          'currentStreak': stats.currentStreak,
-          'longestStreak': stats.longestStreak,
-          'thisWeekEntries': stats.thisWeekEntries,
-          'favoriteCount': stats.favoriteCount,
-        };
-        _insights = insights;
-        _isLoading = false;
+        _calendarEntries = calendarEntries;
+        _isLoadingCalendar = false;
       });
     } catch (e) {
-      debugPrint('Error loading journal data: $e');
+      debugPrint('Error loading calendar data: $e');
+      setState(() => _isLoadingCalendar = false);
+    }
+  }
+
+  Future<void> loadData() async {
+    if (_isLoading && _entries.isNotEmpty) return;
+
+    setState(() {
+      _isLoading = true;
+      _currentOffset = 0;
+      _hasMore = true;
+    });
+
+    try {
+      final userId = await UserService.getCurrentUserId();
+      if (userId == null) return;
+
+      // Independent fetches so they don't block each other
+      
+      // 1. Fetch Entries
+      client.journal.getUserEntries(userId, limit: _pageSize, offset: 0).then((entries) {
+        if (mounted) {
+          setState(() {
+            _entries = entries;
+            _currentOffset = entries.length;
+            _hasMore = entries.length >= _pageSize;
+            // If stats and insights are also not loading anymore, set _isLoading to false
+            // but for now we rely on a combined state or separate ones.
+            // Let's use separate loading states for more granules control if needed, 
+            // but for Timeline, once entries are here, we are good.
+            if (_selectedTabIndex == 0) _isLoading = false; 
+          });
+        }
+      }).catchError((e) => debugPrint('Error loading entries: $e'));
+
+      // 2. Fetch Stats
+      client.journal.getJournalStats(userId).then((stats) {
+        if (mounted) {
+          setState(() {
+            _stats = {
+              'totalEntries': stats.totalEntries,
+              'currentStreak': stats.currentStreak,
+              'longestStreak': stats.longestStreak,
+              'thisWeekEntries': stats.thisWeekEntries,
+              'favoriteCount': stats.favoriteCount,
+            };
+          });
+          _saveToCache();
+        }
+      }).catchError((e) => debugPrint('Error loading stats: $e'));
+
+      // 3. Fetch Insights (Slowest call due to AI)
+      client.journal.getJournalInsights(userId).then((insights) {
+        if (mounted) {
+          setState(() {
+            _insights = insights;
+            // If we are on Insights tab, stop global loading
+            if (_selectedTabIndex == 2) _isLoading = false;
+          });
+          _saveToCache();
+        }
+      }).catchError((e) => debugPrint('Error loading insights: $e'));
+
+      // Final fallback to stop loading indicator if all fail or after a timeout
+      Future.delayed(const Duration(seconds: 10), () {
+        if (mounted && _isLoading) setState(() => _isLoading = false);
+      });
+
+    } catch (e) {
+      debugPrint('Error in loadData: $e');
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> loadMoreEntries() async {
+    if (_isFetchingMore || !_hasMore) return;
+
+    setState(() => _isFetchingMore = true);
+
+    try {
+      final userId = await UserService.getCurrentUserId();
+      if (userId == null) return;
+
+      final moreEntries = await client.journal.getUserEntries(
+        userId,
+        limit: _pageSize,
+        offset: _currentOffset,
+      );
+
+      setState(() {
+        _entries.addAll(moreEntries);
+        _isFetchingMore = false;
+        _currentOffset += moreEntries.length;
+        _hasMore = moreEntries.length >= _pageSize;
+      });
+    } catch (e) {
+      debugPrint('Error fetching more entries: $e');
+      setState(() => _isFetchingMore = false);
     }
   }
 
@@ -301,10 +450,8 @@ class JournalScreenState extends State<JournalScreen>
   }
 
   Widget _buildTimelineTab() {
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.accentPrimary),
-      );
+    if (_isLoading && _entries.isEmpty) {
+      return const JournalSkeleton();
     }
 
     if (_entries.isEmpty) {
@@ -316,6 +463,7 @@ class JournalScreenState extends State<JournalScreen>
       color: AppColors.accentPrimary,
       backgroundColor: AppColors.bgSecondary,
       child: ListView.builder(
+        controller: _timelineScrollController,
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.containerPadding,
           AppSpacing.md,
@@ -323,11 +471,30 @@ class JournalScreenState extends State<JournalScreen>
           140, // Space for floating bottom tab bar
         ),
         physics: const BouncingScrollPhysics(),
-        itemCount: _entries.length,
+        itemCount: _entries.length + (_hasMore ? 1 : 0),
         itemBuilder: (context, index) {
+          if (index == _entries.length) {
+            return _buildLoadMoreIndicator();
+          }
           final entry = _entries[index];
           return _buildEntryCard(entry, index);
         },
+      ),
+    );
+  }
+
+  Widget _buildLoadMoreIndicator() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: AppColors.accentPrimary.withOpacity(0.5),
+          ),
+        ),
       ),
     );
   }
@@ -511,6 +678,7 @@ class JournalScreenState extends State<JournalScreen>
                   _currentMonth.month - 1,
                 );
               });
+              _loadCalendarData();
             },
             icon: const Icon(Icons.chevron_left_rounded, color: Colors.white),
           ),
@@ -531,6 +699,7 @@ class JournalScreenState extends State<JournalScreen>
                   _currentMonth.month + 1,
                 );
               });
+              _loadCalendarData();
             },
             icon: const Icon(Icons.chevron_right_rounded, color: Colors.white),
           ),
@@ -616,8 +785,8 @@ class JournalScreenState extends State<JournalScreen>
         _selectedDate!.month == date.month &&
         _selectedDate!.day == date.day;
 
-    // Find entries for this day
-    final dayEntries = _entries.where((entry) {
+    // Find entries for this day using calendar-specific entries
+    final dayEntries = _calendarEntries.where((entry) {
       final entryDate = (entry.entryDate as DateTime).toLocal();
       return entryDate.year == date.year &&
           entryDate.month == date.month &&
@@ -695,7 +864,7 @@ class JournalScreenState extends State<JournalScreen>
   }
 
   Widget _buildSelectedDateEntries() {
-    final selectedEntries = _entries.where((entry) {
+    final selectedEntries = _calendarEntries.where((entry) {
       final entryDate = (entry.entryDate as DateTime).toLocal();
       return entryDate.year == _selectedDate!.year &&
           entryDate.month == _selectedDate!.month &&
@@ -703,34 +872,105 @@ class JournalScreenState extends State<JournalScreen>
     }).toList();
 
     if (selectedEntries.isEmpty) {
-      return GlassCard(
-        padding: const EdgeInsets.all(24),
-        borderRadius: 24,
-        child: Column(
-          children: [
-            const Icon(
-              Icons.event_note_rounded,
-              color: AppColors.textTertiary,
-              size: 40,
+      return GestureDetector(
+        onTap: () async {
+          await HapticHelper.mediumImpact();
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => JournalEditorScreen(initialDate: _selectedDate),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'No entries for this day',
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.bold,
+          );
+          loadData();
+          _loadCalendarData();
+        },
+        child: GlassCard(
+          padding: const EdgeInsets.all(20),
+          borderRadius: 24,
+          color: AppColors.bgSecondary.withOpacity(0.3),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.08),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentPrimary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.edit_calendar_rounded,
+                      color: AppColors.accentPrimary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        DateFormat('EEEE, MMM d').format(_selectedDate!),
+                        style: AppTextStyles.label.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        'No entry for this day',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textTertiary,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              DateFormat('MMMM d, yyyy').format(_selectedDate!),
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textTertiary,
+              const SizedBox(height: 16),
+              Text(
+                'Capture your thoughts',
+                style: AppTextStyles.body.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.accentPrimary.withOpacity(0.7),
+                  fontSize: 16,
+                ),
               ),
-            ),
-          ],
-        ),
-      ).animate().fadeIn().slideY(begin: 0.1, end: 0);
+              const SizedBox(height: 6),
+              Text(
+                'Keep your streak alive and clear your mind before rest. Share how you\'re feeling today.',
+                style: AppTextStyles.bodySm.copyWith(
+                  color: AppColors.textSecondary,
+                  height: 1.6,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Spacer(),
+                  Text(
+                    'Share a moment',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.accentPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    size: 14,
+                    color: AppColors.accentPrimary,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ).animate().fadeIn().slideY(begin: 0.1, end: 0),
+      );
     }
 
     return Column(
@@ -792,9 +1032,27 @@ class JournalScreenState extends State<JournalScreen>
   }
 
   Widget _buildInsightsTab() {
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.accentPrimary),
+    if (_isLoading && _insights.isEmpty) {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.containerPadding),
+        child: Column(
+          children: [
+            JournalSkeleton.statsSkeleton(),
+            const SizedBox(height: 24),
+            ...List.generate(3, (i) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: SizedBox(
+                height: 80,
+                child: GlassCard(
+                  padding: EdgeInsets.zero,
+                  color: AppColors.bgSecondary.withOpacity(0.2),
+                  borderRadius: 20,
+                  child: const SizedBox.shrink(),
+                ),
+              ),
+            )),
+          ],
+        ),
       );
     }
 
@@ -921,6 +1179,8 @@ class JournalScreenState extends State<JournalScreen>
   }
 
   Widget _buildInsightCard(dynamic insight) {
+    final String message = (insight is Map) ? (insight['message'] ?? '') : (insight.message ?? '');
+    
     return GlassCard(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
       borderRadius: 24,
@@ -970,7 +1230,7 @@ class JournalScreenState extends State<JournalScreen>
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  insight.message as String,
+                  message,
                   style: AppTextStyles.bodySm.copyWith(
                     height: 1.6,
                     fontSize: 14,

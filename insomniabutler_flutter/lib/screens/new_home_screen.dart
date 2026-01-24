@@ -18,6 +18,7 @@ import 'journal/journal_screen.dart';
 import 'journal/journal_editor_screen.dart';
 import 'account/account_screen.dart';
 import 'sounds/sounds_screen.dart';
+import 'sounds/widgets/playback_bar.dart';
 
 /// Home Dashboard - Main app screen
 /// Redesigned with premium high-fidelity UI inspired by modern sleep trackers
@@ -32,9 +33,11 @@ class _NewHomeScreenState extends State<NewHomeScreen>
     with SingleTickerProviderStateMixin {
   final _timerService = SleepTimerService();
   final GlobalKey<JournalScreenState> _journalKey = GlobalKey();
+  final ScrollController _calendarScrollController = ScrollController();
   int _selectedNavIndex = 0;
   DateTime _selectedDate = DateTime.now();
   String? _selectedMood;
+  final Map<String, Map<String, dynamic>> _dataCache = {};
 
   // User data
   String _userName = 'User';
@@ -92,6 +95,27 @@ class _NewHomeScreenState extends State<NewHomeScreen>
     _timerService.onStatusChange.listen((_) {
       if (mounted) setState(() {});
     });
+
+    // Scroll to the end of the calendar strip to show the current date
+    _scrollToCurrentDate();
+  }
+
+  void _scrollToCurrentDate() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_calendarScrollController.hasClients) {
+        _calendarScrollController.animateTo(
+          _calendarScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _calendarScrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUserData() async {
@@ -109,6 +133,36 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   }
 
   Future<void> _loadInsights() async {
+    final dateKey = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    
+    // Check if we have cached data for this date
+    if (_dataCache.containsKey(dateKey)) {
+      final cached = _dataCache[dateKey]!;
+      setState(() {
+        _lastNightDuration = cached['duration'];
+        _lastNightQuality = cached['quality'];
+        _sleepEfficiency = cached['efficiency'];
+        _hasLastNightData = cached['hasData'];
+        _lastNightInterruptions = cached['interruptions'];
+        _selectedMood = cached['mood'];
+        _deepMinutes = cached['deep'];
+        _lightMinutes = cached['light'];
+        _remMinutes = cached['rem'];
+        _awakeMinutes = cached['awake'];
+        _rhr = cached['rhr'];
+        _hrv = cached['hrv'];
+        _respiratoryRate = cached['respiratoryRate'];
+        _consistencyScore = cached['consistency'];
+        _isLoadingInsights = false;
+      });
+      // We still fetch in background to ensure data is fresh, but with no loader
+    } else {
+      // No cache, show loader and reset (optimistic: maybe keep old data but show loader?)
+      // Professionals usually show a shimmer or keep old data while showing a small indicator.
+      // For now, let's keep it simple: if no cache, show loader.
+      setState(() => _isLoadingInsights = true);
+    }
+
     try {
       final userId = await UserService.getCurrentUserId();
       if (userId == null) {
@@ -116,35 +170,18 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         return;
       }
 
-      // Reset data before loading new ones
-      setState(() {
-        _lastNightDuration = null;
-        _lastNightQuality = null;
-        _sleepEfficiency = null;
-        _hasLastNightData = false;
-        _lastNightInterruptions = 0;
-        _deepMinutes = null;
-        _lightMinutes = null;
-        _remMinutes = null;
-        _awakeMinutes = null;
-        _rhr = null;
-        _hrv = null;
-        _respiratoryRate = null;
-        _consistencyScore = null;
-        _latencyImprovement = 0;
-        _avgSleep = 0;
-        _streakDays = 0;
-        _totalSessions = 0;
-      });
+      // Fetch global insights and trend (Independent calls)
+      final results = await Future.wait([
+        client.insights.getUserInsights(userId),
+        client.insights.getSleepTrend(userId, 30),
+      ]);
 
-      final insights = await client.insights.getUserInsights(userId);
+      final insights = results[0] as dynamic;
+      final sessions = results[1] as List<dynamic>;
 
-      // Calculate streak (consecutive days tracked)
-      final sessions = await client.insights.getSleepTrend(userId, 30);
+      // Calculate streak
       int streak = 0;
       DateTime? lastDate;
-
-      // sessions is ordered ascending by date (oldest first)
       final reversedSessions = sessions.reversed.toList();
       for (var session in reversedSessions) {
         final sessionDate = DateTime(
@@ -154,16 +191,14 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         );
 
         if (lastDate == null) {
-          // Check if the most recent session is from today or yesterday
           final now = DateTime.now();
           final today = DateTime(now.year, now.month, now.day);
           final diff = today.difference(sessionDate).inDays;
-
           if (diff <= 1) {
             streak = 1;
             lastDate = sessionDate;
           } else {
-            break; // Streak already broken
+            break;
           }
         } else {
           final diff = lastDate.difference(sessionDate).inDays;
@@ -171,14 +206,14 @@ class _NewHomeScreenState extends State<NewHomeScreen>
             streak++;
             lastDate = sessionDate;
           } else if (diff == 0) {
-            continue; // Same day, ignore
+            continue;
           } else {
-            break; // Gap found
+            break;
           }
         }
       }
 
-      // Get target session based on selected date
+      // Get target session
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final selectedDayOnly = DateTime(
@@ -189,73 +224,38 @@ class _NewHomeScreenState extends State<NewHomeScreen>
 
       dynamic targetSession;
       if (selectedDayOnly.isAtSameMomentAs(today)) {
-        // For today, we usually want to see the most recent finished session (last night's)
         targetSession = await client.sleepSession.getLastNightSession(userId);
       } else {
-        // For other days, find the session that STARTED on that day
         targetSession = await client.sleepSession.getSessionForDate(
           userId,
           _selectedDate,
         );
       }
 
+      Duration? duration;
+      double efficiency = 0.0;
+      bool hasData = false;
+      int? calculatedConsistency;
+
       if (targetSession != null && targetSession.wakeTime != null) {
-        final duration = targetSession.wakeTime!.difference(
-          targetSession.bedTime,
-        );
-        final tibMinutes = duration.inMinutes;
-
-        // Robust Sleep Efficiency Calculation:
-        // SE = (Actual Sleep Time / Total Time in Bed) * 100
-        // Actual Sleep Time = TIB - Sleep Latency - Awake Time
-
+        duration = targetSession.wakeTime!.difference(targetSession.bedTime);
+        final tibMinutes = duration!.inMinutes;
         final latency = targetSession.sleepLatencyMinutes ?? 0;
         final awake = targetSession.awakeDuration ?? 0;
-
-        // If we don't have awakeDuration but have interruptions, estimate it (e.g., 10 mins per interruption)
-        int estimatedAwake = awake;
-        if (awake == 0 && (targetSession.interruptions ?? 0) > 0) {
-          estimatedAwake = (targetSession.interruptions ?? 0) * 10;
-        }
-
-        final actualSleepMinutes = (tibMinutes - latency - estimatedAwake)
-            .clamp(0, tibMinutes);
-        final efficiency = tibMinutes > 0
-            ? (actualSleepMinutes / tibMinutes * 100)
-            : 0.0;
-
-        setState(() {
-          _lastNightDuration = duration;
-          _lastNightQuality = targetSession.sleepQuality;
-          _sleepEfficiency = efficiency.toDouble();
-          _hasLastNightData = true;
-          _lastNightInterruptions = targetSession.interruptions ?? 0;
-          _selectedMood = targetSession.morningMood;
-
-          _deepMinutes = targetSession.deepSleepDuration;
-          _lightMinutes = targetSession.lightSleepDuration;
-          _remMinutes = targetSession.remSleepDuration;
-          _awakeMinutes = targetSession.awakeDuration;
-          _rhr = targetSession.restingHeartRate;
-          _hrv = targetSession.hrv;
-          _respiratoryRate = targetSession.respiratoryRate;
-        });
-      } else {
-        setState(() {
-          _hasLastNightData = false;
-          _lastNightDuration = null;
-          _selectedMood = null;
-        });
+        int estimatedAwake = awake == 0 && (targetSession.interruptions ?? 0) > 0 
+            ? (targetSession.interruptions ?? 0) * 10 
+            : awake;
+        final actualSleepMinutes = (tibMinutes - latency - estimatedAwake).clamp(0, tibMinutes);
+        efficiency = tibMinutes > 0 ? (actualSleepMinutes / tibMinutes * 100) : 0.0;
+        hasData = true;
       }
 
-      // Calculate 7-day consistency metric (using latest sessions)
-      int? calculatedConsistency;
+      // Consistency calculation
       if (sessions.isNotEmpty) {
         final recentSessions = sessions.reversed.take(7).toList();
         if (recentSessions.length >= 2) {
           double totalBedtimeDev = 0;
           double totalWakeDev = 0;
-
           double meanBedtime = 0;
           double meanWake = 0;
           int sessionsWithWake = 0;
@@ -263,7 +263,6 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           for (var s in recentSessions) {
             final bt = s.bedTime.toLocal();
             meanBedtime += (bt.hour * 60 + bt.minute);
-
             if (s.wakeTime != null) {
               final wt = s.wakeTime!.toLocal();
               meanWake += (wt.hour * 60 + wt.minute);
@@ -277,7 +276,6 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           for (var s in recentSessions) {
             final bt = s.bedTime.toLocal();
             totalBedtimeDev += (bt.hour * 60 + bt.minute - meanBedtime).abs();
-
             if (s.wakeTime != null) {
               final wt = s.wakeTime!.toLocal();
               totalWakeDev += (wt.hour * 60 + wt.minute - meanWake).abs();
@@ -285,31 +283,59 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           }
 
           double avgDev = totalBedtimeDev / recentSessions.length;
-          if (sessionsWithWake > 0) {
-            avgDev = (avgDev + (totalWakeDev / sessionsWithWake)) / 2;
-          }
-
+          if (sessionsWithWake > 0) avgDev = (avgDev + (totalWakeDev / sessionsWithWake)) / 2;
           calculatedConsistency = (100 - (avgDev / 1.2)).clamp(0, 100).toInt();
         }
       }
 
-      setState(() {
-        _consistencyScore = calculatedConsistency;
-        _latencyImprovement = insights.latencyImprovement;
-        _avgSleep = insights.avgLatencyWithButler > 0
-            ? (insights.avgLatencyWithButler / 60).clamp(0, 12).toDouble()
-            : 0;
-        _streakDays = streak;
-        _totalSessions = insights.totalSessions;
-        _isLoadingInsights = false;
-      });
+      // Cache the result
+      _dataCache[dateKey] = {
+        'duration': duration,
+        'quality': targetSession?.sleepQuality,
+        'efficiency': efficiency,
+        'hasData': hasData,
+        'interruptions': targetSession?.interruptions ?? 0,
+        'mood': targetSession?.morningMood,
+        'deep': targetSession?.deepSleepDuration,
+        'light': targetSession?.lightSleepDuration,
+        'rem': targetSession?.remSleepDuration,
+        'awake': targetSession?.awakeDuration,
+        'rhr': targetSession?.restingHeartRate,
+        'hrv': targetSession?.hrv,
+        'respiratoryRate': targetSession?.respiratoryRate,
+        'consistency': calculatedConsistency,
+      };
 
-      // Update affirmation based on time of day (mock real functionality)
-      _updateAffirmationForTime();
+      if (mounted) {
+        setState(() {
+          _lastNightDuration = duration;
+          _lastNightQuality = targetSession?.sleepQuality;
+          _sleepEfficiency = efficiency;
+          _hasLastNightData = hasData;
+          _lastNightInterruptions = targetSession?.interruptions ?? 0;
+          _selectedMood = targetSession?.morningMood;
+          _deepMinutes = targetSession?.deepSleepDuration;
+          _lightMinutes = targetSession?.lightSleepDuration;
+          _remMinutes = targetSession?.remSleepDuration;
+          _awakeMinutes = targetSession?.awakeDuration;
+          _rhr = targetSession?.restingHeartRate;
+          _hrv = targetSession?.hrv;
+          _respiratoryRate = targetSession?.respiratoryRate;
+          _consistencyScore = calculatedConsistency;
+
+          _latencyImprovement = insights.latencyImprovement;
+          _avgSleep = insights.avgLatencyWithButler > 0
+              ? (insights.avgLatencyWithButler / 60).clamp(0, 12).toDouble()
+              : 0;
+          _streakDays = streak;
+          _totalSessions = insights.totalSessions;
+          _isLoadingInsights = false;
+        });
+        _updateAffirmationForTime();
+      }
     } catch (e) {
       debugPrint('Error loading insights: $e');
-      setState(() => _isLoadingInsights = false);
-      // Keep demo data on error
+      if (mounted) setState(() => _isLoadingInsights = false);
     }
   }
 
@@ -418,6 +444,32 @@ class _NewHomeScreenState extends State<NewHomeScreen>
             ),
           ),
 
+          // Decorative background elements
+          Positioned(
+            top: -100,
+            right: -50,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.accentPrimary.withOpacity(0.05),
+              ),
+            ).animate().fadeIn(duration: 1200.ms),
+          ),
+          Positioned(
+            top: 200,
+            left: -80,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.accentLavender.withOpacity(0.03),
+              ),
+            ).animate().fadeIn(delay: 400.ms, duration: 1200.ms),
+          ),
+
           // Main Content
           SafeArea(
             child: _buildBody(),
@@ -428,7 +480,13 @@ class _NewHomeScreenState extends State<NewHomeScreen>
             left: 0,
             right: 0,
             bottom: 0,
-            child: _buildBottomNavArea(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PlaybackBar(),
+                _buildBottomNavArea(),
+              ],
+            ),
           ),
 
           // Journal Add Button (Floating above nav)
@@ -444,21 +502,18 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   }
 
   Widget _buildBody() {
-    switch (_selectedNavIndex) {
-      case 0:
-        return _buildHomeTab();
-      case 1:
-        return const SoundsScreen();
-      case 2:
-        return JournalScreen(isTab: true, key: _journalKey);
-      case 3:
-        return AccountScreen(
+    return IndexedStack(
+      index: _selectedNavIndex,
+      children: [
+        _buildHomeTab(),
+        const SoundsScreen(),
+        JournalScreen(isTab: true, key: _journalKey),
+        AccountScreen(
           isTab: true,
           onDataChanged: _refreshAllData,
-        );
-      default:
-        return const SizedBox.shrink();
-    }
+        ),
+      ],
+    );
   }
 
   Widget _buildHomeTab() {
@@ -474,27 +529,27 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               const SizedBox(height: AppSpacing.lg),
-              _buildLastNightSummary(),
+              _buildLastNightSummary().animate().fadeIn(delay: 300.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
               const SizedBox(height: AppSpacing.xl),
-              _buildAdvancedMetrics(),
+              _buildAdvancedMetrics().animate().fadeIn(delay: 350.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
               const SizedBox(height: AppSpacing.xl),
-              _buildDailyAffirmation(),
+              _buildDailyAffirmation().animate().fadeIn(delay: 400.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
               const SizedBox(height: AppSpacing.xl),
-              _buildSleepGauge(),
+              _buildSleepGauge().animate().fadeIn(delay: 450.ms, duration: 400.ms).scale(begin: const Offset(0.98, 0.98)),
               const SizedBox(height: AppSpacing.xl),
-              _buildControlPanel(),
+              _buildControlPanel().animate().fadeIn(delay: 500.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
               const SizedBox(height: AppSpacing.xl),
               if (_isTodaySelected) ...[
-                _buildStartTrackingButton(),
+                _buildStartTrackingButton().animate().fadeIn(delay: 550.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
                 const SizedBox(height: AppSpacing.xl),
               ],
               if (_isTodaySelected && _timerService.isRunning) ...[
-                _buildActiveTimerCard(),
+                _buildActiveTimerCard().animate().fadeIn(delay: 550.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
                 const SizedBox(height: AppSpacing.xl),
               ],
-              _buildMoodTracker(),
+              _buildMoodTracker().animate().fadeIn(delay: 600.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
               const SizedBox(height: AppSpacing.xl),
-              _buildTrendInsights(),
+              _buildTrendInsights().animate().fadeIn(delay: 650.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
               const SizedBox(height: 140), // Space for fab & nav
             ]),
           ),
@@ -527,7 +582,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                   ),
                 ),
               ],
-            ),
+            ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.05, end: 0),
             Row(
               children: [
                 _buildIconButton(
@@ -544,7 +599,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                       _refreshAllData();
                     }
                   },
-                ),
+                ).animate().fadeIn(delay: 100.ms).scale(duration: 300.ms),
                 const SizedBox(width: 12),
                 _buildIconButton(
                   icon: _showFullCalendar
@@ -556,7 +611,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                       _showFullCalendar = !_showFullCalendar;
                     });
                   },
-                ),
+                ).animate().fadeIn(delay: 150.ms).scale(duration: 300.ms),
               ],
             ),
           ],
@@ -654,6 +709,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       child: SizedBox(
         height: 80,
         child: ListView.builder(
+          controller: _calendarScrollController,
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           itemCount: days.length,
@@ -727,7 +783,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                   ],
                 ),
               ),
-            );
+            ).animate().fadeIn(delay: (200 + (index * 20)).ms).slideX(begin: 0.1, end: 0, duration: 300.ms);
           },
         ),
       ),
@@ -1885,6 +1941,9 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         onTap: () {
           HapticHelper.lightImpact();
           setState(() => _selectedNavIndex = index);
+          if (index == 0) {
+            _scrollToCurrentDate();
+          }
         },
         child: Container(
           height: double.infinity,

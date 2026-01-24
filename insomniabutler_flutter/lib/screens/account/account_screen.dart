@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../services/user_service.dart';
@@ -10,6 +12,7 @@ import '../../utils/haptic_helper.dart';
 import '../../main.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../new_home_screen.dart';
+import '../journal/widgets/journal_skeleton.dart';
 
 /// Account & Settings Screen
 /// Provides comprehensive account management, app settings, and user preferences
@@ -41,71 +44,105 @@ class _AccountScreenState extends State<AccountScreen> {
   bool _autoStartTracking = false;
 
   bool _isLoading = true;
+  Map<String, dynamic>? _cachedStats;
 
   @override
   void initState() {
     super.initState();
+    _loadFromCache();
     _loadData();
   }
 
-  Future<void> _loadData() async {
-    setState(() => _isLoading = true);
-
+  Future<void> _loadFromCache() async {
     try {
-      // Load user data
-      final user = await UserService.getCurrentUser();
-      final userName = await UserService.getCachedUserName();
+      final prefs = await SharedPreferences.getInstance();
+      final statsJson = prefs.getString('user_account_stats');
+      final name = await UserService.getCachedUserName();
+      
+      if (statsJson != null || name.isNotEmpty) {
+        setState(() {
+          if (statsJson != null) _cachedStats = jsonDecode(statsJson);
+          _userName = name;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading account cache: $e');
+    }
+  }
+
+  Future<void> _saveToCache(Map<String, dynamic> stats) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString('user_account_stats', jsonEncode(stats));
+    } catch (e) {
+      debugPrint('Error saving account cache: $e');
+    }
+  }
+
+  Future<void> _loadData() async {
+    try {
       final userId = await UserService.getCurrentUserId();
-
-      // Load app settings
-      final bedtimeNotif =
-          await AccountSettingsService.getBedtimeNotifications();
-      final insightsNotif =
-          await AccountSettingsService.getInsightsNotifications();
-      final journalNotif =
-          await AccountSettingsService.getJournalNotifications();
-      final haptics = await AccountSettingsService.getHapticsEnabled();
-      final sounds = await AccountSettingsService.getSoundEffectsEnabled();
-      final autoStart = await AccountSettingsService.getAutoStartTracking();
-
-      // Load app version
-      final packageInfo = await PackageInfo.fromPlatform();
-
-      // Load user stats from backend
-      int totalSessions = 0;
-      int totalJournalEntries = 0;
-      int currentStreak = 0;
-
-      if (userId != null) {
-        try {
-          final stats = await client.auth.getUserStats(userId);
-          totalSessions = stats['totalSleepSessions'] ?? 0;
-          totalJournalEntries = stats['totalJournalEntries'] ?? 0;
-          currentStreak = stats['currentStreak'] ?? 0;
-        } catch (e) {
-          debugPrint('Error loading user stats: $e');
-        }
+      if (userId == null) {
+        setState(() => _isLoading = false);
+        return;
       }
 
-      setState(() {
-        _userName = user?.name ?? userName;
-        _userEmail = user?.email ?? '';
-        _accountCreatedAt = user?.createdAt;
-        _totalSessions = totalSessions;
-        _totalJournalEntries = totalJournalEntries;
-        _currentStreak = currentStreak;
-        _bedtimeNotifications = bedtimeNotif;
-        _insightsNotifications = insightsNotif;
-        _journalNotifications = journalNotif;
-        _hapticsEnabled = haptics;
-        _soundEffectsEnabled = sounds;
-        _autoStartTracking = autoStart;
-        _appVersion = '${packageInfo.version} (${packageInfo.buildNumber})';
-        _isLoading = false;
-      });
+      // 1. Fetch Basic Info & Version
+      final packageInfoFuture = PackageInfo.fromPlatform();
+      final userFuture = UserService.getCurrentUser();
+      
+      // 2. Fetch Settings
+      final settingsFutures = Future.wait([
+        AccountSettingsService.getBedtimeNotifications(),
+        AccountSettingsService.getInsightsNotifications(),
+        AccountSettingsService.getJournalNotifications(),
+        AccountSettingsService.getHapticsEnabled(),
+        AccountSettingsService.getSoundEffectsEnabled(),
+        AccountSettingsService.getAutoStartTracking(),
+      ]);
+
+      // 3. Fetch Stats
+      final statsFuture = client.auth.getUserStats(userId);
+
+      // Execute all in parallel for performance
+      final results = await Future.wait([
+        userFuture,
+        packageInfoFuture,
+        settingsFutures,
+        statsFuture,
+      ]);
+
+      final user = results[0] as dynamic; // User?
+      final packageInfo = results[1] as PackageInfo;
+      final settings = results[2] as List<bool>;
+      final stats = results[3] as Map<String, dynamic>;
+
+      if (mounted) {
+        setState(() {
+          _userName = user?.name ?? _userName;
+          _userEmail = user?.email ?? '';
+          _accountCreatedAt = user?.createdAt;
+          
+          _totalSessions = stats['totalSleepSessions'] ?? 0;
+          _totalJournalEntries = stats['totalJournalEntries'] ?? 0;
+          _currentStreak = stats['currentStreak'] ?? 0;
+          _cachedStats = stats;
+
+          _bedtimeNotifications = settings[0];
+          _insightsNotifications = settings[1];
+          _journalNotifications = settings[2];
+          _hapticsEnabled = settings[3];
+          _soundEffectsEnabled = settings[4];
+          _autoStartTracking = settings[5];
+          
+          _appVersion = '${packageInfo.version} (${packageInfo.buildNumber})';
+          _isLoading = false;
+        });
+        _saveToCache(stats);
+      }
     } catch (e) {
       debugPrint('Error loading account data: $e');
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -129,10 +166,8 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.accentPrimary),
-      );
+    if (_isLoading && _userEmail.isEmpty) {
+      return _buildSkeletonBody();
     }
 
     return Stack(
@@ -338,12 +373,18 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Widget _buildStatsRow() {
+    final stats = _cachedStats ?? {
+      'totalSleepSessions': _totalSessions,
+      'totalJournalEntries': _totalJournalEntries,
+      'currentStreak': _currentStreak,
+    };
+
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
             '🌙',
-            _totalSessions.toString(),
+            '${stats['totalSleepSessions'] ?? 0}',
             'Sleep',
             AppColors.accentPrimary,
           ),
@@ -352,7 +393,7 @@ class _AccountScreenState extends State<AccountScreen> {
         Expanded(
           child: _buildStatCard(
             '📔',
-            _totalJournalEntries.toString(),
+            '${stats['totalJournalEntries'] ?? 0}',
             'Journal',
             AppColors.accentLavender,
           ),
@@ -361,7 +402,7 @@ class _AccountScreenState extends State<AccountScreen> {
         Expanded(
           child: _buildStatCard(
             '🔥',
-            _currentStreak.toString(),
+            '${stats['currentStreak'] ?? 0}',
             'Streak',
             const Color(0xFFFFB156), // Warm Amber
           ),
@@ -794,7 +835,76 @@ class _AccountScreenState extends State<AccountScreen> {
           ],
         ),
       ),
-    ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.2, end: 0);
+    ); // Removed animation here
+  }
+
+  Widget _buildSkeletonBody() {
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
+      child: Column(
+        children: [
+          const SizedBox(height: AppSpacing.xl * 1.5),
+          // Profile Skeleton
+          Column(
+            children: [
+              Container(
+                width: 90,
+                height: 90,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.05),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                width: 150,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: 100,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ],
+          ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 1500.ms, color: Colors.white10),
+          const SizedBox(height: AppSpacing.xl),
+          Row(
+            children: List.generate(3, (i) => Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(right: i == 2 ? 0 : 12),
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                ),
+              ),
+            )),
+          ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 1500.ms, color: Colors.white10),
+          const SizedBox(height: AppSpacing.xl),
+          ...List.generate(4, (i) => Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Container(
+              height: 100,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+          )).animate(onPlay: (c) => c.repeat()).shimmer(duration: 1500.ms, color: Colors.white10, delay: 200.ms),
+        ],
+      ),
+    );
   }
 
   Widget _buildSettingRow({

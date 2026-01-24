@@ -11,8 +11,9 @@ import '../../utils/haptic_helper.dart';
 /// Beautiful glassmorphic editor with mood selection and tags
 class JournalEditorScreen extends StatefulWidget {
   final int? entryId; // null for new entry
+  final DateTime? initialDate;
 
-  const JournalEditorScreen({super.key, this.entryId});
+  const JournalEditorScreen({super.key, this.entryId, this.initialDate});
 
   @override
   State<JournalEditorScreen> createState() => _JournalEditorScreenState();
@@ -24,7 +25,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
   final ScrollController _scrollController = ScrollController();
 
   String? _selectedMood;
-  DateTime _selectedDate = DateTime.now();
+  late DateTime _selectedDate;
   bool _isSaving = false;
   bool _isLoading = false;
 
@@ -46,6 +47,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedDate = widget.initialDate ?? DateTime.now();
     if (widget.entryId != null) {
       _loadEntry();
     } else {

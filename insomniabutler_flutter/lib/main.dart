@@ -11,6 +11,8 @@ import 'package:just_audio_background/just_audio_background.dart';
 import 'screens/new_home_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'core/theme.dart';
+import 'screens/chat/chat_history_screen.dart';
+import 'screens/insomnia_butler_screen.dart';
 
 import 'dart:convert'; // Added for json.decode
 import 'dart:async'; // Added for unawaited
@@ -89,6 +91,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       home: const AppInitializer(),
+      routes: {
+        '/chat_history': (context) => const ChatHistoryScreen(),
+        '/butler': (context) => const InsomniaButlerScreen(),
+      },
     );
   }
 }

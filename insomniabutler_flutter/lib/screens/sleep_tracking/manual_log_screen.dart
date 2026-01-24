@@ -129,89 +129,93 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
   Widget build(BuildContext context) {
     bool isEdit = widget.initialData != null;
 
-    return Scaffold(
-      backgroundColor: AppColors.bgPrimary,
-      body: Stack(
-        children: [
-          // Decorative background elements
-          Positioned(
-            top: -100,
-            left: -50,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.accentPrimary.withOpacity(0.04),
-              ),
-            ).animate().fadeIn(duration: 1200.ms),
-          ),
-          Positioned(
-            bottom: 100,
-            right: -80,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.accentLavender.withOpacity(0.03),
-              ),
-            ).animate().fadeIn(delay: 400.ms, duration: 1200.ms),
-          ),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      behavior: HitTestBehavior.opaque,
+      child: Scaffold(
+        backgroundColor: AppColors.bgPrimary,
+        body: Stack(
+          children: [
+            // Decorative background elements
+            Positioned(
+              top: -100,
+              left: -50,
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.accentPrimary.withOpacity(0.04),
+                ),
+              ).animate().fadeIn(duration: 1200.ms),
+            ),
+            Positioned(
+              bottom: 100,
+              right: -80,
+              child: Container(
+                width: 250,
+                height: 250,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.accentLavender.withOpacity(0.03),
+                ),
+              ).animate().fadeIn(delay: 400.ms, duration: 1200.ms),
+            ),
 
-          SafeArea(
-            child: Column(
-              children: [
-                _buildTopBar(isEdit),
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.all(AppSpacing.containerPadding),
-                    child: Column(
-                      children: [
-                        _buildDatePicker(),
-                        const SizedBox(height: AppSpacing.lg),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildTimePicker(
-                                'In Bed',
-                                _bedtime,
-                                () => _selectTime(true),
-                                Icons.bedtime_rounded,
-                                AppColors.accentPrimary,
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildTopBar(isEdit),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.all(AppSpacing.containerPadding),
+                      child: Column(
+                        children: [
+                          _buildDatePicker(),
+                          const SizedBox(height: AppSpacing.lg),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildTimePicker(
+                                  'In Bed',
+                                  _bedtime,
+                                  () => _selectTime(true),
+                                  Icons.bedtime_rounded,
+                                  AppColors.accentPrimary,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: AppSpacing.md),
-                            Expanded(
-                              child: _buildTimePicker(
-                                'Woke Up',
-                                _waketime,
-                                () => _selectTime(false),
-                                Icons.wb_sunny_rounded,
-                                AppColors.accentAmber,
+                              const SizedBox(width: AppSpacing.md),
+                              Expanded(
+                                child: _buildTimePicker(
+                                  'Woke Up',
+                                  _waketime,
+                                  () => _selectTime(false),
+                                  Icons.wb_sunny_rounded,
+                                  AppColors.accentAmber,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        _buildDurationInfo(),
-                        const SizedBox(height: AppSpacing.xl),
-                        _buildQualityPicker(),
-                        const SizedBox(height: AppSpacing.xl),
-                        _buildInterruptionsPicker(),
-                        const SizedBox(height: AppSpacing.xl),
-                        _buildAdvancedSection(),
-                        const SizedBox(height: 40),
-                      ],
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          _buildDurationInfo(),
+                          const SizedBox(height: AppSpacing.xl),
+                          _buildQualityPicker(),
+                          const SizedBox(height: AppSpacing.xl),
+                          _buildInterruptionsPicker(),
+                          const SizedBox(height: AppSpacing.xl),
+                          _buildAdvancedSection(),
+                          const SizedBox(height: 40),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                _buildSaveButton(isEdit),
-              ],
+                  _buildSaveButton(isEdit),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -590,70 +594,9 @@ class _ManualLogScreenState extends State<ManualLogScreen> {
   Widget _buildAdvancedSection() {
     return Column(
       children: [
-        GestureDetector(
-          onTap: () {
-            HapticHelper.lightImpact();
-            setState(() => _showAdvanced = !_showAdvanced);
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-            decoration: BoxDecoration(
-              color: _showAdvanced
-                  ? AppColors.accentPrimary.withOpacity(0.1)
-                  : AppColors.bgSecondary.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: _showAdvanced
-                    ? AppColors.accentPrimary.withOpacity(0.3)
-                    : Colors.white.withOpacity(0.05),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  _showAdvanced
-                      ? Icons.insights_rounded
-                      : Icons.add_chart_rounded,
-                  size: 18,
-                  color: _showAdvanced
-                      ? AppColors.accentPrimary
-                      : AppColors.textTertiary,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  _showAdvanced
-                      ? 'HIDE PERFORMANCE METRICS'
-                      : 'ADD PERFORMANCE METRICS',
-                  style: AppTextStyles.label.copyWith(
-                    color: _showAdvanced
-                        ? AppColors.accentPrimary
-                        : AppColors.textTertiary,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 10,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Icon(
-                  _showAdvanced
-                      ? Icons.keyboard_arrow_up_rounded
-                      : Icons.keyboard_arrow_down_rounded,
-                  size: 18,
-                  color: _showAdvanced
-                      ? AppColors.accentPrimary
-                      : AppColors.textTertiary,
-                ),
-              ],
-            ),
-          ),
-        ),
-        if (_showAdvanced) ...[
-          const SizedBox(height: AppSpacing.lg),
-          _buildSleepStructureInputs(),
-          const SizedBox(height: AppSpacing.md),
-          _buildRecoveryInputs(),
-        ],
+        _buildSleepStructureInputs(),
+        const SizedBox(height: AppSpacing.md),
+        _buildRecoveryInputs(),
       ],
     ).animate().fadeIn(delay: 500.ms);
   }

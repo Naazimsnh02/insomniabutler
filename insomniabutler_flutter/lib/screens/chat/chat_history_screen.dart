@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../utils/haptic_helper.dart';
@@ -7,6 +9,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../main.dart';
 import '../../services/user_service.dart';
 import 'package:insomniabutler_client/insomniabutler_client.dart';
+import '../sleep_tracking/widgets/history_skeleton.dart';
 
 class ChatHistoryScreen extends StatefulWidget {
   const ChatHistoryScreen({super.key});
@@ -22,23 +25,51 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
   @override
   void initState() {
     super.initState();
+    _loadFromCache();
     _loadHistory();
   }
 
+  Future<void> _loadFromCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedJson = prefs.getString('chat_history_cache');
+      if (cachedJson != null) {
+        final List<dynamic> decoded = jsonDecode(cachedJson);
+        final history = decoded.map((item) => ChatSessionInfo.fromJson(item)).toList();
+        setState(() {
+          _history = history;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading chat history cache: $e');
+    }
+  }
+
   Future<void> _loadHistory() async {
-    setState(() => _isLoading = true);
+    if (_history.isEmpty) {
+      setState(() => _isLoading = true);
+    }
     try {
       final userId = await UserService.getCurrentUserId();
       if (userId == null) throw Exception('User not logged in');
 
       final history = await client.thoughtClearing.getChatHistory(userId);
-      setState(() {
-        _history = history;
-        _isLoading = false;
-      });
+      
+      if (mounted) {
+        setState(() {
+          _history = history;
+          _isLoading = false;
+        });
+
+        // Save to cache
+        final prefs = await SharedPreferences.getInstance();
+        final jsonStr = jsonEncode(history.map((h) => h.toJson()).toList());
+        prefs.setString('chat_history_cache', jsonStr);
+      }
     } catch (e) {
       debugPrint('Error loading chat history: $e');
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -79,12 +110,8 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
               children: [
                 _buildTopBar(),
                 Expanded(
-                  child: _isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.accentPrimary,
-                          ),
-                        )
+                  child: _isLoading && _history.isEmpty
+                      ? const HistorySkeleton()
                       : _history.isEmpty
                           ? _buildEmptyState()
                           : RefreshIndicator(
@@ -268,11 +295,15 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                   width: 1.5,
                 ),
               ),
-              child: const Center(
-                child: Icon(
-                  Icons.psychology_rounded,
-                  color: AppColors.accentPrimary,
-                  size: 26,
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/logo/butler_logo.png',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.psychology_rounded,
+                    color: AppColors.accentPrimary,
+                    size: 26,
+                  ),
                 ),
               ),
             ),

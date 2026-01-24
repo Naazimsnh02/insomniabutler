@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:async';
@@ -8,6 +9,7 @@ import '../models/chat_message.dart';
 import '../main.dart';
 import '../services/user_service.dart';
 import '../utils/haptic_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Thought Clearing Chat UI - CORE FEATURE
 /// Premium glassmorphic chat interface for processing anxious thoughts
@@ -56,11 +58,71 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
           ),
         );
 
-    _sessionId = widget.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString();
+    _initializeSession();
+  }
 
+  Future<void> _loadFromCache(String sessionId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedJson = prefs.getString('chat_messages_$sessionId');
+      if (cachedJson != null) {
+        final List<dynamic> decoded = jsonDecode(cachedJson);
+        final messages = decoded.map((item) => ChatMessage.fromJson(item)).toList();
+        setState(() {
+          _messages.addAll(messages);
+        });
+        _scrollToBottom();
+      }
+    } catch (e) {
+      debugPrint('Error loading chat message cache: $e');
+    }
+  }
+
+  Future<void> _saveToCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = jsonEncode(_messages.map((m) => m.toJson()).toList());
+      prefs.setString('chat_messages_$_sessionId', jsonStr);
+    } catch (e) {
+      debugPrint('Error saving chat message cache: $e');
+    }
+  }
+
+  Future<void> _initializeSession() async {
     if (widget.sessionId != null) {
-      _loadSessionHistory();
+      _sessionId = widget.sessionId!;
+      await _loadFromCache(_sessionId);
+      await _loadSessionHistory();
     } else {
+      final prefs = await SharedPreferences.getInstance();
+      final savedSessionId = prefs.getString('current_butler_session_id');
+
+      if (savedSessionId != null) {
+        _sessionId = savedSessionId;
+        await _loadFromCache(_sessionId);
+        await _loadSessionHistory();
+      } else {
+        await _startNewSession();
+      }
+    }
+  }
+
+  Future<void> _startNewSession() async {
+    final newSessionId = DateTime.now().millisecondsSinceEpoch.toString();
+    _sessionId = newSessionId;
+    
+    // Save to prefs for persistence
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('current_butler_session_id', newSessionId);
+
+    if (mounted) {
+      setState(() {
+        _messages.clear();
+        _currentCategory = null;
+        _sleepReadiness = 45;
+        _previousReadiness = 45;
+      });
+
       // Initial AI greeting
       _addMessage(
         ChatMessage(
@@ -70,7 +132,15 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
           timestamp: DateTime.now(),
         ),
       );
+      _saveToCache();
     }
+  }
+
+  Future<void> _resetSession() async {
+    await HapticHelper.mediumImpact();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('current_butler_session_id');
+    await _startNewSession();
   }
 
   Future<void> _loadSessionHistory() async {
@@ -86,11 +156,15 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         category: null, 
       )).toList();
 
-      setState(() {
-        _messages.addAll(mappedMessages);
-        _isHistoryLoading = false;
-      });
-      _scrollToBottom();
+      if (mounted) {
+        setState(() {
+          _messages.clear();
+          _messages.addAll(mappedMessages);
+          _isHistoryLoading = false;
+        });
+        _scrollToBottom();
+        _saveToCache();
+      }
     } catch (e) {
       print('Error loading session history: $e');
       setState(() => _isHistoryLoading = false);
@@ -181,6 +255,7 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
 
         _previousReadiness = _sleepReadiness;
         _sleepReadiness = response.newReadiness;
+        _saveToCache();
         _isLoading = false;
       });
 
@@ -371,6 +446,17 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
           ).animate().fadeIn(delay: 200.ms).slideY(begin: -0.2, end: 0),
 
           const Spacer(),
+
+          // New Session Button
+          _buildIconButton(
+                icon: Icons.add_rounded,
+                onTap: _resetSession,
+              )
+              .animate()
+              .fadeIn(duration: 400.ms)
+              .scale(delay: 100.ms),
+
+          const SizedBox(width: 8),
 
           _buildIconButton(
                 icon: Icons.history_rounded,

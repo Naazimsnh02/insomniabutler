@@ -7,6 +7,7 @@ import '../../services/audio_player_service.dart';
 import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../utils/haptic_helper.dart';
+import 'widgets/sound_skeleton.dart';
 
 class SoundsScreen extends StatefulWidget {
   const SoundsScreen({super.key});
@@ -20,18 +21,31 @@ class _SoundsScreenState extends State<SoundsScreen> {
   SoundCategory? _selectedCategory; // null means 'All'
   Set<String> _favoriteIds = {};
   bool _showFavoritesOnly = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadFavorites();
+    _loadFromCache();
   }
 
-  Future<void> _loadFavorites() async {
+  Future<void> _loadFromCache() async {
     final prefs = await SharedPreferences.getInstance();
+    final cachedCategory = prefs.getString('last_sound_category');
+    
     setState(() {
       _favoriteIds = (prefs.getStringList('favorite_sounds') ?? []).toSet();
+      if (cachedCategory != null) {
+        _selectedCategory = SoundCategory.values.firstWhere(
+          (e) => e.toString() == cachedCategory,
+          orElse: () => SoundCategory.melodic,
+        );
+      }
     });
+
+    // Simulated network delay for professional transition
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (mounted) setState(() => _isLoading = false);
   }
 
   Future<void> _toggleFavorite(String id) async {
@@ -176,9 +190,9 @@ class _SoundsScreenState extends State<SoundsScreen> {
               _buildHeader(),
               _buildCategorySelector(),
               Expanded(
-                child: _buildSoundGrid(),
+                child: _isLoading ? const SoundSkeleton() : _buildSoundGrid(),
               ),
-              _buildPlaybackBar(),
+              const SizedBox(height: 100), // Space for global playback bar
             ],
           ),
         ),
@@ -317,12 +331,18 @@ class _SoundsScreenState extends State<SoundsScreen> {
           final isAllChip = index == 0;
           final category = isAllChip ? null : SoundCategory.values[index - 1];
           final isSelected = _selectedCategory == category;
-          final label = isAllChip ? 'All Sounds' : _getCategoryName(category!);
+          final label = isAllChip ? 'All Sounds' : category!.displayName;
 
           return GestureDetector(
-            onTap: () {
+            onTap: () async {
               HapticHelper.lightImpact();
               setState(() => _selectedCategory = category);
+              final prefs = await SharedPreferences.getInstance();
+              if (category != null) {
+                prefs.setString('last_sound_category', category.toString());
+              } else {
+                prefs.remove('last_sound_category');
+              }
             },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
@@ -334,8 +354,9 @@ class _SoundsScreenState extends State<SoundsScreen> {
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
                   color: isSelected 
-                    ? AppColors.accentPrimary.withOpacity(0.5) 
-                    : Colors.white.withOpacity(0.05),
+                    ? AppColors.accentPrimary.withOpacity(0.6) 
+                    : Colors.white.withOpacity(0.12),
+                  width: 1.2,
                 ),
                 boxShadow: isSelected ? [
                   BoxShadow(
@@ -359,21 +380,6 @@ class _SoundsScreenState extends State<SoundsScreen> {
         },
       ),
     ).animate().fadeIn(delay: 300.ms);
-  }
-
-  String _getCategoryName(SoundCategory category) {
-    switch (category) {
-      case SoundCategory.melodic:
-        return 'Melodic';
-      case SoundCategory.ambient:
-        return 'Ambient';
-      case SoundCategory.nature:
-        return 'Nature';
-      case SoundCategory.lullaby:
-        return 'Lullaby';
-      case SoundCategory.meditative:
-        return 'Meditative';
-    }
   }
 
   Widget _buildSoundGrid() {
@@ -575,7 +581,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        _getCategoryName(sound.category),
+                                        sound.category.displayName,
                                         style: AppTextStyles.caption.copyWith(
                                           color: Colors.white.withOpacity(0.6),
                                           fontSize: 11,
@@ -628,214 +634,6 @@ class _SoundsScreenState extends State<SoundsScreen> {
         );
       },
     );
-  }
-
-  Widget _buildPlaybackBar() {
-    return StreamBuilder<SleepSound?>(
-      stream: _audioService.currentSoundStream,
-      initialData: _audioService.currentSound,
-      builder: (context, snapshot) {
-        final currentSound = snapshot.data;
-        if (currentSound == null) return const SizedBox.shrink();
-
-        return Container(
-          margin: const EdgeInsets.fromLTRB(20, 0, 20, 110),
-          child: GlassCard(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            borderRadius: 28,
-            color: AppColors.bgSecondary.withOpacity(0.9),
-            border: Border.all(
-              color: AppColors.accentPrimary.withOpacity(0.3),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        image: currentSound.imagePath != null
-                            ? DecorationImage(
-                                image: AssetImage(currentSound.imagePath!),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
-                        color: AppColors.accentPrimary.withOpacity(0.2),
-                        border: Border.all(color: Colors.white.withOpacity(0.1)),
-                      ),
-                      child: currentSound.imagePath == null
-                          ? const Icon(
-                              Icons.music_note_rounded,
-                              color: AppColors.accentPrimary,
-                              size: 24,
-                            )
-                          : null,
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            currentSound.title,
-                            style: AppTextStyles.body.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontSize: 15,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _getCategoryName(currentSound.category),
-                            style: AppTextStyles.caption.copyWith(
-                              fontSize: 11,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    StreamBuilder<bool>(
-                      stream: _audioService.isPlayingStream,
-                      initialData: _audioService.isPlaying,
-                      builder: (context, playingSnapshot) {
-                        final isPlaying = playingSnapshot.data ?? false;
-                        return Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                if (isPlaying) {
-                                  _audioService.pause();
-                                } else {
-                                  _audioService.resume();
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  isPlaying
-                                      ? Icons.pause_circle_filled_rounded
-                                      : Icons.play_circle_filled_rounded,
-                                  color: Colors.white,
-                                  size: 44,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.close_rounded,
-                                color: AppColors.textTertiary,
-                                size: 24,
-                              ),
-                              onPressed: () => _audioService.stop(),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                StreamBuilder<Duration?>(
-                  stream: _audioService.durationStream,
-                  builder: (context, durationSnapshot) {
-                    final duration = durationSnapshot.data ?? Duration.zero;
-                    return StreamBuilder<Duration?>(
-                      stream: _audioService.positionStream,
-                      builder: (context, positionSnapshot) {
-                        var position = positionSnapshot.data ?? Duration.zero;
-                        if (position > duration) position = duration;
-
-                        return Column(
-                          children: [
-                            SliderTheme(
-                              data: SliderTheme.of(context).copyWith(
-                                trackHeight: 3,
-                                thumbShape: const RoundSliderThumbShape(
-                                  enabledThumbRadius: 5,
-                                ),
-                                overlayShape: const RoundSliderOverlayShape(
-                                  overlayRadius: 12,
-                                ),
-                                activeTrackColor: AppColors.accentPrimary,
-                                inactiveTrackColor: Colors.white.withOpacity(0.1),
-                                thumbColor: Colors.white,
-                              ),
-                              child: Slider(
-                                value: position.inMilliseconds.toDouble(),
-                                max: duration.inMilliseconds.toDouble() > 0 
-                                    ? duration.inMilliseconds.toDouble() 
-                                    : 1.0,
-                                onChanged: (value) {
-                                  _audioService.seek(
-                                    Duration(milliseconds: value.toInt()),
-                                  );
-                                },
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    _formatDuration(position),
-                                    style: AppTextStyles.caption.copyWith(
-                                      fontSize: 10,
-                                      color: AppColors.textTertiary,
-                                      fontFeatures: [const FontFeature.tabularFigures()],
-                                    ),
-                                  ),
-                                  Text(
-                                    _formatDuration(duration),
-                                    style: AppTextStyles.caption.copyWith(
-                                      fontSize: 10,
-                                      color: AppColors.textTertiary,
-                                      fontFeatures: [const FontFeature.tabularFigures()],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                ),
-              ],
-            ),
-          ).animate().slideY(
-                begin: 1,
-                end: 0,
-                duration: 500.ms,
-                curve: Curves.easeOutBack,
-              ),
-        );
-      },
-    );
-  }
-
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, "0");
-    String minutes = twoDigits(duration.inMinutes.remainder(60));
-    String seconds = twoDigits(duration.inSeconds.remainder(60));
-    if (duration.inHours > 0) {
-      return "${twoDigits(duration.inHours)}:$minutes:$seconds";
-    }
-    return "$minutes:$seconds";
   }
 }
 
