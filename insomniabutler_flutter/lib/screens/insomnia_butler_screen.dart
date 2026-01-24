@@ -27,7 +27,7 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<ChatMessage> _messages = [];
-  late final String _sessionId;
+  late String _sessionId;
   bool _isHistoryLoading = false;
 
   int _sleepReadiness = 45;
