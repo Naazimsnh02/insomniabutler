@@ -25,6 +25,7 @@ abstract class JournalEntry implements _i1.SerializableModel {
     required this.createdAt,
     required this.updatedAt,
     required this.entryDate,
+    this.embedding,
   }) : isFavorite = isFavorite ?? false;
 
   factory JournalEntry({
@@ -39,6 +40,7 @@ abstract class JournalEntry implements _i1.SerializableModel {
     required DateTime createdAt,
     required DateTime updatedAt,
     required DateTime entryDate,
+    _i1.Vector? embedding,
   }) = _JournalEntryImpl;
 
   factory JournalEntry.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -60,6 +62,9 @@ abstract class JournalEntry implements _i1.SerializableModel {
       entryDate: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['entryDate'],
       ),
+      embedding: jsonSerialization['embedding'] == null
+          ? null
+          : _i1.VectorJsonExtension.fromJson(jsonSerialization['embedding']),
     );
   }
 
@@ -88,6 +93,8 @@ abstract class JournalEntry implements _i1.SerializableModel {
 
   DateTime entryDate;
 
+  _i1.Vector? embedding;
+
   /// Returns a shallow copy of this [JournalEntry]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -103,6 +110,7 @@ abstract class JournalEntry implements _i1.SerializableModel {
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? entryDate,
+    _i1.Vector? embedding,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -119,6 +127,7 @@ abstract class JournalEntry implements _i1.SerializableModel {
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
       'entryDate': entryDate.toJson(),
+      if (embedding != null) 'embedding': embedding?.toJson(),
     };
   }
 
@@ -143,6 +152,7 @@ class _JournalEntryImpl extends JournalEntry {
     required DateTime createdAt,
     required DateTime updatedAt,
     required DateTime entryDate,
+    _i1.Vector? embedding,
   }) : super._(
          id: id,
          userId: userId,
@@ -155,6 +165,7 @@ class _JournalEntryImpl extends JournalEntry {
          createdAt: createdAt,
          updatedAt: updatedAt,
          entryDate: entryDate,
+         embedding: embedding,
        );
 
   /// Returns a shallow copy of this [JournalEntry]
@@ -173,6 +184,7 @@ class _JournalEntryImpl extends JournalEntry {
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? entryDate,
+    Object? embedding = _Undefined,
   }) {
     return JournalEntry(
       id: id is int? ? id : this.id,
@@ -188,6 +200,7 @@ class _JournalEntryImpl extends JournalEntry {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       entryDate: entryDate ?? this.entryDate,
+      embedding: embedding is _i1.Vector? ? embedding : this.embedding?.clone(),
     );
   }
 }

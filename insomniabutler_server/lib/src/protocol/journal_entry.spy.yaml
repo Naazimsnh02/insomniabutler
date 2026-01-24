@@ -11,3 +11,9 @@ fields:
   createdAt: DateTime
   updatedAt: DateTime
   entryDate: DateTime
+  embedding: Vector(768)?
+indexes:
+  journal_entries_embedding_idx:
+    fields: embedding
+    type: hnsw
+

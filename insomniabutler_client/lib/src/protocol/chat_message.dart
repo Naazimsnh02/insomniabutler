@@ -20,6 +20,7 @@ abstract class ChatMessage implements _i1.SerializableModel {
     required this.role,
     required this.content,
     required this.timestamp,
+    this.embedding,
   });
 
   factory ChatMessage({
@@ -29,6 +30,7 @@ abstract class ChatMessage implements _i1.SerializableModel {
     required String role,
     required String content,
     required DateTime timestamp,
+    _i1.Vector? embedding,
   }) = _ChatMessageImpl;
 
   factory ChatMessage.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -41,6 +43,9 @@ abstract class ChatMessage implements _i1.SerializableModel {
       timestamp: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['timestamp'],
       ),
+      embedding: jsonSerialization['embedding'] == null
+          ? null
+          : _i1.VectorJsonExtension.fromJson(jsonSerialization['embedding']),
     );
   }
 
@@ -59,6 +64,8 @@ abstract class ChatMessage implements _i1.SerializableModel {
 
   DateTime timestamp;
 
+  _i1.Vector? embedding;
+
   /// Returns a shallow copy of this [ChatMessage]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -69,6 +76,7 @@ abstract class ChatMessage implements _i1.SerializableModel {
     String? role,
     String? content,
     DateTime? timestamp,
+    _i1.Vector? embedding,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -80,6 +88,7 @@ abstract class ChatMessage implements _i1.SerializableModel {
       'role': role,
       'content': content,
       'timestamp': timestamp.toJson(),
+      if (embedding != null) 'embedding': embedding?.toJson(),
     };
   }
 
@@ -99,6 +108,7 @@ class _ChatMessageImpl extends ChatMessage {
     required String role,
     required String content,
     required DateTime timestamp,
+    _i1.Vector? embedding,
   }) : super._(
          id: id,
          sessionId: sessionId,
@@ -106,6 +116,7 @@ class _ChatMessageImpl extends ChatMessage {
          role: role,
          content: content,
          timestamp: timestamp,
+         embedding: embedding,
        );
 
   /// Returns a shallow copy of this [ChatMessage]
@@ -119,6 +130,7 @@ class _ChatMessageImpl extends ChatMessage {
     String? role,
     String? content,
     DateTime? timestamp,
+    Object? embedding = _Undefined,
   }) {
     return ChatMessage(
       id: id is int? ? id : this.id,
@@ -127,6 +139,7 @@ class _ChatMessageImpl extends ChatMessage {
       role: role ?? this.role,
       content: content ?? this.content,
       timestamp: timestamp ?? this.timestamp,
+      embedding: embedding is _i1.Vector? ? embedding : this.embedding?.clone(),
     );
   }
 }

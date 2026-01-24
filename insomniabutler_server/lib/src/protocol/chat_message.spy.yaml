@@ -6,3 +6,9 @@ fields:
   role: String
   content: String
   timestamp: DateTime
+  embedding: Vector(768)?
+indexes:
+  chat_messages_embedding_idx:
+    fields: embedding
+    type: hnsw
+

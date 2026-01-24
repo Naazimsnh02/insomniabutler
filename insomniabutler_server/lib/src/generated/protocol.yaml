@@ -19,6 +19,7 @@ auth:
 dev:
   - generateRealisticData:
   - clearUserData:
+  - backfillEmbeddings:
 insights:
   - getUserInsights:
   - getWeeklyInsights:

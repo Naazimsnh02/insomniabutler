@@ -2,9 +2,30 @@ import 'dart:io';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import '../services/gemini_service.dart';
+import '../services/embedding_service.dart';
 import 'dart:convert';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 class JournalEndpoint extends Endpoint {
+  EmbeddingService? _embeddingService;
+
+  /// Get or create Embedding service instance
+  EmbeddingService _getEmbeddingService(Session session) {
+    if (_embeddingService != null) return _embeddingService!;
+
+    var apiKey = session.passwords['geminiApiKey'];
+    if (apiKey == null || apiKey.isEmpty) {
+      apiKey = Platform.environment['GEMINI_API_KEY'];
+    }
+
+    if (apiKey == null || apiKey.isEmpty) {
+      throw Exception('Gemini API key not found');
+    }
+
+    _embeddingService = EmbeddingService(apiKey);
+    return _embeddingService!;
+  }
+
   /// Create a new journal entry
   Future<JournalEntry> createEntry(
     Session session,
@@ -31,6 +52,16 @@ class JournalEndpoint extends Endpoint {
       entryDate: entryDate ?? now,
     );
 
+    // Generate embedding for semantic search
+    try {
+      final embeddingService = _getEmbeddingService(session);
+      final textForEmbedding = '${title ?? ''} $content';
+      final vector = await embeddingService.generateEmbedding(textForEmbedding);
+      entry.embedding = Vector(vector);
+    } catch (e) {
+      session.log('Failed to generate embedding for journal entry: $e');
+    }
+
     await JournalEntry.db.insertRow(session, entry);
     return entry;
   }
@@ -55,8 +86,19 @@ class JournalEndpoint extends Endpoint {
     entry.content = content ?? entry.content;
     entry.mood = mood ?? entry.mood;
     entry.tags = tags ?? entry.tags;
-    entry.isFavorite = isFavorite ?? entry.isFavorite;
     entry.updatedAt = DateTime.now().toUtc();
+
+    // Re-generate embedding if content or title changed
+    if (content != null || title != null) {
+      try {
+        final embeddingService = _getEmbeddingService(session);
+        final textForEmbedding = '${entry.title ?? ''} ${entry.content}';
+        final vector = await embeddingService.generateEmbedding(textForEmbedding);
+        entry.embedding = Vector(vector);
+      } catch (e) {
+        session.log('Failed to update embedding for journal entry: $e');
+      }
+    }
 
     await JournalEntry.db.updateRow(session, entry);
     return entry;
@@ -344,11 +386,10 @@ Entries:
 $entriesText
 ''';
 
-        final aiResponse = await gemini.sendMessage(
-          systemPrompt:
-              'You are an expert sleep psychologist and data analyst.',
-          userMessage: prompt,
-        );
+        final response = await gemini.model.generateContent([
+          Content.text('You are an expert sleep psychologist and data analyst.\n\nUser: $prompt')
+        ]);
+        final aiResponse = response.text ?? '';
 
         // Clean response of markdown if present
         var jsonStr = aiResponse.trim();

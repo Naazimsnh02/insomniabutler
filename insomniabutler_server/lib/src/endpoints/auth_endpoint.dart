@@ -1,17 +1,17 @@
 import 'package:serverpod/serverpod.dart';
-import '../generated/protocol.dart';
+import '../generated/protocol.dart' as protocol;
 
 /// Authentication endpoint for user registration and login
 class AuthEndpoint extends Endpoint {
   /// Register a new user
   /// Returns the created user or null if email already exists
-  Future<User?> register(
+  Future<protocol.User?> register(
     Session session,
     String email,
     String name,
   ) async {
     // Check if user exists
-    var existing = await User.db.findFirstRow(
+    var existing = await protocol.User.db.findFirstRow(
       session,
       where: (t) => t.email.equals(email),
     );
@@ -19,37 +19,37 @@ class AuthEndpoint extends Endpoint {
     if (existing != null) return null;
 
     // Create user
-    var user = User(
+    var user = protocol.User(
       email: email,
       name: name,
       createdAt: DateTime.now(),
     );
 
-    return await User.db.insertRow(session, user);
+    return await protocol.User.db.insertRow(session, user);
   }
 
   /// Login user by email
   /// Returns the user if found, null otherwise
-  Future<User?> login(Session session, String email) async {
-    return await User.db.findFirstRow(
+  Future<protocol.User?> login(Session session, String email) async {
+    return await protocol.User.db.findFirstRow(
       session,
       where: (t) => t.email.equals(email),
     );
   }
 
   /// Get user by ID
-  Future<User?> getUserById(Session session, int userId) async {
-    return await User.db.findById(session, userId);
+  Future<protocol.User?> getUserById(Session session, int userId) async {
+    return await protocol.User.db.findById(session, userId);
   }
 
   /// Update user preferences
-  Future<User?> updatePreferences(
+  Future<protocol.User?> updatePreferences(
     Session session,
     int userId,
     String? sleepGoal,
     DateTime? bedtimePreference,
   ) async {
-    var user = await User.db.findById(session, userId);
+    var user = await protocol.User.db.findById(session, userId);
 
     if (user == null) return null;
 
@@ -58,32 +58,32 @@ class AuthEndpoint extends Endpoint {
       bedtimePreference: bedtimePreference ?? user.bedtimePreference,
     );
 
-    return await User.db.updateRow(session, updated);
+    return await protocol.User.db.updateRow(session, updated);
   }
 
   /// Update user profile (name)
-  Future<User?> updateUserProfile(
+  Future<protocol.User?> updateUserProfile(
     Session session,
     int userId,
     String name,
   ) async {
-    var user = await User.db.findById(session, userId);
+    var user = await protocol.User.db.findById(session, userId);
 
     if (user == null) return null;
 
     var updated = user.copyWith(name: name);
 
-    return await User.db.updateRow(session, updated);
+    return await protocol.User.db.updateRow(session, updated);
   }
 
   /// Delete user and all associated data
   Future<bool> deleteUser(Session session, int userId) async {
     try {
-      var user = await User.db.findById(session, userId);
+      var user = await protocol.User.db.findById(session, userId);
       if (user == null) return false;
 
       // Delete user (cascade delete will handle related data if configured)
-      await User.db.deleteRow(session, user);
+      await protocol.User.db.deleteRow(session, user);
       return true;
     } catch (e) {
       session.log('Error deleting user: $e');
@@ -94,18 +94,18 @@ class AuthEndpoint extends Endpoint {
   /// Get user statistics
   /// Returns total sleep sessions, journal entries, and current streak
   Future<Map<String, int>> getUserStats(Session session, int userId) async {
-    final totalSleepSessions = await SleepSession.db.count(
+    final totalSleepSessions = await protocol.SleepSession.db.count(
       session,
       where: (t) => t.userId.equals(userId),
     );
 
-    final totalJournalEntries = await JournalEntry.db.count(
+    final totalJournalEntries = await protocol.JournalEntry.db.count(
       session,
       where: (t) => t.userId.equals(userId),
     );
 
     // Calculate current streak from sleep sessions
-    final sessions = await SleepSession.db.find(
+    final sessions = await protocol.SleepSession.db.find(
       session,
       where: (t) => t.userId.equals(userId),
       orderBy: (t) => t.sessionDate,

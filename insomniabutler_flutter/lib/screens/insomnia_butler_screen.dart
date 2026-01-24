@@ -9,6 +9,9 @@ import '../models/chat_message.dart';
 import '../main.dart';
 import '../services/user_service.dart';
 import '../utils/haptic_helper.dart';
+import '../services/audio_player_service.dart';
+import '../services/sound_service.dart';
+import 'package:insomniabutler_client/insomniabutler_client.dart' as protocol;
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Thought Clearing Chat UI - CORE FEATURE
@@ -259,6 +262,11 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         _isLoading = false;
       });
 
+      // Execute AI action if present
+      if (response.action != null) {
+        _handleAIAction(response.action!);
+      }
+
       // Auto-scroll to bottom
       _scrollToBottom();
 
@@ -291,6 +299,43 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
       // Log error for debugging
       print('Thought processing error: $e');
     }
+  }
+
+  Future<void> _handleAIAction(protocol.AIAction action) async {
+    debugPrint('Executing AI action: ${action.command}');
+    final params = action.parameters != null ? jsonDecode(action.parameters!) : {};
+
+    switch (action.command) {
+      case 'play_sound':
+        final soundName = params['sound_name'] as String?;
+        if (soundName != null) {
+          final sound = SoundService().findSoundByName(soundName);
+          if (sound != null) {
+            await AudioPlayerService().play(sound);
+            _showActionFeedback('Playing ${sound.title}...');
+          }
+        }
+        break;
+      case 'set_reminder':
+        _showActionFeedback('Reminder set: ${params['message'] ?? 'Bedtime approaching'}');
+        break;
+      case 'save_thought':
+        _showActionFeedback('Thought saved to your journal.');
+        break;
+    }
+  }
+
+  void _showActionFeedback(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+        backgroundColor: AppColors.accentPrimary.withOpacity(0.8),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
   }
 
   String _getCategoryEmoji(String category) {

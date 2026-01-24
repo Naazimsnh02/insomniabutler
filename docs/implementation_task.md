@@ -154,7 +154,7 @@ class GeminiService {
   final GenerativeModel model;
   
   GeminiService(String apiKey) : model = GenerativeModel(
-    model: 'gemini-2.5-flash',
+    model: 'gemini-2.5-flash-lite',
     apiKey: apiKey,
   );
   

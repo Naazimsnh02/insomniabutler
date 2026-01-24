@@ -1,0 +1,5 @@
+class: AIAction
+fields:
+  command: String  # e.g., "play_sound", "set_reminder", "log_thought"
+  parameters: String?  # JSON-encoded parameters
+  description: String?  # Human-readable description of the action

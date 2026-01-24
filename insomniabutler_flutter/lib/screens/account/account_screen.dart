@@ -1319,6 +1319,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 if (userId != null) {
                   await client.dev.generateRealisticData(userId);
                   if (mounted) {
+                    await _loadData(); // Reload data to update UI
                     Navigator.pop(context); // Close loading
                     widget.onDataChanged?.call();
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -1372,6 +1373,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 if (userId != null) {
                   await client.dev.clearUserData(userId);
                   if (mounted) {
+                    await _loadData(); // Reload data to update UI
                     Navigator.pop(context); // Close loading
                     widget.onDataChanged?.call();
                     ScaffoldMessenger.of(context).showSnackBar(

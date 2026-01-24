@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/sleep_sound.dart';
 import '../../services/audio_player_service.dart';
+import '../../services/sound_service.dart';
 import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../utils/haptic_helper.dart';
@@ -61,89 +62,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
     await prefs.setStringList('favorite_sounds', _favoriteIds.toList());
   }
 
-  final List<SleepSound> _allSounds = [
-    SleepSound(
-      id: '1',
-      title: 'Peaceful Sleep',
-      assetPath: 'assets/sounds/sleep/peaceful-sleep-188311.mp3',
-      category: SoundCategory.ambient,
-      description: 'Deep ambient tones for restful sleep.',
-      imagePath: 'assets/images/sounds/Peaceful Sleep.png',
-    ),
-    SleepSound(
-      id: '2',
-      title: 'Soft Ambient Rain',
-      assetPath:
-          'assets/sounds/sleep/relaxing-sleep-music-with-soft-ambient-rain-369762.mp3',
-      category: SoundCategory.nature,
-      description: 'Gentle rain falling on a quiet evening.',
-      imagePath: 'assets/images/sounds/Soft Ambient Rain.png',
-    ),
-    SleepSound(
-      id: '3',
-      title: 'Tibetan Bells',
-      assetPath: 'assets/sounds/sleep/sleep-inducing-tibetan-bells-388638.mp3',
-      category: SoundCategory.meditative,
-      description: 'Calming bells for deep meditation.',
-      imagePath: 'assets/images/sounds/Tibetan Bell.png',
-    ),
-    SleepSound(
-      id: '4',
-      title: 'Baby Lullaby',
-      assetPath: 'assets/sounds/sleep/lullaby-baby-sleep-music-456277.mp3',
-      category: SoundCategory.lullaby,
-      description: 'Sweet melodies for the little ones.',
-      imagePath: 'assets/images/sounds/Baby Lullaby.png',
-    ),
-    SleepSound(
-      id: '5',
-      title: 'Sleep Lullaby',
-      assetPath: 'assets/sounds/sleep/sleep-lullaby-142090.mp3',
-      category: SoundCategory.lullaby,
-      description: 'Soft lullaby to drift away.',
-      imagePath: 'assets/images/sounds/Sleep Lullaby.png',
-    ),
-    SleepSound(
-      id: '6',
-      title: 'Ethereal Journey',
-      assetPath: 'assets/sounds/sleep/sleep-music-vol12-190199.mp3',
-      category: SoundCategory.melodic,
-      description: 'Vol 12: A melodic journey into dreams.',
-      imagePath: 'assets/images/sounds/Ethereal Journey.png',
-    ),
-    SleepSound(
-      id: '7',
-      title: 'Midnight Calm',
-      assetPath: 'assets/sounds/sleep/sleep-music-vol14-195424.mp3',
-      category: SoundCategory.melodic,
-      description: 'Vol 14: Deep midnight serenity.',
-      imagePath: 'assets/images/sounds/Midnight Calm.png',
-    ),
-    SleepSound(
-      id: '8',
-      title: 'Twilight Dreams',
-      assetPath: 'assets/sounds/sleep/sleep-music-vol17-195423.mp3',
-      category: SoundCategory.melodic,
-      description: 'Vol 17: Soft twilight melodies.',
-      imagePath: 'assets/images/sounds/Twilight Dreams.png',
-    ),
-    SleepSound(
-      id: '9',
-      title: 'Forest Whispers',
-      assetPath: 'assets/sounds/sleep/sleep-music-vol6-182813.mp3',
-      category: SoundCategory.nature,
-      description: 'Vol 6: Gentle nature whispers.',
-      imagePath: 'assets/images/sounds/Forest Whispers.png',
-    ),
-    SleepSound(
-      id: '10',
-      title: 'Starlight Serenade',
-      assetPath: 'assets/sounds/sleep/sleep-music-vol7-182815.mp3',
-      category: SoundCategory.melodic,
-      description: 'Vol 7: Melodic starlight serenade.',
-      imagePath: 'assets/images/sounds/Starlight Serenade.png',
-    ),
-  ];
+  final List<SleepSound> _allSounds = SoundService().allSounds;
 
   List<SleepSound> get _filteredSounds {
     if (_showFavoritesOnly) {

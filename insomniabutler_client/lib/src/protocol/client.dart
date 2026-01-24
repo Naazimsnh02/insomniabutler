@@ -350,6 +350,14 @@ class EndpointDev extends _i2.EndpointRef {
     'clearUserData',
     {'userId': userId},
   );
+
+  /// Generates embeddings for all historical data that doesn't have them
+  _i3.Future<Map<String, int>> backfillEmbeddings() =>
+      caller.callServerEndpoint<Map<String, int>>(
+        'dev',
+        'backfillEmbeddings',
+        {},
+      );
 }
 
 /// Analytics and insights endpoint for sleep intelligence

@@ -3,3 +3,6 @@ fields:
   message: String
   category: String
   newReadiness: int
+  action: AIAction?  # Optional action for the app to execute
+  metadata: String?  # JSON-encoded additional data
+

@@ -1,0 +1,106 @@
+{
+  "__className__": "serverpod.DatabaseMigration",
+  "actions": [
+    {
+      "__className__": "serverpod.DatabaseMigrationAction",
+      "type": "alterTable",
+      "alterTable": {
+        "__className__": "serverpod.TableMigration",
+        "name": "chat_messages",
+        "schema": "public",
+        "addColumns": [
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "embedding",
+            "columnType": 10,
+            "isNullable": true,
+            "dartType": "Vector(768)?",
+            "vectorDimension": 768
+          }
+        ],
+        "deleteColumns": [
+          "embedding"
+        ],
+        "modifyColumns": [],
+        "addIndexes": [],
+        "deleteIndexes": [],
+        "addForeignKeys": [],
+        "deleteForeignKeys": [],
+        "warnings": [
+          {
+            "__className__": "serverpod.DatabaseMigrationWarning",
+            "type": "columnDropped",
+            "message": "Column \"embedding\" of table \"chat_messages\" is modified in a way that it must be deleted and recreated.",
+            "table": "chat_messages",
+            "columns": [
+              "embedding"
+            ],
+            "destrucive": true
+          }
+        ]
+      }
+    },
+    {
+      "__className__": "serverpod.DatabaseMigrationAction",
+      "type": "alterTable",
+      "alterTable": {
+        "__className__": "serverpod.TableMigration",
+        "name": "journal_entries",
+        "schema": "public",
+        "addColumns": [
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "embedding",
+            "columnType": 10,
+            "isNullable": true,
+            "dartType": "Vector(768)?",
+            "vectorDimension": 768
+          }
+        ],
+        "deleteColumns": [
+          "embedding"
+        ],
+        "modifyColumns": [],
+        "addIndexes": [],
+        "deleteIndexes": [],
+        "addForeignKeys": [],
+        "deleteForeignKeys": [],
+        "warnings": [
+          {
+            "__className__": "serverpod.DatabaseMigrationWarning",
+            "type": "columnDropped",
+            "message": "Column \"embedding\" of table \"journal_entries\" is modified in a way that it must be deleted and recreated.",
+            "table": "journal_entries",
+            "columns": [
+              "embedding"
+            ],
+            "destrucive": true
+          }
+        ]
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "__className__": "serverpod.DatabaseMigrationWarning",
+      "type": "columnDropped",
+      "message": "Column \"embedding\" of table \"chat_messages\" is modified in a way that it must be deleted and recreated.",
+      "table": "chat_messages",
+      "columns": [
+        "embedding"
+      ],
+      "destrucive": true
+    },
+    {
+      "__className__": "serverpod.DatabaseMigrationWarning",
+      "type": "columnDropped",
+      "message": "Column \"embedding\" of table \"journal_entries\" is modified in a way that it must be deleted and recreated.",
+      "table": "journal_entries",
+      "columns": [
+        "embedding"
+      ],
+      "destrucive": true
+    }
+  ],
+  "migrationApiVersion": 1
+}
