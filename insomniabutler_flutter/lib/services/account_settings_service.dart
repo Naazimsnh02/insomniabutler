@@ -8,6 +8,10 @@ class AccountSettingsService {
   static const String _hapticsEnabledKey = 'haptics_enabled';
   static const String _soundEffectsEnabledKey = 'sound_effects_enabled';
   static const String _autoStartTrackingKey = 'auto_start_tracking';
+  static const String _distractionBlockingEnabledKey = 'distraction_blocking_enabled';
+  static const String _blockedAppsKey = 'blocked_apps';
+  static const String _distractionBedtimeStartKey = 'distraction_bedtime_start';
+  static const String _distractionBedtimeEndKey = 'distraction_bedtime_end';
 
   // Notification Settings
   static Future<bool> getBedtimeNotifications() async {
@@ -70,6 +74,47 @@ class AccountSettingsService {
   static Future<void> setAutoStartTracking(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_autoStartTrackingKey, enabled);
+  }
+
+  // Distraction Blocking Settings
+  static Future<bool> getDistractionBlockingEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_distractionBlockingEnabledKey) ?? false;
+  }
+
+  static Future<void> setDistractionBlockingEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_distractionBlockingEnabledKey, enabled);
+  }
+
+  static Future<List<String>> getBlockedApps() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(_blockedAppsKey) ?? [];
+  }
+
+  static Future<void> setBlockedApps(List<String> packages) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_blockedAppsKey, packages);
+  }
+
+  static Future<String> getDistractionBedtimeStart() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_distractionBedtimeStartKey) ?? '22:00';
+  }
+
+  static Future<void> setDistractionBedtimeStart(String time) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_distractionBedtimeStartKey, time);
+  }
+
+  static Future<String> getDistractionBedtimeEnd() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_distractionBedtimeEndKey) ?? '06:00';
+  }
+
+  static Future<void> setDistractionBedtimeEnd(String time) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_distractionBedtimeEndKey, time);
   }
 
   /// Clear all app settings (reset to defaults)

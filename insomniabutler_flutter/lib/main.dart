@@ -13,6 +13,11 @@ import 'screens/onboarding/onboarding_screen.dart';
 import 'core/theme.dart';
 import 'screens/chat/chat_history_screen.dart';
 import 'screens/insomnia_butler_screen.dart';
+import 'screens/insomnia_butler_screen.dart';
+import 'services/account_settings_service.dart';
+import 'package:installed_apps/installed_apps.dart';
+import 'services/notification_service.dart';
+import 'services/distraction_monitor_service.dart';
 
 import 'dart:convert'; // Added for json.decode
 import 'dart:async'; // Added for unawaited
@@ -33,6 +38,9 @@ void main() async {
   } catch (e) {
     debugPrint('JustAudioBackground init error: $e');
   }
+
+  // Initialize notifications
+  await NotificationService.initialize();
 
   // Enable edge-to-edge display and set transparent system bars
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -79,6 +87,9 @@ void main() async {
   FlutterNativeSplash.remove();
 
   runApp(const MyApp());
+  
+  // Start the distraction monitor service
+  DistractionMonitorService.instance.start();
 }
 
 class MyApp extends StatelessWidget {

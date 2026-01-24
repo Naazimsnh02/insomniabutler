@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/primary_button.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -500,6 +501,23 @@ class PermissionsScreen extends StatefulWidget {
 class _PermissionsScreenState extends State<PermissionsScreen> {
   bool _notificationsEnabled = true;
 
+  Future<void> _requestPermissions() async {
+    if (_notificationsEnabled) {
+      final status = await Permission.notification.request();
+      if (status.isPermanentlyDenied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please enable notifications in system settings to receive sleep reminders.'),
+              action: SnackBarAction(label: 'Settings', onPressed: openAppSettings),
+            ),
+          );
+        }
+      }
+    }
+    widget.onNext();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -687,7 +705,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                     width: double.infinity,
                     child: PrimaryButton(
                       text: 'Grant permissions',
-                      onPressed: widget.onNext,
+                      onPressed: _requestPermissions,
                     ),
                   ),
 

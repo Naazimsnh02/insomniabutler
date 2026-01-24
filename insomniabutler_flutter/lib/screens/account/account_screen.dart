@@ -13,6 +13,10 @@ import '../../main.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../new_home_screen.dart';
 import '../journal/widgets/journal_skeleton.dart';
+import '../distraction/distraction_settings_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:usage_stats/usage_stats.dart';
+import '../../services/notification_service.dart';
 
 /// Account & Settings Screen
 /// Provides comprehensive account management, app settings, and user preferences
@@ -43,6 +47,13 @@ class _AccountScreenState extends State<AccountScreen> {
   bool _soundEffectsEnabled = true;
   bool _autoStartTracking = false;
 
+  // Permission state
+  // bool _isOverlayGranted = false; // Removed
+  bool _isUsageStatsGranted = false;
+  bool _isNotificationGranted = false;
+  bool _isBatteryOptimDisabled = false;
+  bool _isExactAlarmGranted = false;
+  
   bool _isLoading = true;
   Map<String, dynamic>? _cachedStats;
 
@@ -138,6 +149,7 @@ class _AccountScreenState extends State<AccountScreen> {
           _appVersion = '${packageInfo.version} (${packageInfo.buildNumber})';
           _isLoading = false;
         });
+        _checkPermissionsStatus();
         _saveToCache(stats);
       }
     } catch (e) {
@@ -153,6 +165,28 @@ class _AccountScreenState extends State<AccountScreen> {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
     return _userName[0].toUpperCase();
+  }
+
+  Future<void> _checkPermissionsStatus() async {
+    try {
+      final notificationStatus = await Permission.notification.status;
+      // final overlayGranted = await FlutterOverlayWindow.isPermissionGranted();
+      final usageGranted = await UsageStats.checkUsagePermission() ?? false;
+      final batteryOptimDisabled = await Permission.ignoreBatteryOptimizations.status.isGranted;
+      final exactAlarmGranted = await Permission.scheduleExactAlarm.status.isGranted;
+
+      if (mounted) {
+        setState(() {
+          _isNotificationGranted = notificationStatus.isGranted;
+          // _isOverlayGranted = overlayGranted;
+          _isUsageStatsGranted = usageGranted;
+          _isBatteryOptimDisabled = batteryOptimDisabled;
+          _isExactAlarmGranted = exactAlarmGranted;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error checking permissions: $e');
+    }
   }
 
   String _getAccountAge() {
@@ -239,6 +273,11 @@ class _AccountScreenState extends State<AccountScreen> {
                   _buildSectionHeader('Display & Sound'),
                   const SizedBox(height: AppSpacing.md),
                   _buildDisplaySettings(),
+                  const SizedBox(height: AppSpacing.xl),
+
+                  _buildSectionHeader('System Permissions'),
+                  const SizedBox(height: AppSpacing.md),
+                  _buildPermissionsManager(),
                   const SizedBox(height: AppSpacing.xl),
 
                   _buildSectionHeader('Data & Privacy'),
@@ -508,6 +547,25 @@ class _AccountScreenState extends State<AccountScreen> {
               _showBedtimeDialog();
             },
           ),
+          _buildDivider(),
+          _buildSettingRow(
+            icon: Icons.block_rounded,
+            title: 'Distraction Blocking',
+            subtitle: 'Manage blocked apps during bedtime',
+            iconColor: Colors.orangeAccent,
+            trailing: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+              size: 20,
+            ),
+            onTap: () {
+              HapticHelper.lightImpact();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DistractionSettingsScreen()),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -775,6 +833,29 @@ class _AccountScreenState extends State<AccountScreen> {
             onTap: () {
               HapticHelper.heavyImpact();
               _showClearDataDialog();
+            },
+          ),
+
+          _buildDivider(),
+          _buildSettingRow(
+            icon: Icons.notifications_active_outlined,
+            title: 'Test Notification',
+            subtitle: 'Send high-priority notification',
+            iconColor: Colors.blueAccent,
+            trailing: const Icon(
+              Icons.send_rounded,
+              color: Colors.blueAccent,
+              size: 20,
+            ),
+            onTap: () async {
+              await HapticHelper.lightImpact();
+              debugPrint('AccountScreen: Testing notification...');
+              
+              await NotificationService.showNotification(
+                id: 999,
+                title: 'Time for Bed',
+                body: 'This is a test notification from Insomnia Butler.',
+              );
             },
           ),
         ],
@@ -1481,6 +1562,148 @@ class _AccountScreenState extends State<AccountScreen> {
               text,
               style: const TextStyle(color: AppColors.textPrimary),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPermissionsManager() {
+    return GlassCard(
+      padding: const EdgeInsets.all(8),
+      borderRadius: 24,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.08),
+      ),
+      child: Column(
+        children: [
+          _buildPermissionItem(
+            icon: Icons.notifications_active_rounded,
+            title: 'Notifications',
+            subtitle: 'Required for reminders & overlays',
+            isEnabled: _isNotificationGranted,
+            iconColor: Colors.blueAccent,
+            onTap: () => _requestPermission(Permission.notification),
+          ),
+          _buildDivider(),
+          // _buildPermissionItem(
+          //   icon: Icons.layers_rounded,
+          //   title: 'Display Over Nudge',
+          //   subtitle: 'Required for distraction blocking',
+          //   isEnabled: _isOverlayGranted,
+          //   iconColor: Colors.orangeAccent,
+          //   onTap: () => _requestPermission(null, type: 'overlay'),
+          // ),
+          // _buildDivider(),
+          _buildPermissionItem(
+            icon: Icons.bar_chart_rounded,
+            title: 'Usage Stats',
+            subtitle: 'Detects apps during bedtime',
+            isEnabled: _isUsageStatsGranted,
+            iconColor: Colors.greenAccent,
+            onTap: () => _requestPermission(null, type: 'usage'),
+          ),
+          _buildPermissionItem(
+            icon: Icons.alarm_on_rounded,
+            title: 'Exact Alarms',
+            subtitle: 'Ensures timely distraction checks',
+            isEnabled: _isExactAlarmGranted,
+            iconColor: Colors.purpleAccent,
+            onTap: () => _requestPermission(Permission.scheduleExactAlarm, type: 'exact_alarm'),
+          ),
+          _buildDivider(),
+          _buildPermissionItem(
+            icon: Icons.battery_saver_rounded,
+            title: 'Battery Optimization',
+            subtitle: 'Keep butler running in background',
+            isEnabled: _isBatteryOptimDisabled,
+            iconColor: Colors.redAccent,
+            onTap: () => _requestPermission(Permission.ignoreBatteryOptimizations),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPermissionItem({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool isEnabled,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
+    return _buildSettingRow(
+      icon: icon,
+      title: title,
+      subtitle: subtitle,
+      iconColor: iconColor,
+      trailing: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: isEnabled 
+            ? Colors.green.withOpacity(0.15) 
+            : Colors.orange.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: (isEnabled ? Colors.green : Colors.orange).withOpacity(0.3),
+          ),
+        ),
+        child: Text(
+          isEnabled ? 'Granted' : 'Request',
+          style: AppTextStyles.caption.copyWith(
+            color: isEnabled ? Colors.greenAccent : Colors.orangeAccent,
+            fontWeight: FontWeight.bold,
+            fontSize: 10,
+          ),
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Future<void> _requestPermission(Permission? permission, {String? type}) async {
+    await HapticHelper.mediumImpact();
+    
+    if (type == 'usage') {
+      await UsageStats.grantUsagePermission();
+    } else if (permission != null) {
+      if (type == 'exact_alarm' && await permission.status.isGranted) {
+        // If already granted, the user might want to check settings manually
+        // Since we can't easily launch the specific Exact Alarm intent without a plugin,
+        // we offer to open general app settings.
+        _showSettingsDialog('Exact Alarms', 'This permission appears to serve "Granted".\n\nWould you like to open app settings to verify?');
+      } else {
+        final status = await permission.request();
+        if (status.isPermanentlyDenied) {
+          openAppSettings();
+        }
+      }
+    }
+    
+    // Refresh status
+    if (mounted) _checkPermissionsStatus();
+  }
+
+  void _showSettingsDialog(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.bgPrimary,
+        title: Text(title, style: const TextStyle(color: Colors.white)),
+        content: Text(content, style: const TextStyle(color: AppColors.textSecondary)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              openAppSettings();
+            },
+            child: const Text('Open Settings', style: TextStyle(color: AppColors.accentPrimary)),
           ),
         ],
       ),
