@@ -1,74 +1,70 @@
 # 💤 Insomnia Butler
 
-**Your AI Thought Partner for Racing Minds at 2 AM**
+**Your Intelligent AI Thought Partner for Racing Minds at 2 AM**
 
 [![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Serverpod](https://img.shields.io/badge/Serverpod-3.0-blueviolet?style=for-the-badge)](https://serverpod.dev)
 [![Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google-gemini&logoColor=white)](https://deepmind.google/technologies/gemini/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
 ---
 
 ## 🌟 Executive Summary
 
-**Insomnia Butler** is a personalized AI companion designed to help you fall asleep when your mind won't shut off. Whether you're spiraling about tomorrow's presentation, yesterday's mistakes, or an endless to-do list, Insomnia Butler steps in to **organize your thoughts, calm your mind, and guide you to sleep.**
+**Insomnia Butler** is a premium, AI-powered companion designed to resolve the root cause of late-night wakefulness: a racing mind. Unlike traditional sleep apps that only offer passive sounds, the Butler engages in a structured, therapeutic dialogue to **organize your thoughts, provide cognitive reframing, and guide you into a restful state.**
 
-By combining **AI-powered thought processing**, **sleep pattern intelligence**, and **gentle accountability**, we clear your "mental RAM" so you can finally rest.
-
----
-
-## 🌙 The Problem
-
-It's 2:13 AM. You're exhausted but your brain won't stop:
-- *"Did I lock the front door?"*
-- *"That email I sent sounded passive-aggressive..."*
-- *"I have 7 meetings tomorrow and haven't prepped."*
-
-Traditional sleep apps offer sounds or stories, but they don't resolve the **underlying thoughts** keeping you awake. Those thoughts remain unresolved, circulating in your mind until they are properly addressed.
+By combining **Cognitive Behavioral Therapy (CBT-I) principles**, **Gemini 2.5 Intelligence**, and **Long-term Vector Memory**, we create a personalized sanctuary that learns your patterns and helps you "park" your worries so you can finally rest.
 
 ---
 
-## 🛠️ The Solution: The Butler Experience
+## 💎 The "Deep Night" Experience
 
-Insomnia Butler doesn't just track your sleep; it actively helps you achieve it through a structured dialogue:
-
-1.  **Thought Capture:** Tell the Butler exactly what's on your mind.
-2.  **AI Categorization:** Powered by Gemini, the Butler identifies if your worry is work-related, social anxiety, or a simple task.
-3.  **Guided Intervention:**
-    - **Reality Check:** "Can you fix this at 2 AM?"
-    - **Reframing:** "You've handled this before."
-    - **Action Capture:** Park the thought for tomorrow with an automated reminder.
-4.  **Closure:** "The thought is parked. Your morning-self will handle it. It's safe to rest."
-5.  **Sleep Readiness:** A visual meter shows your mental state improving as thoughts are resolved.
-
----
-
-## 🏗️ System Architecture
-
-Insomnia Butler is built on a robust, scalable architecture:
-
--   **Frontend (Flutter):** A beautiful, dark-themed mobile application providing a calming user experience.
--   **Backend (Serverpod 3.0):** An orchestration layer handling user sessions, analytics, and AI logic.
--   **Intelligence (Google Gemini):** A specialized LLM implementation trained in CBT-I (Cognitive Behavioral Therapy for Insomnia) principles.
--   **Database (PostgreSQL):** Storing sleep patterns, thought logs (anonymized/encrypted), and personalized insights.
+The application features a high-fidelity **Glassmorphic UI** designed for low-light environments.
+- **Subtle Glows & Gradients:** A curated palette of Deep Navy, Sky Blue, and Lavender.
+- **Micro-animations:** Smooth transitions and haptic feedback to reduce digital friction.
+- **Adaptive Dashboard:** A dynamic home screen that shifts based on the time of day and your sleep readiness.
 
 ---
 
 ## 🚀 Key Features
 
-### 🧠 The Thought Clearing Engine
-The star feature that guides you from a racing mind to sleep readiness. It uses Socratic questioning to help you "park" worries properly.
+### 🧠 AI Thought Clearing Engine (Core Feature)
+A sophisticated chat interface powered by **Gemini 2.5 Flash** that acts as your personal cognitive coach.
+- **Socratic Questioning:** Guides you to resolve worries rather than just venting.
+- **Automatic Categorization:** Identifies if thoughts are related to Work, Social, Finances, or Health.
+- **AI Actions:** The Butler can actively assist you by:
+  - 🎵 **Playing Sleep Sounds** directly in the chat.
+  - 📅 **Scheduling Reminders** for tomorrow so you can let go today.
+  - 🚫 **Blocking Distracting Apps** on your device to prevent doom-scrolling.
+  - 🧘 **Launching Breathing Exercises** when it detects high anxiety.
+- **Context-Aware Memory:** Uses **Vector Embeddings (pgvector)** to remember your past worries and journals, providing continuity across sessions.
 
-### 📊 Sleep Intelligence Dashboard
-Don't just guess—know what works.
-- **Impact Tracking:** See how much faster you fall asleep after a Butler session.
-- **Pattern Detection:** Identify that you worry about work most on Sunday nights.
-- **Sweet Spot:** Discover your optimal bed-time window.
+### 📊 Advanced Sleep Architecture Tracking
+Go beyond simple "hours slept" with high-fidelity metrics:
+- **Sleep Stages:** Visual breakdown of Deep, Light, REM, and Awake periods.
+- **Physiological Recovery:** Track Resting Heart Rate (RHR), HRV, and Respiratory Rate.
+- **Efficiency Scoring:** Dynamic calculation of your sleep quality and sleep consistency.
+- **Interruptions Tracking:** Log and analyze wake-up events during the night.
 
-### 🌅 Morning Reflection Loop
-A quick check-in to correlate your 2 AM worries with your morning reality, helping train your brain to let go of late-night anxieties.
+### 🎵 Immersive Sleep Sounds & Ambience
+A curated library of high-quality audio landscapes.
+- **3D Glassmorphic Album Art:** Stunning visuals for every soundscape.
+- **Pro Playback Controls:** Seamless seeking, background playback, and fade-out timers.
+- **AI Suggested Audio:** The Butler suggests specific sounds based on your current mood.
 
-### 🚫 Gentle Distraction Blocking (Android)
-Optional feature to nudge you away from doom-scrolling and toward sleep readiness.
+### 🧘 Interactive Breathing Coach
+An integrated breathing widget featuring:
+- **Guided Visuals:** Expanding/contracting circles to pace your breath.
+- **Customizable Cycles:** Inhale, Hold, and Exhale timings (e.g., Box Breathing).
+- **Haptic Pacing:** Feel the rhythm of your breath without looking at the screen.
+
+### 📅 Historical Intelligence & Analytics
+- **Monthly Calendar View:** Easily navigate through months of sleep history.
+- **Weekly Trend Reports:** See progress in sleep latency and consistency.
+- **Mood Correlation:** Track how your morning mood correlates with your sleep architecture.
+
+### 🚫 Smart Distraction Blocker
+A robust nudging system that uses **High-Priority Notifications** to gently pull you away from blocked apps (Social Media, Games) during your scheduled bedtime.
 
 ---
 
@@ -76,27 +72,21 @@ Optional feature to nudge you away from doom-scrolling and toward sleep readines
 
 | Layer | Technology |
 | :--- | :--- |
-| **Mobile App** | Flutter (Dart) |
+| **Mobile App** | Flutter (Dart) with `flutter_animate` & `glass_kit` |
 | **Backend** | Serverpod 3.0 (Dart) |
-| **AI Engine** | Google Gemini 2.5 Flash |
-| **Database** | PostgreSQL |
-| **Infrastructure** | AWS Fargate (App) + AWS RDS (DB) |
+| **AI Intelligence** | Google Gemini 2.5 Flash Lite |
+| **Vector Search** | pgvector (PostgreSQL) for RAG |
+| **Database** | PostgreSQL 18.1 |
+| **Infrastructure** | AWS Fargate (ECS) + AWS RDS + ALB |
 
-### ☁️ AWS Resources Used
-- **Application Load Balancer (ALB)**: Provides a **static DNS endpoint** for the app.
-- **ECS on Fargate**: Runs the Serverpod container serverless.
-- **RDS PostgreSQL**: Managed database production instance (v18.1).
-- **ECR**: Hosts the private Docker container image.
-- **CloudWatch**: Centralized logging for the server application.
-- **VPC Security Groups**: Restricts access (Public -> ALB -> App -> DB).
-
+---
 
 ## ⚙️ Getting Started
 
 ### Prerequisites
 - [Flutter SDK](https://docs.flutter.dev/get-started/install)
 - [Serverpod CLI](https://docs.serverpod.dev/getting-started/installing-serverpod)
-- [Docker](https://www.docker.com/get-started)
+- [Docker & Docker Compose](https://www.docker.com/get-started)
 - Gemini API Key
 
 ### Setup
@@ -107,64 +97,44 @@ Optional feature to nudge you away from doom-scrolling and toward sleep readines
     cd insomniabutler
     ```
 
-2.  **Configure the Server:**
+2.  **Configure Environment:**
     - Navigate to `insomniabutler_server/config/`
-    - Create/update `passwords.yaml` with your database and API keys.
+    - Update `passwords.yaml` with your `geminiApiKey` and database credentials.
 
-3.  **Start the Database:**
+3.  **Spin up Postgres with pgvector:**
     ```bash
     cd insomniabutler_server
     docker-compose up -d
     ```
 
-4.  **Run the Server:**
+4.  **Migrate & Run Server:**
     ```bash
     dart bin/main.dart --apply-migrations
     ```
 
-### ☁️ AWS Deployment
-
-For a full production deployment to AWS (ECS Fargate + RDS PostgreSQL):
-
-1.  **Configure AWS CLI:**
-    Ensure you have run `aws configure`.
-
-2.  **Fix Windows CLI Pager (One-time):**
-    ```powershell
-    aws configure set cli_pager ""
-    ```
-
-3.  **Run Full Infrastructure Deployment:**
-    ```powershell
-    .\deploy-aws-full.ps1 -GeminiApiKey "YOUR_GEMINI_API_KEY"
-    ```
-    *This builds, pushes, and creates all AWS resources (ALB, ECS, RDS).*
-
-4.  **Run Database Migrations & Sync Client:**
-    ```powershell
-    .\run-migrations.ps1
-    ```
-    *This script:
-    - Automatically captures the new ALB DNS.
-    - Updates `insomniabutler_flutter/assets/config.json`.
-    - Applies Serverpod migrations to your RDS instance.*
-
-5.  **Monitor Logs (Optional):**
-    ```powershell
-    aws logs tail /ecs/insomniabutler --follow
-    ```
-
-6.  **Run the Flutter App:**
+5.  **Run Flutter App:**
     ```bash
     cd insomniabutler_flutter
     flutter run
     ```
 
-### 🧹 Cleanup
-To delete all AWS resources and avoid costs:
-```powershell
-.\cleanup-all.ps1
-```
+---
+
+## ☁️ Cloud Deployment (AWS)
+
+Insomnia Butler is designed to scale on AWS using a fully automated pipeline:
+
+1.  **Infrastructure Provisioning:**
+    ```powershell
+    .\deploy-aws-full.ps1 -GeminiApiKey "YOUR_KEY"
+    ```
+    *Creates ALB, ECS Services, RDS Instance, and ECR Repositories.*
+
+2.  **Database Sync:**
+    ```powershell
+    .\run-migrations.ps1
+    ```
+    *Captures dynamic DNS and applies complex PostgreSQL migrations to RDS.*
 
 ---
 

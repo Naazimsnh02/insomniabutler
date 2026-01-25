@@ -100,6 +100,36 @@ class ThoughtClearingEndpoint extends Endpoint {
       ),
     );
 
+    // 4. Gather User Context (Optimized for performance)
+    final contextBuilder = StringBuffer();
+    
+    // recent journals
+    try {
+      final recentJournals = await protocol.JournalEntry.db.find(
+        session,
+        where: (t) => t.userId.equals(userId),
+        limit: 3, 
+        orderBy: (t) => t.entryDate, 
+        orderDescending: true,
+      );
+      if (recentJournals.isNotEmpty) {
+        contextBuilder.writeln("Recent Journal Entries:");
+        for (var j in recentJournals) {
+          contextBuilder.writeln("- ${j.entryDate.toString().split(' ')[0]} (${j.mood ?? 'No mood'}): ${j.title ?? 'Untitled'}");
+        }
+      }
+    } catch (_) {}
+
+    if (contextBuilder.isNotEmpty) {
+      messageToSend = '''
+[SYSTEM CONTEXT START]
+${contextBuilder.toString()}
+[SYSTEM CONTEXT END]
+
+User Query: $messageToSend
+''';
+    }
+
     // 4. Send to Gemini with history and tools
     final response = await gemini.sendMessageWithHistory(
       history: history,
@@ -129,16 +159,14 @@ class ThoughtClearingEndpoint extends Endpoint {
           
           finalMessage = followUp.text ?? '';
           
-          // If it was an execute_action tool, capture the action
-          if (part.name == 'execute_action') {
-            final args = jsonDecode(result);
-            if (args['action_queued'] == true) {
-              aiAction = protocol.AIAction(
-                command: args['command'],
-                parameters: jsonEncode(args['parameters']),
-                description: args['message'],
-              );
-            }
+          // If the tool execution queued an action for the client, capture it
+          final decodedResult = jsonDecode(result);
+          if (decodedResult is Map<String, dynamic> && decodedResult['action_queued'] == true) {
+            aiAction = protocol.AIAction(
+              command: decodedResult['command'],
+              parameters: jsonEncode(decodedResult['parameters']),
+              description: decodedResult['message'],
+            );
           }
         }
       }
@@ -204,16 +232,46 @@ class ThoughtClearingEndpoint extends Endpoint {
       session,
       where: (t) => t.sessionId.equals(sessionId),
       orderBy: (t) => t.timestamp,
-      limit: 20, // Send last 20 messages for context
+      limit: 20,
     );
 
-    return messages.map((m) {
-      if (m.role == 'user') {
-        return ai.Content('user', [ai.TextPart(m.content)]);
+    final List<ai.Content> history = [];
+    String? currentRole;
+    StringBuffer? currentContent;
+
+    for (final m in messages) {
+      // Map 'assistant' to 'model' for Gemini
+      final role = (m.role == 'user') ? 'user' : 'model';
+      final content = m.content.trim().isEmpty ? '.' : m.content;
+
+      if (currentRole == role) {
+        // Merge consecutive messages of same role
+        currentContent?.writeln('\n$content');
       } else {
-        return ai.Content('model', [ai.TextPart(m.content)]);
+        // Push previous message if exists
+        if (currentRole != null && currentContent != null) {
+          if (currentRole == 'user') {
+            history.add(ai.Content.text(currentContent.toString()));
+          } else {
+            history.add(ai.Content.model([ai.TextPart(currentContent.toString())]));
+          }
+        }
+        // Start new block
+        currentRole = role;
+        currentContent = StringBuffer(content);
       }
-    }).toList().cast<ai.Content>();
+    }
+
+    // Push final message
+    if (currentRole != null && currentContent != null) {
+      if (currentRole == 'user') {
+        history.add(ai.Content.text(currentContent.toString()));
+      } else {
+        history.add(ai.Content.model([ai.TextPart(currentContent.toString())]));
+      }
+    }
+
+    return history;
   }
 
   /// Get conversation history for a session

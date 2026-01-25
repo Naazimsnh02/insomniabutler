@@ -95,7 +95,74 @@ Conversational, non-judgmental, and patient. Avoid clinical jargon. Speak like a
           ),
         ),
 
-        // Tool 3: Execute actions (Restricted to available features)
+        // Tool 3: Set a Smart Reminder
+        FunctionDeclaration(
+          'set_reminder',
+          'Schedules a system notification for a specific time and message',
+          Schema(
+            SchemaType.object,
+            properties: {
+              'time': Schema(
+                SchemaType.string,
+                description: 'ISO8601 timestamp or relative time (e.g., "2024-03-20T18:00:00Z" or "in 30 minutes")',
+              ),
+              'message': Schema(
+                SchemaType.string,
+                description: 'The notification message to display',
+              ),
+            },
+            requiredProperties: ['time', 'message'],
+          ),
+        ),
+
+        // Tool 4: Block an app
+        FunctionDeclaration(
+          'block_app',
+          'Adds an app to the block list to prevent doomscrolling during bedtime',
+          Schema(
+            SchemaType.object,
+            properties: {
+              'app_name': Schema(
+                SchemaType.string,
+                description: 'The name of the app to block (e.g., "Instagram", "TikTok", "Twitter")',
+              ),
+            },
+            requiredProperties: ['app_name'],
+          ),
+        ),
+
+        // Tool 5: Start Breathing Exercise
+        FunctionDeclaration(
+          'start_breathing_exercise',
+          'Starts a visual guided breathing exercise (Inhale, Hold, Exhale) for the user',
+          Schema(
+            SchemaType.object,
+            properties: {
+              'duration_minutes': Schema(
+                SchemaType.integer,
+                description: 'Duration of the exercise in minutes (default is 2)',
+              ),
+            },
+          ),
+        ),
+
+        // Tool 6: Analyze Journal Patterns
+        FunctionDeclaration(
+          'analyze_journal_patterns',
+          'Queries the journal database to find recurring themes or patterns related to a specific topic',
+          Schema(
+            SchemaType.object,
+            properties: {
+              'topic': Schema(
+                SchemaType.string,
+                description: 'The topic to analyze (e.g., "work stress", "sleep quality", "anxiety")',
+              ),
+            },
+            requiredProperties: ['topic'],
+          ),
+        ),
+
+        // Tool 7: Execute actions (Legacy/Generic)
         FunctionDeclaration(
           'execute_action',
           'Triggers an action in the mobile app. Currently ONLY supports playing sleep sounds.',

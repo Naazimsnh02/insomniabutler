@@ -22,11 +22,96 @@ class ToolExecutor {
         return await _querySleepHistory(args);
       case 'search_memories':
         return await _searchMemories(args);
+      case 'set_reminder':
+        return await _setReminder(args);
+      case 'block_app':
+        return await _blockApp(args);
+      case 'start_breathing_exercise':
+        return await _startBreathingExercise(args);
+      case 'analyze_journal_patterns':
+        return await _analyzeJournalPatterns(args);
       case 'execute_action':
         return await _executeAction(args);
       default:
         return jsonEncode({'error': 'Unknown tool: $toolName'});
     }
+  }
+
+  /// Tool Handler: Set Reminder
+  Future<String> _setReminder(Map<String, dynamic> args) async {
+    return jsonEncode({
+      'action_queued': true,
+      'command': 'set_reminder',
+      'parameters': {
+        'time': args['time'],
+        'message': args['message'],
+      },
+      'message': 'Reminder has been scheduled.',
+    });
+  }
+
+  /// Tool Handler: Block App
+  Future<String> _blockApp(Map<String, dynamic> args) async {
+    return jsonEncode({
+      'action_queued': true,
+      'command': 'block_app',
+      'parameters': {
+        'app_name': args['app_name'],
+      },
+      'message': '${args['app_name']} has been added to the block list.',
+    });
+  }
+
+  /// Tool Handler: Start Breathing Exercise
+  Future<String> _startBreathingExercise(Map<String, dynamic> args) async {
+    return jsonEncode({
+      'action_queued': true,
+      'command': 'start_breathing_exercise',
+      'parameters': {
+        'duration_minutes': args['duration_minutes'] ?? 2,
+      },
+      'message': 'Starting breathing exercise...',
+    });
+  }
+
+  /// Tool Handler: Analyze Journal Patterns
+  Future<String> _analyzeJournalPatterns(Map<String, dynamic> args) async {
+    final topic = args['topic'] as String;
+    
+    // Use semantic search to find relevant entries
+    final queryEmbedding = await embeddingService.generateQueryEmbedding(topic);
+    final embeddingStr = '[${queryEmbedding.join(',')}]';
+
+    final results = await session.db.unsafeQuery(
+      '''
+      SELECT "title", "content", "mood", "entryDate"
+      FROM "journal_entries"
+      WHERE "userId" = $userId AND "embedding" IS NOT NULL
+      ORDER BY "embedding" <=> '$embeddingStr'::vector
+      LIMIT 10
+      ''',
+    );
+
+    if (results.isEmpty) {
+      return jsonEncode({
+        'summary': 'No journal entries found related to "$topic".',
+        'count': 0,
+      });
+    }
+
+    final entries = results.map((row) => {
+      'title': row[0],
+      'content': row[1],
+      'mood': row[2],
+      'date': (row[3] as DateTime).toIso8601String(),
+    }).toList();
+
+    return jsonEncode({
+      'topic': topic,
+      'entry_count': entries.length,
+      'entries': entries,
+      'instruction': 'Review these entries to find patterns, themes, or recurring stressors related to "$topic" and summarize them for the user.',
+    });
   }
 
   /// Query sleep history for the user

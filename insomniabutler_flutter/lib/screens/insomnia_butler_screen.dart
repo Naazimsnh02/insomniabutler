@@ -13,6 +13,10 @@ import '../services/audio_player_service.dart';
 import '../services/sound_service.dart';
 import 'package:insomniabutler_client/insomniabutler_client.dart' as protocol;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:installed_apps/installed_apps.dart';
+import '../widgets/chat/breathing_exercise_widget.dart';
+import '../services/account_settings_service.dart';
+import '../services/notification_service.dart';
 
 /// Thought Clearing Chat UI - CORE FEATURE
 /// Premium glassmorphic chat interface for processing anxious thoughts
@@ -239,18 +243,18 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         userMessage,
         _sessionId,
         _sleepReadiness,
+        userLocalTime: DateTime.now(),
       );
 
       // Add AI response and update state in a single call to prevent flickering
       setState(() {
-        _messages.add(
-          ChatMessage(
-            role: 'assistant',
-            content: response.message,
-            timestamp: DateTime.now(),
-            category: response.category,
-          ),
+        final aiMessage = ChatMessage(
+          role: 'assistant',
+          content: response.message,
+          timestamp: DateTime.now(),
+          category: response.category,
         );
+        _messages.add(aiMessage);
 
         if (response.category.isNotEmpty && response.category != 'general') {
           _currentCategory = _getCategoryEmoji(response.category);
@@ -263,8 +267,8 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
       });
 
       // Execute AI action if present
-      if (response.action != null) {
-        _handleAIAction(response.action!);
+      if (response.action != null && mounted) {
+        await _handleAIAction(response.action!);
       }
 
       // Auto-scroll to bottom
@@ -317,8 +321,79 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         }
         break;
       case 'set_reminder':
-        _showActionFeedback('Reminder set: ${params['message'] ?? 'Bedtime approaching'}');
+        final timeStr = params['time'] as String;
+        final message = params['message'] as String;
+        
+        DateTime scheduledTime;
+        if (timeStr.contains('in')) {
+          // Relative time handling
+          final minutes = int.tryParse(RegExp(r'\d+').firstMatch(timeStr)?.group(0) ?? '30') ?? 30;
+          scheduledTime = DateTime.now().add(Duration(minutes: minutes));
+        } else {
+          scheduledTime = DateTime.tryParse(timeStr) ?? DateTime.now().add(const Duration(hours: 1));
+        }
+
+        await NotificationService.scheduleNotification(
+          id: DateTime.now().millisecond,
+          title: 'Butler Reminder',
+          body: message,
+          scheduledTime: scheduledTime,
+        );
+        
+        // Show in chat instead of snackbar
+        if (mounted) {
+          setState(() {
+            _messages.add(ChatMessage(
+              role: 'assistant',
+              content: 'I have scheduled that reminder for you.',
+              timestamp: DateTime.now(),
+              widgetType: 'reminder_card',
+              widgetData: {
+                'time': '${scheduledTime.hour}:${scheduledTime.minute.toString().padLeft(2, '0')}',
+                'message': message,
+              },
+            ));
+          });
+          _scrollToBottom();
+        }
         break;
+        
+      case 'block_app':
+        final appName = params['app_name'] as String;
+        try {
+          final apps = await InstalledApps.getInstalledApps();
+          final targetApp = apps.firstWhere(
+            (app) => app.name?.toLowerCase().contains(appName.toLowerCase()) ?? false,
+            orElse: () => throw Exception('App not found'),
+          );
+          
+          final blockedApps = await AccountSettingsService.getBlockedApps();
+          if (!blockedApps.contains(targetApp.packageName)) {
+            blockedApps.add(targetApp.packageName!);
+            await AccountSettingsService.setBlockedApps(blockedApps);
+            await AccountSettingsService.setDistractionBlockingEnabled(true);
+            _showActionFeedback('${targetApp.name} blocked during bedtime.');
+          } else {
+            _showActionFeedback('${targetApp.name} is already blocked.');
+          }
+        } catch (e) {
+          _showActionFeedback('Could not find app "$appName" to block.');
+        }
+        break;
+
+      case 'start_breathing_exercise':
+        setState(() {
+          _messages.add(ChatMessage(
+            role: 'assistant',
+            content: 'Let\'s take a moment to breathe.',
+            timestamp: DateTime.now(),
+            widgetType: 'breathing_exercise',
+            widgetData: {'duration_minutes': params['duration_minutes'] ?? 2},
+          ));
+        });
+        _scrollToBottom();
+        break;
+
       case 'save_thought':
         _showActionFeedback('Thought saved to your journal.');
         break;
@@ -538,10 +613,13 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
   Widget _buildChatBubble(ChatMessage message, int index) {
     final isUser = message.isUser;
 
-    return Align(
+    return Column(
+      crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Align(
           alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
-            margin: const EdgeInsets.only(bottom: 16),
+            margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.symmetric(
               horizontal: 18,
               vertical: 14,
@@ -594,7 +672,16 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
               ),
             ),
           ),
-        )
+        ),
+        
+        // Render Custom Widget if present
+        if (message.widgetType != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16, top: 4),
+            child: _buildCustomWidget(message.widgetType!, message.widgetData),
+          ),
+      ],
+    )
         .animate(key: ValueKey(message.timestamp.millisecondsSinceEpoch))
         .fadeIn(duration: 400.ms)
         .slideY(
@@ -603,6 +690,57 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
           duration: 400.ms,
           curve: Curves.easeOut,
         );
+  }
+
+  Widget _buildCustomWidget(String type, Map<String, dynamic>? data) {
+    switch (type) {
+      case 'breathing_exercise':
+        return BreathingExerciseWidget(
+          durationMinutes: data?['duration_minutes'] ?? 2,
+        );
+      case 'reminder_card':
+        return Container(
+          width: 250,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.bgSecondary.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.accentPrimary.withOpacity(0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.alarm_on_rounded, color: AppColors.accentCyan, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Reminder Set',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.accentCyan,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                data?['time'] ?? '',
+                style: AppTextStyles.h2.copyWith(fontSize: 24, height: 1.2),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                data?['message'] ?? '',
+                style: AppTextStyles.bodySm.copyWith(
+                  color: AppColors.textPrimary.withOpacity(0.8),
+                ),
+              ),
+            ],
+          ),
+        ).animate().fadeIn().scale();
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   Widget _buildTypingIndicator() {

@@ -4,12 +4,16 @@ class ChatMessage {
   final String content;
   final DateTime timestamp;
   final String? category; // Optional thought category
+  final String? widgetType; // e.g., 'breathing_exercise'
+  final Map<String, dynamic>? widgetData;
 
   ChatMessage({
     required this.role,
     required this.content,
     required this.timestamp,
     this.category,
+    this.widgetType,
+    this.widgetData,
   });
 
   bool get isUser => role == 'user';
@@ -21,6 +25,8 @@ class ChatMessage {
       content: json['content'] as String,
       timestamp: DateTime.parse(json['timestamp'] as String),
       category: json['category'] as String?,
+      widgetType: json['widgetType'] as String?,
+      widgetData: json['widgetData'] as Map<String, dynamic>?,
     );
   }
 
@@ -30,6 +36,8 @@ class ChatMessage {
       'content': content,
       'timestamp': timestamp.toIso8601String(),
       'category': category,
+      'widgetType': widgetType,
+      'widgetData': widgetData,
     };
   }
 }
