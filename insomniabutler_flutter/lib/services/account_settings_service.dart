@@ -12,6 +12,9 @@ class AccountSettingsService {
   static const String _blockedAppsKey = 'blocked_apps';
   static const String _distractionBedtimeStartKey = 'distraction_bedtime_start';
   static const String _distractionBedtimeEndKey = 'distraction_bedtime_end';
+  static const String _bedtimeTimeKey = 'notifications_bedtime_time';
+  static const String _insightsTimeKey = 'notifications_insights_time';
+  static const String _journalTimeKey = 'notifications_journal_time';
 
   // Notification Settings
   static Future<bool> getBedtimeNotifications() async {
@@ -117,12 +120,46 @@ class AccountSettingsService {
     await prefs.setString(_distractionBedtimeEndKey, time);
   }
 
+  // Notification Times
+  static Future<String> getBedtimeTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_bedtimeTimeKey) ?? '22:30';
+  }
+
+  static Future<void> setBedtimeTime(String time) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_bedtimeTimeKey, time);
+  }
+
+  static Future<String> getInsightsTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_insightsTimeKey) ?? '09:00';
+  }
+
+  static Future<void> setInsightsTime(String time) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_insightsTimeKey, time);
+  }
+
+  static Future<String> getJournalTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_journalTimeKey) ?? '21:00';
+  }
+
+  static Future<void> setJournalTime(String time) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_journalTimeKey, time);
+  }
+
   /// Clear all app settings (reset to defaults)
   static Future<void> clearAllSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_notificationsBedtimeKey);
     await prefs.remove(_notificationsInsightsKey);
     await prefs.remove(_notificationsJournalKey);
+    await prefs.remove(_bedtimeTimeKey);
+    await prefs.remove(_insightsTimeKey);
+    await prefs.remove(_journalTimeKey);
     await prefs.remove(_hapticsEnabledKey);
     await prefs.remove(_soundEffectsEnabledKey);
     await prefs.remove(_autoStartTrackingKey);

@@ -2,6 +2,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
@@ -10,6 +11,14 @@ class NotificationService {
   static Future<void> initialize() async {
     tz.initializeTimeZones();
     
+    try {
+      final timezoneInfo = await FlutterTimezone.getLocalTimezone();
+      final String timeZoneName = timezoneInfo.identifier;
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
+    } catch (e) {
+      debugPrint('Error setting local timezone: $e');
+    }
+
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/launcher_icon');
 
@@ -23,6 +32,14 @@ class NotificationService {
         debugPrint('Notification clicked: ${response.payload}');
       },
     );
+
+    // Request permissions for Android 13+ and Exact Alarms
+    final platform = _notificationsPlugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    if (platform != null) {
+      await platform.requestNotificationsPermission();
+      await platform.requestExactAlarmsPermission();
+    }
   }
 
   static Future<void> showNotification({
@@ -77,6 +94,56 @@ class NotificationService {
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
+  }
+
+  static Future<void> scheduleDailyNotification({
+    required int id,
+    required String title,
+    required String body,
+    required TimeOfDay time,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      time.hour,
+      time.minute,
+    );
+
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    debugPrint('Scheduling customized daily notification (ID: $id) at $scheduledDate in ${tz.local.name}');
+
+    await _notificationsPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'insomnia_butler_daily_reminders_v2',
+          'Daily Reminders',
+          channelDescription: 'Daily reminders for your sleep hygiene',
+          importance: Importance.max,
+          priority: Priority.high,
+          showWhen: true,
+          enableVibration: true,
+          playSound: true,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+  }
+
+  static Future<void> cancelNotification(int id) async {
+    await _notificationsPlugin.cancel(id);
   }
 
   static Future<void> showFullScreenNotification({

@@ -11,6 +11,7 @@ import '../../utils/haptic_helper.dart';
 import 'journal_editor_screen.dart';
 import 'journal_detail_screen.dart';
 import 'widgets/journal_skeleton.dart';
+import 'package:insomniabutler_client/insomniabutler_client.dart' as protocol;
 
 /// Journal Screen - Main hub for journaling
 /// Features: Timeline, Calendar, Insights tabs with premium glassmorphic design
@@ -87,6 +88,22 @@ class JournalScreenState extends State<JournalScreen>
       if (insightsJson != null) {
         setState(() => _insights = jsonDecode(insightsJson));
       }
+
+      final entriesJson = prefs.getString('journal_entries');
+      if (entriesJson != null) {
+        final List<dynamic> decoded = jsonDecode(entriesJson);
+        setState(() {
+          _entries = decoded.map((item) => protocol.JournalEntry.fromJson(item)).toList();
+        });
+      }
+
+      final calendarJson = prefs.getString('journal_calendar_entries');
+      if (calendarJson != null) {
+        final List<dynamic> decoded = jsonDecode(calendarJson);
+        setState(() {
+          _calendarEntries = decoded.map((item) => protocol.JournalEntry.fromJson(item)).toList();
+        });
+      }
     } catch (e) {
       debugPrint('Error loading journal cache: $e');
     }
@@ -100,6 +117,14 @@ class JournalScreenState extends State<JournalScreen>
       }
       if (_insights.isNotEmpty) {
         prefs.setString('journal_insights', jsonEncode(_insights));
+      }
+      if (_entries.isNotEmpty) {
+        // Only cache the first page to keep it small
+        final cacheList = _entries.take(20).toList();
+        prefs.setString('journal_entries', jsonEncode(cacheList.map((e) => e.toJson()).toList()));
+      }
+      if (_calendarEntries.isNotEmpty) {
+        prefs.setString('journal_calendar_entries', jsonEncode(_calendarEntries.map((e) => e.toJson()).toList()));
       }
     } catch (e) {
       debugPrint('Error saving journal cache: $e');
@@ -128,6 +153,7 @@ class JournalScreenState extends State<JournalScreen>
         _calendarEntries = calendarEntries;
         _isLoadingCalendar = false;
       });
+      _saveToCache();
     } catch (e) {
       debugPrint('Error loading calendar data: $e');
       setState(() => _isLoadingCalendar = false);
@@ -162,6 +188,7 @@ class JournalScreenState extends State<JournalScreen>
             // but for Timeline, once entries are here, we are good.
             if (_selectedTabIndex == 0) _isLoading = false; 
           });
+          _saveToCache();
         }
       }).catchError((e) => debugPrint('Error loading entries: $e'));
 

@@ -112,6 +112,18 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'Vector(768)?',
           vectorDimension: 768,
         ),
+        _i2.ColumnDefinition(
+          name: 'widgetType',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'widgetData',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
       ],
       foreignKeys: [],
       indexes: [

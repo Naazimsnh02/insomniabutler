@@ -7,6 +7,8 @@ fields:
   content: String
   timestamp: DateTime
   embedding: Vector(768)?
+  widgetType: String?
+  widgetData: String?
 indexes:
   chat_messages_embedding_idx:
     fields: embedding

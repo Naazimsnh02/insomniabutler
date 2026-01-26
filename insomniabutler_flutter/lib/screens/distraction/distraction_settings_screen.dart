@@ -106,48 +106,81 @@ class _DistractionSettingsScreenState extends State<DistractionSettingsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: _isLoading 
+      body: _isLoading
         ? const Center(child: CircularProgressIndicator(color: AppColors.accentPrimary))
-        : CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.containerPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeaderCard(),
-                      const SizedBox(height: AppSpacing.xl),
-                      _buildBedtimeSection(),
-                      const SizedBox(height: AppSpacing.xl),
-                      Text(
-                        'SELECT APPS TO BLOCK',
-                        style: AppTextStyles.label.copyWith(
-                          color: AppColors.textTertiary,
-                          letterSpacing: 1.5,
-                        ),
+        : Stack(
+            children: [
+              // Decorative background elements
+              Positioned(
+                top: -100,
+                right: -50,
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.accentPrimary.withOpacity(0.05),
+                  ),
+                ),
+              ),
+              
+              CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.containerPadding,
+                        vertical: 24,
                       ),
-                      const SizedBox(height: AppSpacing.md),
-                    ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHeaderCard(),
+                          const SizedBox(height: AppSpacing.xl),
+                          _buildSectionHeader('Schedule Window'),
+                          const SizedBox(height: AppSpacing.md),
+                          _buildBedtimeSection(),
+                          const SizedBox(height: AppSpacing.xl),
+                          _buildSectionHeader('Apps to Nudge'),
+                          const SizedBox(height: AppSpacing.md),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final app = _installedApps[index];
-                      final isBlocked = _blockedPackages.contains(app.packageName);
-                      return _buildAppTile(app, isBlocked);
-                    },
-                    childCount: _installedApps.length,
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final app = _installedApps[index];
+                          final isBlocked = _blockedPackages.contains(app.packageName);
+                          return _buildAppTile(app, isBlocked);
+                        },
+                        childCount: _installedApps.length,
+                      ),
+                    ),
                   ),
-                ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                ],
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 100)),
             ],
           ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 4),
+      child: Text(
+        title.toUpperCase(),
+        style: AppTextStyles.label.copyWith(
+          color: AppColors.textTertiary,
+          letterSpacing: 1.5,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
     );
   }
 
@@ -156,8 +189,19 @@ class _DistractionSettingsScreenState extends State<DistractionSettingsScreen> {
       padding: const EdgeInsets.all(20),
       borderRadius: 24,
       color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(color: Colors.white.withOpacity(0.08)),
       child: Row(
         children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.accentPrimary.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.accentPrimary.withOpacity(0.2)),
+            ),
+            child: const Icon(Icons.bolt_rounded, color: AppColors.accentPrimary, size: 28),
+          ),
+          const SizedBox(width: 18),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,24 +209,32 @@ class _DistractionSettingsScreenState extends State<DistractionSettingsScreen> {
                 Text(
                   'Enable Nudges',
                   style: AppTextStyles.body.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                     fontSize: 18,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   'Show a gentle reminder when you open distracting apps during bedtime.',
                   style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textSecondary,
+                    color: AppColors.textTertiary,
+                    fontSize: 13,
+                    height: 1.3,
                   ),
                 ),
               ],
             ),
           ),
-          Switch.adaptive(
-            value: _isEnabled,
-            activeColor: AppColors.accentPrimary,
-            onChanged: _toggleEnabled,
+          const SizedBox(width: 12),
+          Transform.scale(
+            scale: 0.9,
+            child: Switch(
+              value: _isEnabled,
+              activeColor: AppColors.accentPrimary,
+              activeTrackColor: AppColors.accentPrimary.withOpacity(0.3),
+              onChanged: _toggleEnabled,
+            ),
           ),
         ],
       ),
@@ -191,32 +243,73 @@ class _DistractionSettingsScreenState extends State<DistractionSettingsScreen> {
 
   Widget _buildBedtimeSection() {
     return GlassCard(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(12),
       borderRadius: 24,
       color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(color: Colors.white.withOpacity(0.08)),
       child: Column(
         children: [
-          _buildTimeRow('Bedtime Starts', _bedtimeStart, (val) async {
-            await AccountSettingsService.setDistractionBedtimeStart(val);
-            setState(() => _bedtimeStart = val);
-          }),
-          const Divider(color: Colors.white10, height: 32),
-          _buildTimeRow('Bedtime Ends', _bedtimeEnd, (val) async {
-            await AccountSettingsService.setDistractionBedtimeEnd(val);
-            setState(() => _bedtimeEnd = val);
-          }),
+          _buildTimeRow(
+            icon: Icons.bedtime_rounded,
+            title: 'Bedtime Starts',
+            time: _bedtimeStart,
+            iconColor: AppColors.accentLavender,
+            onSave: (val) async {
+              await AccountSettingsService.setDistractionBedtimeStart(val);
+              setState(() => _bedtimeStart = val);
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 64, right: 16),
+            child: Divider(color: Colors.white.withOpacity(0.05), height: 1),
+          ),
+          _buildTimeRow(
+            icon: Icons.wb_sunny_rounded,
+            title: 'Bedtime Ends',
+            time: _bedtimeEnd,
+            iconColor: Colors.orangeAccent,
+            onSave: (val) async {
+              await AccountSettingsService.setDistractionBedtimeEnd(val);
+              setState(() => _bedtimeEnd = val);
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTimeRow(String title, String time, Function(String) onSave) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(title, style: AppTextStyles.body),
-        InkWell(
-          onTap: () async {
+  Widget _buildTimeRow({
+    required IconData icon,
+    required String title,
+    required String time,
+    required Color iconColor,
+    required Function(String) onSave,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: iconColor.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: iconColor.withOpacity(0.2)),
+            ),
+            child: Icon(icon, color: iconColor, size: 22),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              title,
+              style: AppTextStyles.body.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          _buildValueBox(_formatTime(time), () async {
             final picked = await showTimePicker(
               context: context,
               initialTime: TimeOfDay(
@@ -225,12 +318,10 @@ class _DistractionSettingsScreenState extends State<DistractionSettingsScreen> {
               ),
               builder: (context, child) {
                 return Theme(
-                  data: Theme.of(context).copyWith(
+                  data: ThemeData.dark().copyWith(
                     colorScheme: const ColorScheme.dark(
                       primary: AppColors.accentPrimary,
-                      onPrimary: Colors.white,
                       surface: AppColors.bgSecondary,
-                      onSurface: Colors.white,
                     ),
                   ),
                   child: child!,
@@ -241,23 +332,53 @@ class _DistractionSettingsScreenState extends State<DistractionSettingsScreen> {
               final formatted = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
               onSave(formatted);
             }
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.accentPrimary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              time,
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.accentPrimary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          }, color: iconColor),
+        ],
+      ),
+    );
+  }
+
+  String _formatTime(String timeStr) {
+    try {
+      final parts = timeStr.split(':');
+      final hour = int.parse(parts[0]);
+      final minute = int.parse(parts[1]);
+      final ampm = hour >= 12 ? 'PM' : 'AM';
+      final h = hour % 12 == 0 ? 12 : hour % 12;
+      final m = minute.toString().padLeft(2, '0');
+      return '$h:$m $ampm';
+    } catch (e) {
+      return timeStr;
+    }
+  }
+
+  Widget _buildValueBox(String value, VoidCallback onTap, {Color? color}) {
+    final themeColor = color ?? AppColors.accentPrimary;
+    return InkWell(
+      onTap: () {
+        HapticHelper.lightImpact();
+        onTap();
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: themeColor.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: themeColor.withOpacity(0.3),
+            width: 1.5,
           ),
         ),
-      ],
+        child: Text(
+          value,
+          style: AppTextStyles.bodySm.copyWith(
+            color: themeColor,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
     );
   }
 
@@ -265,53 +386,94 @@ class _DistractionSettingsScreenState extends State<DistractionSettingsScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GlassCard(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        borderRadius: 16,
-        color: isBlocked ? AppColors.accentPrimary.withOpacity(0.1) : AppColors.bgSecondary.withOpacity(0.2),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        borderRadius: 20,
+        color: isBlocked 
+            ? AppColors.accentPrimary.withOpacity(0.08) 
+            : AppColors.bgSecondary.withOpacity(0.3),
+        border: Border.all(
+          color: isBlocked 
+              ? AppColors.accentPrimary.withOpacity(0.2) 
+              : Colors.white.withOpacity(0.05),
+        ),
         child: Row(
           children: [
             if (app.icon != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.memory(app.icon!, width: 40, height: 40),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(app.icon!, width: 44, height: 44),
+                ),
               )
             else
-              const Icon(Icons.android, color: AppColors.textTertiary),
-            const SizedBox(width: 16),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.bgTertiary,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.android_rounded, color: AppColors.textTertiary, size: 24),
+              ),
+            const SizedBox(width: 18),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     app.name ?? 'Unknown',
-                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+                    style: AppTextStyles.body.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                      fontSize: 15,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     app.packageName ?? '',
-                    style: AppTextStyles.caption.copyWith(fontSize: 10),
+                    style: AppTextStyles.caption.copyWith(
+                      fontSize: 11,
+                      color: AppColors.textTertiary,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            Checkbox(
-              value: isBlocked,
-              activeColor: AppColors.accentPrimary,
-              shape: RoundedRectangleChanges.circle ? const CircleBorder() : RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)), // Assuming some defaults
-              onChanged: (val) async {
-                HapticHelper.lightImpact();
-                final newList = List<String>.from(_blockedPackages);
-                if (val == true) {
-                  newList.add(app.packageName!);
-                } else {
-                  newList.remove(app.packageName);
-                }
-                await AccountSettingsService.setBlockedApps(newList);
-                setState(() => _blockedPackages = newList);
-              },
+            Transform.scale(
+              scale: 0.9,
+              child: Checkbox(
+                value: isBlocked,
+                activeColor: AppColors.accentPrimary,
+                checkColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                side: BorderSide(color: Colors.white.withOpacity(0.2), width: 1.5),
+                onChanged: (val) async {
+                  HapticHelper.lightImpact();
+                  final newList = List<String>.from(_blockedPackages);
+                  if (val == true) {
+                    newList.add(app.packageName!);
+                  } else {
+                    newList.remove(app.packageName);
+                  }
+                  await AccountSettingsService.setBlockedApps(newList);
+                  setState(() => _blockedPackages = newList);
+                },
+              ),
             ),
           ],
         ),

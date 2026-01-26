@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:async';
 import 'dart:io';
@@ -141,7 +142,6 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
           timestamp: DateTime.now(),
         ),
       );
-      _saveToCache();
     }
   }
 
@@ -158,12 +158,16 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
       final messages = await client.thoughtClearing.getChatSessionMessages(_sessionId);
       
       // Map Serverpod ChatMessage to our local ChatMessage model
-      final mappedMessages = messages.map((m) => ChatMessage(
-        role: m.role,
-        content: m.content,
-        timestamp: m.timestamp,
-        category: null, 
-      )).toList();
+      final mappedMessages = messages.map((m) {
+        return ChatMessage(
+          role: m.role,
+          content: m.content,
+          timestamp: m.timestamp,
+          category: null, 
+          widgetType: m.widgetType,
+          widgetData: m.widgetData != null ? jsonDecode(m.widgetData!) : null,
+        );
+      }).toList();
 
       if (mounted) {
         setState(() {
@@ -205,6 +209,7 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
     });
 
     _scrollToBottom();
+    _saveToCache();
   }
 
   Future<void> _sendMessage() async {
@@ -301,6 +306,8 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
           content: response.message,
           category: response.category,
           isStreaming: false,
+          widgetType: _getWidgetTypeFromAction(response.action),
+          widgetData: response.action?.parameters != null ? jsonDecode(response.action!.parameters!) : null,
         );
 
         if (response.category.isNotEmpty && response.category != 'general') {
@@ -363,31 +370,8 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         if (soundName != null) {
           final sound = SoundService().findSoundByName(soundName);
           if (sound != null) {
-            // Add sound card message FIRST to ensure UI updates immediately
-            if (mounted) {
-              setState(() {
-                _messages.add(ChatMessage(
-                  role: 'assistant',
-                  content: 'I\'ll play some ${sound.title} for you.',
-                  timestamp: DateTime.now(),
-                  widgetType: 'sound_card',
-                  widgetData: {
-                    'sound_title': sound.title,
-                    'sound_image': sound.imagePath,
-                    'category': sound.category.displayName,
-                    'sound_id': sound.id,
-                  },
-                ));
-              });
-              _saveToCache();
-              _scrollToBottom();
-              // Delayed scroll to handle layout shifts after card renders
-              Future.delayed(const Duration(milliseconds: 200), () {
-                if (mounted) _scrollToBottom();
-              });
-            }
-            
-            // Then start playback
+            // Then start playback - NO LONGER adding a separate message here 
+            // as it is now attached to the assistant's text response bubble
             try {
               await AudioPlayerService().play(sound);
             } catch (e) {
@@ -443,22 +427,8 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
           scheduledTime: scheduledTime,
         );
         
-        if (mounted) {
-          setState(() {
-            _messages.add(ChatMessage(
-              role: 'assistant',
-              content: 'I have scheduled that reminder for you.',
-              timestamp: DateTime.now(),
-              widgetType: 'reminder_card',
-              widgetData: {
-                'time': '${scheduledTime.hour}:${scheduledTime.minute.toString().padLeft(2, '0')}',
-                'message': message,
-              },
-            ));
-          });
-          _saveToCache();
-          _scrollToBottom();
-        }
+        // Side effect only - message/widget persistence handled 
+        // by attaching to the main response bubble
         break;
         
       case 'block_app':
@@ -485,19 +455,8 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         break;
 
       case 'start_breathing_exercise':
-        if (mounted) {
-          setState(() {
-            _messages.add(ChatMessage(
-              role: 'assistant',
-              content: 'Let\'s take a moment to breathe.',
-              timestamp: DateTime.now(),
-              widgetType: 'breathing_exercise',
-              widgetData: {'duration_minutes': params['duration_minutes'] ?? 2},
-            ));
-          });
-          _saveToCache();
-          _scrollToBottom();
-        }
+        // Side effect only - widget persistence handled 
+        // by attaching to the main response bubble
         break;
 
       case 'save_thought':
@@ -540,6 +499,20 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
     if (readiness < 50) return AppColors.sleepReadyLow;
     if (readiness < 75) return AppColors.sleepReadyMid;
     return AppColors.sleepReadyHigh;
+  }
+
+  String? _getWidgetTypeFromAction(protocol.AIAction? action) {
+    if (action == null) return null;
+    switch (action.command) {
+      case 'play_sound':
+        return 'sound_card';
+      case 'set_reminder':
+        return 'reminder_card';
+      case 'start_breathing_exercise':
+        return 'breathing_exercise';
+      default:
+        return null;
+    }
   }
 
   @override
@@ -590,19 +563,22 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
                         vertical: AppSpacing.md,
                       ),
                       physics: const BouncingScrollPhysics(),
-                      itemCount: _messages.length + (_isLoading ? 1 : 0),
+                      itemCount: _messages.length + (_isLoading ? 1 : 0) + (_isHistoryLoading && _messages.isEmpty ? 1 : 0),
                       itemBuilder: (context, index) {
-                        if (_isHistoryLoading && index == 0) {
+                        if (_isHistoryLoading && _messages.isEmpty) {
                           return const Center(
                             child: Padding(
-                              padding: EdgeInsets.all(20.0),
+                              padding: EdgeInsets.all(40.0),
                               child: CircularProgressIndicator(color: AppColors.accentPrimary),
                             ),
                           );
                         }
+                        
+                        // Handle typing indicator at the end
                         if (index == _messages.length) {
                           return _buildTypingIndicator();
                         }
+                        
                         return _buildChatBubble(_messages[index], index);
                       },
                     ),
@@ -787,6 +763,21 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
             ),
           ),
         ),
+        Align(
+          alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 6, right: 6, bottom: 14),
+            child: Text(
+              DateFormat.jm().format(message.timestamp.toLocal()),
+              style: AppTextStyles.caption.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textTertiary.withOpacity(0.35),
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+        ),
         
         // Render Custom Widget if present
         if (message.widgetType != null)
@@ -835,9 +826,23 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
                 ],
               ),
               const SizedBox(height: 8),
-              Text(
-                data?['time'] ?? '',
-                style: AppTextStyles.h2.copyWith(fontSize: 24, height: 1.2),
+              Builder(
+                builder: (context) {
+                  String rawTime = data?['time'] ?? '';
+                  String displayedTime = rawTime;
+                  try {
+                    // Try to parse ISO format
+                    DateTime? parsed = DateTime.tryParse(rawTime);
+                    if (parsed != null) {
+                      displayedTime = DateFormat('h:mm a').format(parsed.toLocal());
+                    }
+                  } catch (_) {}
+                  
+                  return Text(
+                    displayedTime,
+                    style: AppTextStyles.h2.copyWith(fontSize: 24, height: 1.2),
+                  );
+                }
               ),
               const SizedBox(height: 4),
               Text(
@@ -851,12 +856,18 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         ).animate().fadeIn().scale();
       case 'sound_card':
         final soundId = data?['sound_id'] as String?;
-        final sound = soundId != null ? SoundService().getSoundById(soundId) : null;
+        final soundName = data?['sound_name'] as String? ?? data?['sound_title'] as String?;
+        var sound = soundId != null ? SoundService().getSoundById(soundId) : null;
+        
+        // Fallback to name-based lookup if ID search fails (common in AI actions)
+        if (sound == null && soundName != null) {
+          sound = SoundService().findSoundByName(soundName);
+        }
         
         return SleepSoundCard(
-          soundTitle: data?['sound_title'] ?? 'Sleep Sound',
-          soundImagePath: data?['sound_image'],
-          category: data?['category'],
+          soundTitle: sound?.title ?? data?['sound_title'] ?? 'Sleep Sound',
+          soundImagePath: sound?.imagePath ?? data?['sound_image'],
+          category: sound?.category.displayName ?? data?['category'],
           sound: sound,
         );
       default:

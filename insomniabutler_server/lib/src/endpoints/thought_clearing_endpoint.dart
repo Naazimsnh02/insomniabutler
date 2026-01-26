@@ -5,6 +5,7 @@ import '../generated/protocol.dart' as protocol;
 import '../services/gemini_service.dart';
 import '../services/embedding_service.dart';
 import '../services/tool_executor.dart';
+import '../services/sound_mapping_service.dart';
 import 'package:google_generative_ai/google_generative_ai.dart' as ai;
 
 /// Core thought clearing endpoint - processes user thoughts through AI
@@ -186,7 +187,50 @@ User Query: $messageToSend
       session.log('Failed to generate AI embedding: $e');
     }
 
-    // 7. Save AI response
+    // 7. Map AI action to widget for persistence if needed
+    String? widgetType;
+    String? widgetData;
+    
+    if (aiAction != null) {
+      switch (aiAction.command) {
+        case 'play_sound':
+          widgetType = 'sound_card';
+          // Extract sound name from parameters and get full metadata
+          final params = jsonDecode(aiAction.parameters!);
+          final soundName = params['sound_name'] as String?;
+          
+          if (soundName != null) {
+            final soundMetadata = SoundMappingService.getSoundMetadata(soundName);
+            if (soundMetadata != null) {
+              widgetData = jsonEncode({
+                'sound_title': soundMetadata['title'],
+                'sound_image': soundMetadata['imagePath'],
+                'category': soundMetadata['category'],
+                'sound_id': soundMetadata['id'],
+              });
+            } else {
+              // Fallback if sound not found
+              widgetData = jsonEncode({
+                'sound_title': soundName,
+                'sound_image': null,
+                'category': 'Unknown',
+                'sound_id': '0',
+              });
+            }
+          }
+          break;
+        case 'set_reminder':
+          widgetType = 'reminder_card';
+          widgetData = aiAction.parameters;
+          break;
+        case 'start_breathing_exercise':
+          widgetType = 'breathing_exercise';
+          widgetData = aiAction.parameters;
+          break;
+      }
+    }
+
+    // 8. Save AI response
     await protocol.ChatMessage.db.insertRow(
       session,
       protocol.ChatMessage(
@@ -196,6 +240,8 @@ User Query: $messageToSend
         content: finalMessage,
         timestamp: DateTime.now(),
         embedding: aiEmbedding != null ? Vector(aiEmbedding) : null,
+        widgetType: widgetType,
+        widgetData: widgetData,
       ),
     );
 

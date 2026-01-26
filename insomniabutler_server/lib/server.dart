@@ -77,13 +77,29 @@ void run(List<String> args) async {
   // Start the server.
   await pod.start();
 
-  // Seed journal prompts
+  // Seed journal prompts and perform database migrations
   final session = await pod.createSession();
   try {
+    // 1. Seed journal prompts
     await JournalEndpoint().seedPrompts(session);
     session.log('Journal prompts seeded successfully');
+
+    // 2. Perform Widget Persistence Migration
+    session.log('Checking for chat_messages table updates...');
+    try {
+      await session.db.unsafeQuery(
+        'ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS "widgetType" text;'
+      );
+      await session.db.unsafeQuery(
+        'ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS "widgetData" text;'
+      );
+      session.log('✅ Chat messages table migration successful.');
+    } catch (e) {
+      session.log('Warning: Chat migration skipped or failed (likely already exists): $e');
+    }
+
   } catch (e) {
-    session.log('Error seeding journal prompts: $e', level: LogLevel.error);
+    session.log('Error during server initialization tasks: $e', level: LogLevel.error);
   } finally {
     await session.close();
   }

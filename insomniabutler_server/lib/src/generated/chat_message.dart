@@ -22,6 +22,8 @@ abstract class ChatMessage
     required this.content,
     required this.timestamp,
     this.embedding,
+    this.widgetType,
+    this.widgetData,
   });
 
   factory ChatMessage({
@@ -32,6 +34,8 @@ abstract class ChatMessage
     required String content,
     required DateTime timestamp,
     _i1.Vector? embedding,
+    String? widgetType,
+    String? widgetData,
   }) = _ChatMessageImpl;
 
   factory ChatMessage.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -47,6 +51,8 @@ abstract class ChatMessage
       embedding: jsonSerialization['embedding'] == null
           ? null
           : _i1.VectorJsonExtension.fromJson(jsonSerialization['embedding']),
+      widgetType: jsonSerialization['widgetType'] as String?,
+      widgetData: jsonSerialization['widgetData'] as String?,
     );
   }
 
@@ -69,6 +75,10 @@ abstract class ChatMessage
 
   _i1.Vector? embedding;
 
+  String? widgetType;
+
+  String? widgetData;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -83,6 +93,8 @@ abstract class ChatMessage
     String? content,
     DateTime? timestamp,
     _i1.Vector? embedding,
+    String? widgetType,
+    String? widgetData,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -95,6 +107,8 @@ abstract class ChatMessage
       'content': content,
       'timestamp': timestamp.toJson(),
       if (embedding != null) 'embedding': embedding?.toJson(),
+      if (widgetType != null) 'widgetType': widgetType,
+      if (widgetData != null) 'widgetData': widgetData,
     };
   }
 
@@ -109,6 +123,8 @@ abstract class ChatMessage
       'content': content,
       'timestamp': timestamp.toJson(),
       if (embedding != null) 'embedding': embedding?.toJson(),
+      if (widgetType != null) 'widgetType': widgetType,
+      if (widgetData != null) 'widgetData': widgetData,
     };
   }
 
@@ -153,6 +169,8 @@ class _ChatMessageImpl extends ChatMessage {
     required String content,
     required DateTime timestamp,
     _i1.Vector? embedding,
+    String? widgetType,
+    String? widgetData,
   }) : super._(
          id: id,
          sessionId: sessionId,
@@ -161,6 +179,8 @@ class _ChatMessageImpl extends ChatMessage {
          content: content,
          timestamp: timestamp,
          embedding: embedding,
+         widgetType: widgetType,
+         widgetData: widgetData,
        );
 
   /// Returns a shallow copy of this [ChatMessage]
@@ -175,6 +195,8 @@ class _ChatMessageImpl extends ChatMessage {
     String? content,
     DateTime? timestamp,
     Object? embedding = _Undefined,
+    Object? widgetType = _Undefined,
+    Object? widgetData = _Undefined,
   }) {
     return ChatMessage(
       id: id is int? ? id : this.id,
@@ -184,6 +206,8 @@ class _ChatMessageImpl extends ChatMessage {
       content: content ?? this.content,
       timestamp: timestamp ?? this.timestamp,
       embedding: embedding is _i1.Vector? ? embedding : this.embedding?.clone(),
+      widgetType: widgetType is String? ? widgetType : this.widgetType,
+      widgetData: widgetData is String? ? widgetData : this.widgetData,
     );
   }
 }
@@ -222,6 +246,16 @@ class ChatMessageUpdateTable extends _i1.UpdateTable<ChatMessageTable> {
         table.embedding,
         value,
       );
+
+  _i1.ColumnValue<String, String> widgetType(String? value) => _i1.ColumnValue(
+    table.widgetType,
+    value,
+  );
+
+  _i1.ColumnValue<String, String> widgetData(String? value) => _i1.ColumnValue(
+    table.widgetData,
+    value,
+  );
 }
 
 class ChatMessageTable extends _i1.Table<int?> {
@@ -252,6 +286,14 @@ class ChatMessageTable extends _i1.Table<int?> {
       this,
       dimension: 768,
     );
+    widgetType = _i1.ColumnString(
+      'widgetType',
+      this,
+    );
+    widgetData = _i1.ColumnString(
+      'widgetData',
+      this,
+    );
   }
 
   late final ChatMessageUpdateTable updateTable;
@@ -268,6 +310,10 @@ class ChatMessageTable extends _i1.Table<int?> {
 
   late final _i1.ColumnVector embedding;
 
+  late final _i1.ColumnString widgetType;
+
+  late final _i1.ColumnString widgetData;
+
   @override
   List<_i1.Column> get columns => [
     id,
@@ -277,6 +323,8 @@ class ChatMessageTable extends _i1.Table<int?> {
     content,
     timestamp,
     embedding,
+    widgetType,
+    widgetData,
   ];
 }
 

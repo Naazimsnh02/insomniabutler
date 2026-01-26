@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/primary_button.dart';
@@ -85,6 +87,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   @override
   void initState() {
     super.initState();
+    _loadFromCache();
     _loadUserData();
     _refreshAllData();
 
@@ -116,6 +119,80 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   void dispose() {
     _calendarScrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveToCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Save data cache (convert Durations to minutes for JSON serialization)
+      final serializableCache = <String, Map<String, dynamic>>{};
+      _dataCache.forEach((key, value) {
+        final val = Map<String, dynamic>.from(value);
+        if (val['duration'] != null && val['duration'] is Duration) {
+          val['duration'] = (val['duration'] as Duration).inMinutes;
+        }
+        serializableCache[key] = val;
+      });
+      
+      prefs.setString('home_data_cache', jsonEncode(serializableCache));
+      
+      // Save global stats
+      prefs.setInt('home_latency_improvement', _latencyImprovement);
+      prefs.setDouble('home_avg_sleep', _avgSleep.toDouble());
+      prefs.setInt('home_streak_days', _streakDays);
+      prefs.setInt('home_total_sessions', _totalSessions);
+    } catch (e) {
+      debugPrint('Error saving home cache: $e');
+    }
+  }
+
+  Future<void> _loadFromCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      final cacheJson = prefs.getString('home_data_cache');
+      if (cacheJson != null) {
+        final decoded = jsonDecode(cacheJson) as Map<String, dynamic>;
+        decoded.forEach((key, value) {
+          final val = Map<String, dynamic>.from(value as Map);
+          if (val['duration'] != null) {
+            val['duration'] = Duration(minutes: val['duration'] as int);
+          }
+          _dataCache[key] = val;
+        });
+      }
+      
+      setState(() {
+        _latencyImprovement = prefs.getInt('home_latency_improvement') ?? 0;
+        _avgSleep = prefs.getDouble('home_avg_sleep') ?? 0;
+        _streakDays = prefs.getInt('home_streak_days') ?? 0;
+        _totalSessions = prefs.getInt('home_total_sessions') ?? 0;
+        
+        // Populate current selected date from cache if available
+        final dateKey = DateFormat('yyyy-MM-dd').format(_selectedDate);
+        if (_dataCache.containsKey(dateKey)) {
+          final cached = _dataCache[dateKey]!;
+          _lastNightDuration = cached['duration'];
+          _lastNightQuality = cached['quality'];
+          _sleepEfficiency = cached['efficiency'];
+          _hasLastNightData = cached['hasData'];
+          _lastNightInterruptions = cached['interruptions'];
+          _selectedMood = cached['mood'];
+          _deepMinutes = cached['deep'];
+          _lightMinutes = cached['light'];
+          _remMinutes = cached['rem'];
+          _awakeMinutes = cached['awake'];
+          _rhr = cached['rhr'];
+          _hrv = cached['hrv'];
+          _respiratoryRate = cached['respiratoryRate'];
+          _consistencyScore = cached['consistency'];
+          _isLoadingInsights = false;
+        }
+      });
+    } catch (e) {
+      debugPrint('Error loading home cache: $e');
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -331,6 +408,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           _totalSessions = insights.totalSessions;
           _isLoadingInsights = false;
         });
+        _saveToCache();
         _updateAffirmationForTime();
       }
     } catch (e) {
