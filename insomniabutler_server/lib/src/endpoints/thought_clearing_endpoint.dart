@@ -76,7 +76,9 @@ class ThoughtClearingEndpoint extends Endpoint {
       final minute = userLocalTime.minute.toString().padLeft(2, '0');
       final period = hour >= 12 ? 'PM' : 'AM';
       final formattedHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-      messageToSend = "[User Local Time: $formattedHour:$minute $period]\n$userMessage";
+      
+      // Provide both human readable and ISO 8601 for the AI
+      messageToSend = "[User Local Time: $formattedHour:$minute $period, ISO: ${userLocalTime.toIso8601String()}]\n$userMessage";
     }
 
     // 2. Generate embedding for user message (semantic memory)

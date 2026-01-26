@@ -1375,10 +1375,34 @@ class _AccountScreenState extends State<AccountScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.bgPrimary,
-        title: const Text('Generate Data?', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'This will generate 30 days of realistic sleep and journal data for your account. This is for testing only.',
-          style: TextStyle(color: AppColors.textSecondary),
+        title: const Text('Generate Professional Demo Data?', style: TextStyle(color: Colors.white)),
+        content: const SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'This will generate 30 days of professional, realistic data including:',
+                style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 12),
+              Text('• Sleep sessions with detailed metrics', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+              Text('• Professional journal entries', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+              Text('• AI chat conversations with embeddings', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+              Text('• Thought logs across diverse categories', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+              Text('• Sleep insights and analytics', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+              SizedBox(height: 12),
+              Text(
+                'Perfect for hackathon demos and testing all features!',
+                style: TextStyle(color: AppColors.accentPrimary, fontSize: 12, fontStyle: FontStyle.italic),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Note: This may take 1-2 minutes to generate embeddings.',
+                style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -1387,12 +1411,28 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
-              // Show loading
+              final dialogContext = context;
+              Navigator.pop(dialogContext);
+              
+              // Show loading with message
+              if (!mounted) return;
               showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (context) => const Center(child: CircularProgressIndicator(color: AppColors.accentPrimary)),
+                builder: (loadingContext) => const Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(color: AppColors.accentPrimary),
+                      SizedBox(height: 16),
+                      Text(
+                        'Generating professional data...\nThis may take 1-2 minutes',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                ),
               );
 
               try {
@@ -1400,24 +1440,35 @@ class _AccountScreenState extends State<AccountScreen> {
                 if (userId != null) {
                   await client.dev.generateRealisticData(userId);
                   if (mounted) {
+                    Navigator.of(context).pop(); // Close loading
                     await _loadData(); // Reload data to update UI
-                    Navigator.pop(context); // Close loading
                     widget.onDataChanged?.call();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Realistic data generated successfully!')),
-                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('✨ Professional demo data generated successfully!'),
+                          backgroundColor: AppColors.accentPrimary,
+                          duration: Duration(seconds: 3),
+                        ),
+                      );
+                    }
                   }
                 }
               } catch (e) {
+                debugPrint('Error generating data: $e');
                 if (mounted) {
-                  Navigator.pop(context); // Close loading
+                  Navigator.of(context).pop(); // Close loading
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.accentError),
+                    SnackBar(
+                      content: Text('Error: $e'),
+                      backgroundColor: AppColors.accentError,
+                      duration: const Duration(seconds: 5),
+                    ),
                   );
                 }
               }
             },
-            child: const Text('Generate', style: TextStyle(color: AppColors.accentPrimary)),
+            child: const Text('Generate', style: TextStyle(color: AppColors.accentPrimary, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -1441,12 +1492,15 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
+              final dialogContext = context;
+              Navigator.pop(dialogContext);
+              
               // Show loading
+              if (!mounted) return;
               showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (context) => const Center(child: CircularProgressIndicator(color: AppColors.accentPrimary)),
+                builder: (loadingContext) => const Center(child: CircularProgressIndicator(color: AppColors.accentPrimary)),
               );
 
               try {
@@ -1454,19 +1508,26 @@ class _AccountScreenState extends State<AccountScreen> {
                 if (userId != null) {
                   await client.dev.clearUserData(userId);
                   if (mounted) {
+                    Navigator.of(context).pop(); // Close loading
                     await _loadData(); // Reload data to update UI
-                    Navigator.pop(context); // Close loading
                     widget.onDataChanged?.call();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('All data cleared successfully.')),
-                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('All data cleared successfully.')),
+                      );
+                    }
                   }
                 }
               } catch (e) {
+                debugPrint('Error clearing data: $e');
                 if (mounted) {
-                  Navigator.pop(context); // Close loading
+                  Navigator.of(context).pop(); // Close loading
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.accentError),
+                    SnackBar(
+                      content: Text('Error: $e'),
+                      backgroundColor: AppColors.accentError,
+                      duration: const Duration(seconds: 5),
+                    ),
                   );
                 }
               }

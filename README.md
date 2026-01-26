@@ -13,7 +13,7 @@
 
 **Insomnia Butler** is a premium, AI-powered companion designed to resolve the root cause of late-night wakefulness: a racing mind. Unlike traditional sleep apps that only offer passive sounds, the Butler engages in a structured, therapeutic dialogue to **organize your thoughts, provide cognitive reframing, and guide you into a restful state.**
 
-By combining **Cognitive Behavioral Therapy (CBT-I) principles**, **Gemini 2.5 Intelligence**, and **Long-term Vector Memory**, we create a personalized sanctuary that learns your patterns and helps you "park" your worries so you can finally rest.
+By combining **Cognitive Behavioral Therapy (CBT-I) principles**, **Gemini Intelligence**, and **Long-term Vector Memory**, we create a personalized sanctuary that learns your patterns and helps you "park" your worries so you can finally rest.
 
 ---
 
@@ -29,7 +29,7 @@ The application features a high-fidelity **Glassmorphic UI** designed for low-li
 ## 🚀 Key Features
 
 ### 🧠 AI Thought Clearing Engine (Core Feature)
-A sophisticated chat interface powered by **Gemini 2.5 Flash** that acts as your personal cognitive coach.
+A sophisticated chat interface powered by **Gemini** that acts as your personal cognitive coach.
 - **Socratic Questioning:** Guides you to resolve worries rather than just venting.
 - **Automatic Categorization:** Identifies if thoughts are related to Work, Social, Finances, or Health.
 - **AI Actions:** The Butler can actively assist you by:
@@ -59,12 +59,21 @@ An integrated breathing widget featuring:
 - **Haptic Pacing:** Feel the rhythm of your breath without looking at the screen.
 
 ### 📅 Historical Intelligence & Analytics
-- **Monthly Calendar View:** Easily navigate through months of sleep history.
+### 📅 Historical Intelligence & Analytics
+- **Monthly Calendar View:** Easily navigate through months of sleep and journal history.
 - **Weekly Trend Reports:** See progress in sleep latency and consistency.
 - **Mood Correlation:** Track how your morning mood correlates with your sleep architecture.
 
 ### 🚫 Smart Distraction Blocker
 A robust nudging system that uses **High-Priority Notifications** to gently pull you away from blocked apps (Social Media, Games) during your scheduled bedtime.
+
+### 💬 Session History & Context
+- **Chat Archives:** Review past conversations and advice from the Butler.
+- **Continuous Memory:** The AI remembers context from previous days to provide personalized support.
+
+---
+
+> **[📄 Click here to view the detailed Feature Breakdown per Screen (FEATURES.md)](FEATURES.md)**
 
 ---
 
@@ -74,7 +83,7 @@ A robust nudging system that uses **High-Priority Notifications** to gently pull
 | :--- | :--- |
 | **Mobile App** | Flutter (Dart) with `flutter_animate` & `glass_kit` |
 | **Backend** | Serverpod 3.0 (Dart) |
-| **AI Intelligence** | Google Gemini 2.5 Flash Lite |
+| **AI Intelligence** | Google Gemini |
 | **Vector Search** | pgvector (PostgreSQL) for RAG |
 | **Database** | PostgreSQL 18.1 |
 | **Infrastructure** | AWS Fargate (ECS) + AWS RDS + ALB |

@@ -10,7 +10,7 @@ class GeminiService {
   GeminiService(String apiKey)
       : _apiKey = apiKey,
         _chatModel = GenerativeModel(
-          model: 'gemini-2.5-flash-lite',
+          model: 'gemini-2.5-flash',
           apiKey: apiKey,
           systemInstruction: Content.system(_buildSystemPrompt()),
           tools: _buildTools(),
@@ -44,11 +44,13 @@ CORE PRINCIPLES:
 3.  **Socratic Guidance**: Ask gentle, open-ended question to help them realize they are safe and can let go for now. Avoid lecturing.
 4.  **Closure is Key**: Always aim to wrap up the thought loops. End responses with a soothing statement or a "permission to rest" sentiment.
 5.  **Safety First**: NEVER provide medical advice. If crisis language is detected, gently provide helpline resources immediately.
+6.  **Time Awareness**: You will be provided with the user's local time (ISO format). Use this to correctly calculate "tomorrow", "this evening", or specific hours for reminders.
 
 AVAILABLE TOOLS:
-- query_sleep_history: Use this to contextualize their current struggle with past patterns (e.g., "I see you've had trouble falling asleep this week...").
-- search_memories: Use this to connect dots. If they worry about "work" again, remind them "You handled a similar issue well last Tuesday."
-- execute_action: Proactively offer help (e.g., "Shall I play the 'Peaceful Sleep' sound for you?").
+- query_sleep_history: Use this to contextualize their current struggle with past patterns.
+- search_memories: Use this to connect dots from past journal entries or chats.
+- set_reminder: Use this to schedule "worry time" or tasks for later. ALWAYS provide the `time` in ISO8601 format (e.g., "2024-03-21T08:00:00") based on the provided user context.
+- execute_action: Use this to play sleep sounds.
 
 TONE:
 Conversational, non-judgmental, and patient. Avoid clinical jargon. Speak like a wise, calm friend who is sitting by their side.
@@ -98,13 +100,13 @@ Conversational, non-judgmental, and patient. Avoid clinical jargon. Speak like a
         // Tool 3: Set a Smart Reminder
         FunctionDeclaration(
           'set_reminder',
-          'Schedules a system notification for a specific time and message',
+          'Schedules a system notification for a specific time and message. Use the provided user local time context to determine the exact UTC/Local ISO8601 string.',
           Schema(
             SchemaType.object,
             properties: {
               'time': Schema(
                 SchemaType.string,
-                description: 'ISO8601 timestamp or relative time (e.g., "2024-03-20T18:00:00Z" or "in 30 minutes")',
+                description: 'The exact ISO8601 timestamp (e.g., "2024-03-21T08:00:00") or relative message (e.g., "in 30 minutes")',
               ),
               'message': Schema(
                 SchemaType.string,

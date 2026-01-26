@@ -187,13 +187,11 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
   }
 
   void _scrollToBottom() {
-    // Auto-scroll to bottom with smooth animation
-    Future.delayed(const Duration(milliseconds: 100), () {
+    // Immediate scroll without delay for instant response
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
-        _scrollController.animateTo(
+        _scrollController.jumpTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
         );
       }
     });
@@ -216,19 +214,27 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
     // Light haptic feedback for send action
     await HapticHelper.lightImpact();
 
-    // Hide keyboard
-    FocusScope.of(context).unfocus();
+    // Add message first, THEN dismiss keyboard to avoid viewport jump
+    setState(() {
+      _messages.add(
+        ChatMessage(
+          role: 'user',
+          content: userMessage,
+          timestamp: DateTime.now(),
+        ),
+      );
+      _isLoading = true;
+    });
 
-    // Add user message
-    _addMessage(
-      ChatMessage(
-        role: 'user',
-        content: userMessage,
-        timestamp: DateTime.now(),
-      ),
-    );
-
-    setState(() => _isLoading = true);
+    // Scroll immediately
+    _scrollToBottom();
+    
+    // Delay keyboard dismissal slightly to let message render first
+    Future.delayed(const Duration(milliseconds: 50), () {
+      if (mounted) {
+        FocusScope.of(context).unfocus();
+      }
+    });
 
     try {
       // Get current user ID
@@ -243,7 +249,13 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         userMessage,
         _sessionId,
         _sleepReadiness,
-        userLocalTime: DateTime.now(),
+        userLocalTime: DateTime.utc(
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+          DateTime.now().hour,
+          DateTime.now().minute,
+        ),
       );
 
       // Add AI response and update state in a single call to prevent flickering
@@ -325,12 +337,39 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         final message = params['message'] as String;
         
         DateTime scheduledTime;
+        final now = DateTime.now();
+        
         if (timeStr.contains('in')) {
           // Relative time handling
           final minutes = int.tryParse(RegExp(r'\d+').firstMatch(timeStr)?.group(0) ?? '30') ?? 30;
-          scheduledTime = DateTime.now().add(Duration(minutes: minutes));
+          scheduledTime = now.add(Duration(minutes: minutes));
         } else {
-          scheduledTime = DateTime.tryParse(timeStr) ?? DateTime.now().add(const Duration(hours: 1));
+          // Try parsing as ISO
+          var parsed = DateTime.tryParse(timeStr);
+          
+          if (parsed == null) {
+            // Try parsing as HH:mm or HH:mm:ss or similar patterns
+            final timeMatch = RegExp(r'(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?', caseSensitive: false)
+                .firstMatch(timeStr);
+            
+            if (timeMatch != null) {
+              int hour = int.parse(timeMatch.group(1)!);
+              final int minute = int.parse(timeMatch.group(2)!);
+              final String? period = timeMatch.group(4);
+              
+              if (period?.toUpperCase() == 'PM' && hour < 12) hour += 12;
+              if (period?.toUpperCase() == 'AM' && hour == 12) hour = 0;
+              
+              parsed = DateTime(now.year, now.month, now.day, hour, minute);
+              
+              // If the time already passed today, schedule for tomorrow
+              if (parsed.isBefore(now)) {
+                parsed = parsed.add(const Duration(days: 1));
+              }
+            }
+          }
+          
+          scheduledTime = parsed ?? now.add(const Duration(hours: 1));
         }
 
         await NotificationService.scheduleNotification(
@@ -683,13 +722,7 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
       ],
     )
         .animate(key: ValueKey(message.timestamp.millisecondsSinceEpoch))
-        .fadeIn(duration: 400.ms)
-        .slideY(
-          begin: 0.2,
-          end: 0,
-          duration: 400.ms,
-          curve: Curves.easeOut,
-        );
+        .fadeIn(duration: 300.ms);
   }
 
   Widget _buildCustomWidget(String type, Map<String, dynamic>? data) {

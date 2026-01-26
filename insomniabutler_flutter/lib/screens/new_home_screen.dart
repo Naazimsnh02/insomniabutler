@@ -537,16 +537,14 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               const SizedBox(height: AppSpacing.xl),
               _buildSleepGauge().animate().fadeIn(delay: 450.ms, duration: 400.ms).scale(begin: const Offset(0.98, 0.98)),
               const SizedBox(height: AppSpacing.xl),
-              _buildControlPanel().animate().fadeIn(delay: 500.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
-              const SizedBox(height: AppSpacing.xl),
               if (_isTodaySelected) ...[
-                _buildStartTrackingButton().animate().fadeIn(delay: 550.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
+                _timerService.isRunning 
+                  ? _buildActiveTimerCard().animate().fadeIn(delay: 500.ms, duration: 400.ms).slideY(begin: 0.05, end: 0)
+                  : _buildStartTrackingButton().animate().fadeIn(delay: 500.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
                 const SizedBox(height: AppSpacing.xl),
               ],
-              if (_isTodaySelected && _timerService.isRunning) ...[
-                _buildActiveTimerCard().animate().fadeIn(delay: 550.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
-                const SizedBox(height: AppSpacing.xl),
-              ],
+              _buildControlPanel().animate().fadeIn(delay: 550.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
+              const SizedBox(height: AppSpacing.xl),
               _buildMoodTracker().animate().fadeIn(delay: 600.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
               const SizedBox(height: AppSpacing.xl),
               _buildTrendInsights().animate().fadeIn(delay: 650.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
