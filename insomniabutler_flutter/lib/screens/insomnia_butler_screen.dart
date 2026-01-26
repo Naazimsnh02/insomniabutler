@@ -15,8 +15,10 @@ import 'package:insomniabutler_client/insomniabutler_client.dart' as protocol;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:installed_apps/installed_apps.dart';
 import '../widgets/chat/breathing_exercise_widget.dart';
+import '../widgets/chat/sleep_sound_card.dart';
 import '../services/account_settings_service.dart';
 import '../services/notification_service.dart';
+
 
 /// Thought Clearing Chat UI - CORE FEATURE
 /// Premium glassmorphic chat interface for processing anxious thoughts
@@ -258,15 +260,48 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         ),
       );
 
-      // Add AI response and update state in a single call to prevent flickering
+      // Create a placeholder streaming message
+      final streamingMessageIndex = _messages.length;
       setState(() {
-        final aiMessage = ChatMessage(
-          role: 'assistant',
-          content: response.message,
-          timestamp: DateTime.now(),
-          category: response.category,
+        _messages.add(
+          ChatMessage(
+            role: 'assistant',
+            content: '',
+            timestamp: DateTime.now(),
+            isStreaming: true,
+          ),
         );
-        _messages.add(aiMessage);
+        _isLoading = false;
+      });
+      _scrollToBottom();
+
+      // Stream the AI response word by word
+      final words = response.message.split(' ');
+      final buffer = StringBuffer();
+      
+      for (int i = 0; i < words.length; i++) {
+        buffer.write(words[i]);
+        if (i < words.length - 1) buffer.write(' ');
+        
+        setState(() {
+          _messages[streamingMessageIndex] = _messages[streamingMessageIndex].copyWith(
+            content: buffer.toString(),
+          );
+        });
+        
+        _scrollToBottom();
+        
+        // Delay between words for streaming effect (faster for better UX)
+        await Future.delayed(const Duration(milliseconds: 30));
+      }
+
+      // Finalize the message with metadata
+      setState(() {
+        _messages[streamingMessageIndex] = _messages[streamingMessageIndex].copyWith(
+          content: response.message,
+          category: response.category,
+          isStreaming: false,
+        );
 
         if (response.category.isNotEmpty && response.category != 'general') {
           _currentCategory = _getCategoryEmoji(response.category);
@@ -274,14 +309,15 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
 
         _previousReadiness = _sleepReadiness;
         _sleepReadiness = response.newReadiness;
-        _saveToCache();
-        _isLoading = false;
       });
 
-      // Execute AI action if present
+      // Execute AI action if present (this may add additional messages like sound cards)
       if (response.action != null && mounted) {
         await _handleAIAction(response.action!);
       }
+
+      // Save to cache AFTER action is handled to include any action-generated messages
+      _saveToCache();
 
       // Auto-scroll to bottom
       _scrollToBottom();
@@ -327,8 +363,36 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         if (soundName != null) {
           final sound = SoundService().findSoundByName(soundName);
           if (sound != null) {
-            await AudioPlayerService().play(sound);
-            _showActionFeedback('Playing ${sound.title}...');
+            // Add sound card message FIRST to ensure UI updates immediately
+            if (mounted) {
+              setState(() {
+                _messages.add(ChatMessage(
+                  role: 'assistant',
+                  content: 'I\'ll play some ${sound.title} for you.',
+                  timestamp: DateTime.now(),
+                  widgetType: 'sound_card',
+                  widgetData: {
+                    'sound_title': sound.title,
+                    'sound_image': sound.imagePath,
+                    'category': sound.category.displayName,
+                    'sound_id': sound.id,
+                  },
+                ));
+              });
+              _saveToCache();
+              _scrollToBottom();
+              // Delayed scroll to handle layout shifts after card renders
+              Future.delayed(const Duration(milliseconds: 200), () {
+                if (mounted) _scrollToBottom();
+              });
+            }
+            
+            // Then start playback
+            try {
+              await AudioPlayerService().play(sound);
+            } catch (e) {
+              debugPrint('Error playing sound in action: $e');
+            }
           }
         }
         break;
@@ -379,7 +443,6 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
           scheduledTime: scheduledTime,
         );
         
-        // Show in chat instead of snackbar
         if (mounted) {
           setState(() {
             _messages.add(ChatMessage(
@@ -393,6 +456,7 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
               },
             ));
           });
+          _saveToCache();
           _scrollToBottom();
         }
         break;
@@ -421,16 +485,19 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         break;
 
       case 'start_breathing_exercise':
-        setState(() {
-          _messages.add(ChatMessage(
-            role: 'assistant',
-            content: 'Let\'s take a moment to breathe.',
-            timestamp: DateTime.now(),
-            widgetType: 'breathing_exercise',
-            widgetData: {'duration_minutes': params['duration_minutes'] ?? 2},
-          ));
-        });
-        _scrollToBottom();
+        if (mounted) {
+          setState(() {
+            _messages.add(ChatMessage(
+              role: 'assistant',
+              content: 'Let\'s take a moment to breathe.',
+              timestamp: DateTime.now(),
+              widgetType: 'breathing_exercise',
+              widgetData: {'duration_minutes': params['duration_minutes'] ?? 2},
+            ));
+          });
+          _saveToCache();
+          _scrollToBottom();
+        }
         break;
 
       case 'save_thought':
@@ -702,26 +769,37 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
                     ]
                   : null,
             ),
-            child: Text(
-              message.content,
-              style: AppTextStyles.bodySm.copyWith(
-                color: AppColors.textPrimary.withOpacity(0.9),
-                height: 1.6,
-                fontSize: 14,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    message.content,
+                    style: AppTextStyles.bodySm.copyWith(
+                      color: AppColors.textPrimary.withOpacity(0.9),
+                      height: 1.6,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+
+              ],
             ),
           ),
         ),
         
         // Render Custom Widget if present
         if (message.widgetType != null)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16, top: 4),
-            child: _buildCustomWidget(message.widgetType!, message.widgetData),
+          Align(
+            alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16, top: 4),
+              child: _buildCustomWidget(message.widgetType!, message.widgetData),
+            ),
           ),
       ],
     )
-        .animate(key: ValueKey(message.timestamp.millisecondsSinceEpoch))
+        .animate(key: ValueKey('${message.role}_${message.timestamp.millisecondsSinceEpoch}_$index'))
         .fadeIn(duration: 300.ms);
   }
 
@@ -771,10 +849,21 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
             ],
           ),
         ).animate().fadeIn().scale();
+      case 'sound_card':
+        final soundId = data?['sound_id'] as String?;
+        final sound = soundId != null ? SoundService().getSoundById(soundId) : null;
+        
+        return SleepSoundCard(
+          soundTitle: data?['sound_title'] ?? 'Sleep Sound',
+          soundImagePath: data?['sound_image'],
+          category: data?['category'],
+          sound: sound,
+        );
       default:
         return const SizedBox.shrink();
     }
   }
+
 
   Widget _buildTypingIndicator() {
     return Align(
