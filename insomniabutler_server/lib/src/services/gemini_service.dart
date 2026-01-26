@@ -8,13 +8,13 @@ class GeminiService {
   GenerativeModel get model => _chatModel;
 
   GeminiService(String apiKey)
-      : _apiKey = apiKey,
-        _chatModel = GenerativeModel(
-          model: 'gemini-2.5-flash',
-          apiKey: apiKey,
-          systemInstruction: Content.system(_buildSystemPrompt()),
-          tools: _buildTools(),
-        );
+    : _apiKey = apiKey,
+      _chatModel = GenerativeModel(
+        model: 'gemini-2.5-flash',
+        apiKey: apiKey,
+        systemInstruction: Content.system(_buildSystemPrompt()),
+        tools: _buildTools(),
+      );
 
   bool get isConfigured => _apiKey.isNotEmpty;
 
@@ -68,156 +68,165 @@ Conversational, non-judgmental, and patient. Avoid clinical jargon. Speak like a
   /// Define available tools for the AI
   static List<Tool> _buildTools() {
     return [
-      Tool(functionDeclarations: [
-        // Tool 1: Query sleep history
-        FunctionDeclaration(
-          'query_sleep_history',
-          'Retrieves the user\'s recent sleep session data including quality, duration, interruptions, and sleep stages',
-          Schema(
-            SchemaType.object,
-            properties: {
-              'days': Schema(
-                SchemaType.integer,
-                description: 'Number of days to look back (1-30)',
-              ),
-            },
-            requiredProperties: ['days'],
+      Tool(
+        functionDeclarations: [
+          // Tool 1: Query sleep history
+          FunctionDeclaration(
+            'query_sleep_history',
+            'Retrieves the user\'s recent sleep session data including quality, duration, interruptions, and sleep stages',
+            Schema(
+              SchemaType.object,
+              properties: {
+                'days': Schema(
+                  SchemaType.integer,
+                  description: 'Number of days to look back (1-30)',
+                ),
+              },
+              requiredProperties: ['days'],
+            ),
           ),
-        ),
 
-        // Tool 2: Search memories (journal + chat history)
-        FunctionDeclaration(
-          'search_memories',
-          'Performs semantic search across user\'s journal entries and past conversations to find relevant context',
-          Schema(
-            SchemaType.object,
-            properties: {
-              'query': Schema(
-                SchemaType.string,
-                description: 'The topic or theme to search for (e.g., "work stress", "relationship anxiety")',
-              ),
-              'limit': Schema(
-                SchemaType.integer,
-                description: 'Maximum number of results to return (1-10)',
-              ),
-            },
-            requiredProperties: ['query'],
+          // Tool 2: Search memories (journal + chat history)
+          FunctionDeclaration(
+            'search_memories',
+            'Performs semantic search across user\'s journal entries and past conversations to find relevant context',
+            Schema(
+              SchemaType.object,
+              properties: {
+                'query': Schema(
+                  SchemaType.string,
+                  description:
+                      'The topic or theme to search for (e.g., "work stress", "relationship anxiety")',
+                ),
+                'limit': Schema(
+                  SchemaType.integer,
+                  description: 'Maximum number of results to return (1-10)',
+                ),
+              },
+              requiredProperties: ['query'],
+            ),
           ),
-        ),
 
-        // Tool 3: Set a Smart Reminder
-        FunctionDeclaration(
-          'set_reminder',
-          'Schedules a system notification for a specific time and message. Use the provided user local time context to determine the exact UTC/Local ISO8601 string.',
-          Schema(
-            SchemaType.object,
-            properties: {
-              'time': Schema(
-                SchemaType.string,
-                description: 'The exact ISO8601 timestamp (e.g., "2024-03-21T08:00:00") or relative message (e.g., "in 30 minutes")',
-              ),
-              'message': Schema(
-                SchemaType.string,
-                description: 'The notification message to display',
-              ),
-            },
-            requiredProperties: ['time', 'message'],
+          // Tool 3: Set a Smart Reminder
+          FunctionDeclaration(
+            'set_reminder',
+            'Schedules a system notification for a specific time and message. Use the provided user local time context to determine the exact UTC/Local ISO8601 string.',
+            Schema(
+              SchemaType.object,
+              properties: {
+                'time': Schema(
+                  SchemaType.string,
+                  description:
+                      'The exact ISO8601 timestamp (e.g., "2024-03-21T08:00:00") or relative message (e.g., "in 30 minutes")',
+                ),
+                'message': Schema(
+                  SchemaType.string,
+                  description: 'The notification message to display',
+                ),
+              },
+              requiredProperties: ['time', 'message'],
+            ),
           ),
-        ),
 
-        // Tool 4: Block an app
-        FunctionDeclaration(
-          'block_app',
-          'Adds an app to the block list to prevent doomscrolling during bedtime',
-          Schema(
-            SchemaType.object,
-            properties: {
-              'app_name': Schema(
-                SchemaType.string,
-                description: 'The name of the app to block (e.g., "Instagram", "TikTok", "Twitter")',
-              ),
-            },
-            requiredProperties: ['app_name'],
+          // Tool 4: Block an app
+          FunctionDeclaration(
+            'block_app',
+            'Adds an app to the block list to prevent doomscrolling during bedtime',
+            Schema(
+              SchemaType.object,
+              properties: {
+                'app_name': Schema(
+                  SchemaType.string,
+                  description:
+                      'The name of the app to block (e.g., "Instagram", "TikTok", "Twitter")',
+                ),
+              },
+              requiredProperties: ['app_name'],
+            ),
           ),
-        ),
 
-        // Tool 5: Start Breathing Exercise
-        FunctionDeclaration(
-          'start_breathing_exercise',
-          'Starts a visual guided breathing exercise (Inhale, Hold, Exhale) for the user',
-          Schema(
-            SchemaType.object,
-            properties: {
-              'duration_minutes': Schema(
-                SchemaType.integer,
-                description: 'Duration of the exercise in minutes (default is 2)',
-              ),
-            },
+          // Tool 5: Start Breathing Exercise
+          FunctionDeclaration(
+            'start_breathing_exercise',
+            'Starts a visual guided breathing exercise (Inhale, Hold, Exhale) for the user',
+            Schema(
+              SchemaType.object,
+              properties: {
+                'duration_minutes': Schema(
+                  SchemaType.integer,
+                  description:
+                      'Duration of the exercise in minutes (default is 2)',
+                ),
+              },
+            ),
           ),
-        ),
 
-        // Tool 6: Analyze Journal Patterns
-        FunctionDeclaration(
-          'analyze_journal_patterns',
-          'Queries the journal database to find recurring themes or patterns related to a specific topic',
-          Schema(
-            SchemaType.object,
-            properties: {
-              'topic': Schema(
-                SchemaType.string,
-                description: 'The topic to analyze (e.g., "work stress", "sleep quality", "anxiety")',
-              ),
-            },
-            requiredProperties: ['topic'],
+          // Tool 6: Analyze Journal Patterns
+          FunctionDeclaration(
+            'analyze_journal_patterns',
+            'Queries the journal database to find recurring themes or patterns related to a specific topic',
+            Schema(
+              SchemaType.object,
+              properties: {
+                'topic': Schema(
+                  SchemaType.string,
+                  description:
+                      'The topic to analyze (e.g., "work stress", "sleep quality", "anxiety")',
+                ),
+              },
+              requiredProperties: ['topic'],
+            ),
           ),
-        ),
 
-        // Tool 7: Execute actions (Legacy/Generic)
-        FunctionDeclaration(
-          'execute_action',
-          'Triggers an action in the mobile app. Currently ONLY supports playing sleep sounds.',
-          Schema(
-            SchemaType.object,
-            properties: {
-              'command': Schema(
-                SchemaType.string,
-                description: 'The action to execute',
-                enumValues: [
-                  'play_sound',
-                ],
-              ),
-              'parameters': Schema(
-                SchemaType.object,
-                properties: {
-                  'sound_name': Schema(
-                    SchemaType.string,
-                    description: 'The exact name of the sound to play',
-                    enumValues: [
-                      'Peaceful Sleep',
-                      'Soft Ambient Rain',
-                      'Tibetan Bells',
-                      'Baby Lullaby',
-                      'Sleep Lullaby',
-                      'Ethereal Journey',
-                      'Midnight Calm',
-                      'Twilight Dreams',
-                      'Forest Whispers',
-                      'Starlight Serenade',
-                    ],
-                  ),
-                },
-                requiredProperties: ['sound_name'],
-              ),
-            },
-            requiredProperties: ['command', 'parameters'],
+          // Tool 7: Execute actions (Legacy/Generic)
+          FunctionDeclaration(
+            'execute_action',
+            'Triggers an action in the mobile app. Currently ONLY supports playing sleep sounds.',
+            Schema(
+              SchemaType.object,
+              properties: {
+                'command': Schema(
+                  SchemaType.string,
+                  description: 'The action to execute',
+                  enumValues: [
+                    'play_sound',
+                  ],
+                ),
+                'parameters': Schema(
+                  SchemaType.object,
+                  properties: {
+                    'sound_name': Schema(
+                      SchemaType.string,
+                      description: 'The exact name of the sound to play',
+                      enumValues: [
+                        'Peaceful Sleep',
+                        'Soft Ambient Rain',
+                        'Tibetan Bells',
+                        'Baby Lullaby',
+                        'Sleep Lullaby',
+                        'Ethereal Journey',
+                        'Midnight Calm',
+                        'Twilight Dreams',
+                        'Forest Whispers',
+                        'Starlight Serenade',
+                      ],
+                    ),
+                  },
+                  requiredProperties: ['sound_name'],
+                ),
+              },
+              requiredProperties: ['command', 'parameters'],
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     ];
   }
 
   /// Legacy method for backward compatibility
-  @deprecated
+  @Deprecated(
+    'Use sendMessageWithHistory instead for better conversation context',
+  )
   Future<String> sendMessage({
     required String systemPrompt,
     required String userMessage,

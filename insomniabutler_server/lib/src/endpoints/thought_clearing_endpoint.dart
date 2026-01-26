@@ -69,7 +69,7 @@ class ThoughtClearingEndpoint extends Endpoint {
 
     // 1. Fetch conversation history
     final history = await _buildConversationHistory(session, sessionId);
-    
+
     // Contextualize message with time if available
     String messageToSend = userMessage;
     if (userLocalTime != null) {
@@ -77,9 +77,10 @@ class ThoughtClearingEndpoint extends Endpoint {
       final minute = userLocalTime.minute.toString().padLeft(2, '0');
       final period = hour >= 12 ? 'PM' : 'AM';
       final formattedHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-      
+
       // Provide both human readable and ISO 8601 for the AI
-      messageToSend = "[User Local Time: $formattedHour:$minute $period, ISO: ${userLocalTime.toIso8601String()}]\n$userMessage";
+      messageToSend =
+          "[User Local Time: $formattedHour:$minute $period, ISO: ${userLocalTime.toIso8601String()}]\n$userMessage";
     }
 
     // 2. Generate embedding for user message (semantic memory)
@@ -105,26 +106,29 @@ class ThoughtClearingEndpoint extends Endpoint {
 
     // 4. Gather User Context (Optimized for performance)
     final contextBuilder = StringBuffer();
-    
+
     // recent journals
     try {
       final recentJournals = await protocol.JournalEntry.db.find(
         session,
         where: (t) => t.userId.equals(userId),
-        limit: 3, 
-        orderBy: (t) => t.entryDate, 
+        limit: 3,
+        orderBy: (t) => t.entryDate,
         orderDescending: true,
       );
       if (recentJournals.isNotEmpty) {
         contextBuilder.writeln("Recent Journal Entries:");
         for (var j in recentJournals) {
-          contextBuilder.writeln("- ${j.entryDate.toString().split(' ')[0]} (${j.mood ?? 'No mood'}): ${j.title ?? 'Untitled'}");
+          contextBuilder.writeln(
+            "- ${j.entryDate.toString().split(' ')[0]} (${j.mood ?? 'No mood'}): ${j.title ?? 'Untitled'}",
+          );
         }
       }
     } catch (_) {}
 
     if (contextBuilder.isNotEmpty) {
-      messageToSend = '''
+      messageToSend =
+          '''
 [SYSTEM CONTEXT START]
 ${contextBuilder.toString()}
 [SYSTEM CONTEXT END]
@@ -146,7 +150,7 @@ User Query: $messageToSend
     if (response.candidates.isNotEmpty) {
       final candidate = response.candidates.first;
       final chat = gemini.model.startChat(history: history);
-      
+
       // Handle potential function calls
       for (final part in candidate.content.parts) {
         if (part is ai.TextPart) {
@@ -154,17 +158,23 @@ User Query: $messageToSend
         } else if (part is ai.FunctionCall) {
           session.log('AI requested tool: ${part.name}');
           final result = await toolExecutor.executeTool(part.name, part.args);
-          
+
           // Send tool result back to model for final response
           final followUp = await chat.sendMessage(
-            ai.Content('function', [ai.FunctionResponse(part.name, jsonDecode(result) as Map<String, dynamic>)]),
+            ai.Content('function', [
+              ai.FunctionResponse(
+                part.name,
+                jsonDecode(result) as Map<String, dynamic>,
+              ),
+            ]),
           );
-          
+
           finalMessage = followUp.text ?? '';
-          
+
           // If the tool execution queued an action for the client, capture it
           final decodedResult = jsonDecode(result);
-          if (decodedResult is Map<String, dynamic> && decodedResult['action_queued'] == true) {
+          if (decodedResult is Map<String, dynamic> &&
+              decodedResult['action_queued'] == true) {
             aiAction = protocol.AIAction(
               command: decodedResult['command'],
               parameters: jsonEncode(decodedResult['parameters']),
@@ -190,7 +200,7 @@ User Query: $messageToSend
     // 7. Map AI action to widget for persistence if needed
     String? widgetType;
     String? widgetData;
-    
+
     if (aiAction != null) {
       switch (aiAction.command) {
         case 'play_sound':
@@ -198,9 +208,11 @@ User Query: $messageToSend
           // Extract sound name from parameters and get full metadata
           final params = jsonDecode(aiAction.parameters!);
           final soundName = params['sound_name'] as String?;
-          
+
           if (soundName != null) {
-            final soundMetadata = SoundMappingService.getSoundMetadata(soundName);
+            final soundMetadata = SoundMappingService.getSoundMetadata(
+              soundName,
+            );
             if (soundMetadata != null) {
               widgetData = jsonEncode({
                 'sound_title': soundMetadata['title'],
@@ -301,7 +313,9 @@ User Query: $messageToSend
           if (currentRole == 'user') {
             history.add(ai.Content.text(currentContent.toString()));
           } else {
-            history.add(ai.Content.model([ai.TextPart(currentContent.toString())]));
+            history.add(
+              ai.Content.model([ai.TextPart(currentContent.toString())]),
+            );
           }
         }
         // Start new block
@@ -357,12 +371,14 @@ User Query: $messageToSend
       final latestMessage = sessionMessages.first;
       final earliestMessage = sessionMessages.last;
 
-      history.add(protocol.ChatSessionInfo(
-        sessionId: sessionId,
-        startTime: earliestMessage.timestamp,
-        lastMessage: latestMessage.content,
-        messageCount: sessionMessages.length,
-      ));
+      history.add(
+        protocol.ChatSessionInfo(
+          sessionId: sessionId,
+          startTime: earliestMessage.timestamp,
+          lastMessage: latestMessage.content,
+          messageCount: sessionMessages.length,
+        ),
+      );
     });
 
     // Sort history by startTime descending

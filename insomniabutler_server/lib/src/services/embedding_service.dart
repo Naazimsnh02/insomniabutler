@@ -11,11 +11,11 @@ class EmbeddingService {
   static const int defaultDimensions = 768;
 
   EmbeddingService(String apiKey)
-      : _apiKey = apiKey,
-        _embeddingModel = GenerativeModel(
-          model: 'text-embedding-004',
-          apiKey: apiKey,
-        );
+    : _apiKey = apiKey,
+      _embeddingModel = GenerativeModel(
+        model: 'text-embedding-004',
+        apiKey: apiKey,
+      );
 
   bool get isConfigured => _apiKey.isNotEmpty;
 
@@ -50,11 +50,15 @@ class EmbeddingService {
       return [];
     }
 
-    final requests = validTexts.map((text) => EmbedContentRequest(
-      Content.text(text),
-      taskType: TaskType.retrievalDocument,
-      outputDimensionality: defaultDimensions,
-    )).toList();
+    final requests = validTexts
+        .map(
+          (text) => EmbedContentRequest(
+            Content.text(text),
+            taskType: TaskType.retrievalDocument,
+            outputDimensionality: defaultDimensions,
+          ),
+        )
+        .toList();
 
     final result = await _embeddingModel.batchEmbedContents(requests);
     return result.embeddings.map((e) => e.values).toList();

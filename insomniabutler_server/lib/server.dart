@@ -88,18 +88,22 @@ void run(List<String> args) async {
     session.log('Checking for chat_messages table updates...');
     try {
       await session.db.unsafeQuery(
-        'ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS "widgetType" text;'
+        'ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS "widgetType" text;',
       );
       await session.db.unsafeQuery(
-        'ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS "widgetData" text;'
+        'ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS "widgetData" text;',
       );
       session.log('✅ Chat messages table migration successful.');
     } catch (e) {
-      session.log('Warning: Chat migration skipped or failed (likely already exists): $e');
+      session.log(
+        'Warning: Chat migration skipped or failed (likely already exists): $e',
+      );
     }
-
   } catch (e) {
-    session.log('Error during server initialization tasks: $e', level: LogLevel.error);
+    session.log(
+      'Error during server initialization tasks: $e',
+      level: LogLevel.error,
+    );
   } finally {
     await session.close();
   }

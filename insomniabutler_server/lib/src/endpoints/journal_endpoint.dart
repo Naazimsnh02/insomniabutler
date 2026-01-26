@@ -93,7 +93,9 @@ class JournalEndpoint extends Endpoint {
       try {
         final embeddingService = _getEmbeddingService(session);
         final textForEmbedding = '${entry.title ?? ''} ${entry.content}';
-        final vector = await embeddingService.generateEmbedding(textForEmbedding);
+        final vector = await embeddingService.generateEmbedding(
+          textForEmbedding,
+        );
         entry.embedding = Vector(vector);
       } catch (e) {
         session.log('Failed to update embedding for journal entry: $e');
@@ -387,7 +389,9 @@ $entriesText
 ''';
 
         final response = await gemini.model.generateContent([
-          Content.text('You are an expert sleep psychologist and data analyst.\n\nUser: $prompt')
+          Content.text(
+            'You are an expert sleep psychologist and data analyst.\n\nUser: $prompt',
+          ),
         ]);
         final aiResponse = response.text ?? '';
 

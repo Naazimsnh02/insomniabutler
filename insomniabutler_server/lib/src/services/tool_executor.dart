@@ -77,7 +77,7 @@ class ToolExecutor {
   /// Tool Handler: Analyze Journal Patterns
   Future<String> _analyzeJournalPatterns(Map<String, dynamic> args) async {
     final topic = args['topic'] as String;
-    
+
     // Use semantic search to find relevant entries
     final queryEmbedding = await embeddingService.generateQueryEmbedding(topic);
     final embeddingStr = '[${queryEmbedding.join(',')}]';
@@ -99,18 +99,23 @@ class ToolExecutor {
       });
     }
 
-    final entries = results.map((row) => {
-      'title': row[0],
-      'content': row[1],
-      'mood': row[2],
-      'date': (row[3] as DateTime).toIso8601String(),
-    }).toList();
+    final entries = results
+        .map(
+          (row) => {
+            'title': row[0],
+            'content': row[1],
+            'mood': row[2],
+            'date': (row[3] as DateTime).toIso8601String(),
+          },
+        )
+        .toList();
 
     return jsonEncode({
       'topic': topic,
       'entry_count': entries.length,
       'entries': entries,
-      'instruction': 'Review these entries to find patterns, themes, or recurring stressors related to "$topic" and summarize them for the user.',
+      'instruction':
+          'Review these entries to find patterns, themes, or recurring stressors related to "$topic" and summarize them for the user.',
     });
   }
 
@@ -136,13 +141,15 @@ class ToolExecutor {
 
     // Calculate statistics
     final totalSessions = sessions.length;
-    final avgQuality = sessions
+    final avgQuality =
+        sessions
             .where((s) => s.sleepQuality != null)
             .map((s) => s.sleepQuality!)
             .fold(0, (a, b) => a + b) /
         totalSessions;
 
-    final avgInterruptions = sessions
+    final avgInterruptions =
+        sessions
             .where((s) => s.interruptions != null)
             .map((s) => s.interruptions!)
             .fold(0, (a, b) => a + b) /
@@ -237,11 +244,11 @@ class ToolExecutor {
         'journal_entries': journalMapped,
         'past_conversations': chatMapped,
       };
-      
+
       return jsonEncode(memories);
     } catch (e, st) {
-      print('ERROR encoding memories: $e');
-      print('Stack trace: $st');
+      session.log('ERROR encoding memories: $e');
+      session.log('Stack trace: $st');
       rethrow;
     }
   }
@@ -252,7 +259,12 @@ class ToolExecutor {
     final parameters = args['parameters'] as Map<String, dynamic>? ?? {};
 
     // Validate command
-    final validCommands = ['play_sound', 'set_reminder', 'save_thought', 'update_goal'];
+    final validCommands = [
+      'play_sound',
+      'set_reminder',
+      'save_thought',
+      'update_goal',
+    ];
     if (!validCommands.contains(command)) {
       return jsonEncode({
         'error': 'Invalid command: $command',

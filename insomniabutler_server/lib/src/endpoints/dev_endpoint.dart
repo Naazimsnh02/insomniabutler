@@ -16,7 +16,9 @@ class DevEndpoint extends Endpoint {
     }
 
     if (apiKey == null || apiKey.isEmpty) {
-      session.log('Warning: No Gemini API key found. Embeddings will be skipped.');
+      session.log(
+        'Warning: No Gemini API key found. Embeddings will be skipped.',
+      );
     }
 
     final embeddingService = apiKey != null ? EmbeddingService(apiKey) : null;
@@ -25,142 +27,180 @@ class DevEndpoint extends Endpoint {
     final journalTemplates = [
       {
         'title': 'Productive Day',
-        'content': 'Completed three major tasks today including the quarterly report. Feeling accomplished and ready to rest. Looking forward to tomorrow\'s team meeting.',
-        'mood': 'Happy'
+        'content':
+            'Completed three major tasks today including the quarterly report. Feeling accomplished and ready to rest. Looking forward to tomorrow\'s team meeting.',
+        'mood': 'Happy',
       },
       {
         'title': 'Mindful Evening',
-        'content': 'Practiced 20 minutes of meditation after work. The breathing exercises really helped clear my mind. Grateful for these quiet moments.',
-        'mood': 'Calm'
+        'content':
+            'Practiced 20 minutes of meditation after work. The breathing exercises really helped clear my mind. Grateful for these quiet moments.',
+        'mood': 'Calm',
       },
       {
         'title': 'Workout Recovery',
-        'content': 'Hit a new personal record at the gym today. Muscles are sore but it\'s a good kind of tired. Hydrated well and ready for deep sleep.',
-        'mood': 'Tired'
+        'content':
+            'Hit a new personal record at the gym today. Muscles are sore but it\'s a good kind of tired. Hydrated well and ready for deep sleep.',
+        'mood': 'Tired',
       },
       {
         'title': 'Work Reflections',
-        'content': 'The presentation went better than expected. Client seemed impressed with our proposal. Need to follow up with the team tomorrow.',
-        'mood': 'Happy'
+        'content':
+            'The presentation went better than expected. Client seemed impressed with our proposal. Need to follow up with the team tomorrow.',
+        'mood': 'Happy',
       },
       {
         'title': 'Self-Care Day',
-        'content': 'Took time for myself today - read a book, went for a walk, cooked a healthy meal. Sometimes slowing down is exactly what I need.',
-        'mood': 'Calm'
+        'content':
+            'Took time for myself today - read a book, went for a walk, cooked a healthy meal. Sometimes slowing down is exactly what I need.',
+        'mood': 'Calm',
       },
       {
         'title': 'Planning Ahead',
-        'content': 'Organized my schedule for the upcoming week. Having a clear plan reduces my anxiety. Tomorrow starts with a morning run.',
-        'mood': 'Calm'
+        'content':
+            'Organized my schedule for the upcoming week. Having a clear plan reduces my anxiety. Tomorrow starts with a morning run.',
+        'mood': 'Calm',
       },
       {
         'title': 'Creative Flow',
-        'content': 'Spent the evening working on my side project. Lost track of time in the best way. Excited to see where this goes.',
-        'mood': 'Happy'
+        'content':
+            'Spent the evening working on my side project. Lost track of time in the best way. Excited to see where this goes.',
+        'mood': 'Happy',
       },
       {
         'title': 'Challenging Day',
-        'content': 'Today was tough with back-to-back meetings and tight deadlines. But I managed to push through. Tomorrow will be better.',
-        'mood': 'Blah'
+        'content':
+            'Today was tough with back-to-back meetings and tight deadlines. But I managed to push through. Tomorrow will be better.',
+        'mood': 'Blah',
       },
       {
         'title': 'Nature Connection',
-        'content': 'Evening walk in the park was exactly what I needed. Fresh air and greenery always help me decompress. Saw a beautiful sunset.',
-        'mood': 'Calm'
+        'content':
+            'Evening walk in the park was exactly what I needed. Fresh air and greenery always help me decompress. Saw a beautiful sunset.',
+        'mood': 'Calm',
       },
       {
         'title': 'Learning Journey',
-        'content': 'Finished two chapters of that technical book. The concepts are starting to click. Continuous learning keeps me motivated.',
-        'mood': 'Happy'
+        'content':
+            'Finished two chapters of that technical book. The concepts are starting to click. Continuous learning keeps me motivated.',
+        'mood': 'Happy',
       },
       {
         'title': 'Social Energy',
-        'content': 'Had dinner with friends tonight. Good conversations and laughter. Feeling recharged from quality time with people I care about.',
-        'mood': 'Happy'
+        'content':
+            'Had dinner with friends tonight. Good conversations and laughter. Feeling recharged from quality time with people I care about.',
+        'mood': 'Happy',
       },
       {
         'title': 'Quiet Reflection',
-        'content': 'Sometimes I just need a quiet evening at home. Watched a documentary, had some tea. Simple pleasures matter.',
-        'mood': 'Calm'
+        'content':
+            'Sometimes I just need a quiet evening at home. Watched a documentary, had some tea. Simple pleasures matter.',
+        'mood': 'Calm',
       },
       {
         'title': 'Progress Check',
-        'content': 'Reviewed my goals for the month. Making steady progress on most fronts. Adjusting a few priorities for next week.',
-        'mood': 'Calm'
+        'content':
+            'Reviewed my goals for the month. Making steady progress on most fronts. Adjusting a few priorities for next week.',
+        'mood': 'Calm',
       },
       {
         'title': 'Energy Dip',
-        'content': 'Feeling a bit low on energy today. Might be the weather or just need more rest. Listening to my body and taking it easy.',
-        'mood': 'Tired'
+        'content':
+            'Feeling a bit low on energy today. Might be the weather or just need more rest. Listening to my body and taking it easy.',
+        'mood': 'Tired',
       },
       {
         'title': 'Family Time',
-        'content': 'Video call with family was heartwarming. Miss them but grateful for technology that keeps us connected. Shared some good news.',
-        'mood': 'Happy'
+        'content':
+            'Video call with family was heartwarming. Miss them but grateful for technology that keeps us connected. Shared some good news.',
+        'mood': 'Happy',
       },
     ];
 
     // Professional chat conversation templates
     final chatConversations = [
       {
-        'user': 'I keep replaying tomorrow\'s presentation in my head. What if I forget my key points?',
-        'ai': 'That\'s a common worry before important presentations. Let\'s use a technique: imagine you\'ve already given the presentation successfully. What would that feel like? Also, your preparation has already happened - trust in that work.'
+        'user':
+            'I keep replaying tomorrow\'s presentation in my head. What if I forget my key points?',
+        'ai':
+            'That\'s a common worry before important presentations. Let\'s use a technique: imagine you\'ve already given the presentation successfully. What would that feel like? Also, your preparation has already happened - trust in that work.',
       },
       {
-        'user': 'My to-do list for tomorrow is overwhelming. I don\'t know where to start.',
-        'ai': 'Let\'s break this down together. What are the top 3 must-do items? We can capture them here so your mind can release them for tonight. Everything else can wait until morning when you\'re fresh.'
+        'user':
+            'My to-do list for tomorrow is overwhelming. I don\'t know where to start.',
+        'ai':
+            'Let\'s break this down together. What are the top 3 must-do items? We can capture them here so your mind can release them for tonight. Everything else can wait until morning when you\'re fresh.',
       },
       {
-        'user': 'I had a difficult conversation with a colleague today and I can\'t stop thinking about it.',
-        'ai': 'Difficult conversations can linger in our minds. What specifically is bothering you - what was said, or how it was said? Sometimes naming the specific concern helps us process it.'
+        'user':
+            'I had a difficult conversation with a colleague today and I can\'t stop thinking about it.',
+        'ai':
+            'Difficult conversations can linger in our minds. What specifically is bothering you - what was said, or how it was said? Sometimes naming the specific concern helps us process it.',
       },
       {
-        'user': 'I\'m worried about my health. I\'ve been feeling tired lately.',
-        'ai': 'Health concerns are important, but nighttime worry rarely leads to solutions. Have you scheduled a check-up? If yes, trust that you\'ve taken action. If not, let\'s make a note to do that tomorrow. For now, rest is actually helping your health.'
+        'user':
+            'I\'m worried about my health. I\'ve been feeling tired lately.',
+        'ai':
+            'Health concerns are important, but nighttime worry rarely leads to solutions. Have you scheduled a check-up? If yes, trust that you\'ve taken action. If not, let\'s make a note to do that tomorrow. For now, rest is actually helping your health.',
       },
       {
         'user': 'Just feeling anxious and I don\'t even know why.',
-        'ai': 'Free-floating anxiety is real and valid. Let\'s try a grounding exercise together. Can you name 5 things you can see right now? This helps anchor us in the present moment.'
+        'ai':
+            'Free-floating anxiety is real and valid. Let\'s try a grounding exercise together. Can you name 5 things you can see right now? This helps anchor us in the present moment.',
       },
       {
         'user': 'I keep thinking about a mistake I made at work last week.',
-        'ai': 'Our minds often replay past events, especially mistakes. What did you learn from this experience? Growth comes from reflection, not rumination. You\'ve likely already grown from this - let\'s acknowledge that.'
+        'ai':
+            'Our minds often replay past events, especially mistakes. What did you learn from this experience? Growth comes from reflection, not rumination. You\'ve likely already grown from this - let\'s acknowledge that.',
       },
       {
-        'user': 'Tomorrow is a big day and I need to be well-rested, but I can\'t sleep.',
-        'ai': 'The pressure to sleep can actually make it harder. Let\'s shift focus: instead of trying to sleep, let\'s aim for deep relaxation. Your body knows how to transition from relaxation to sleep naturally.'
+        'user':
+            'Tomorrow is a big day and I need to be well-rested, but I can\'t sleep.',
+        'ai':
+            'The pressure to sleep can actually make it harder. Let\'s shift focus: instead of trying to sleep, let\'s aim for deep relaxation. Your body knows how to transition from relaxation to sleep naturally.',
       },
       {
-        'user': 'I\'m thinking about a project deadline next week. There\'s so much to do.',
-        'ai': 'Project anxiety is common. Let\'s separate what you can control tonight (nothing) from what you can control tomorrow (your focused work). Would it help to write down your first task for tomorrow?'
+        'user':
+            'I\'m thinking about a project deadline next week. There\'s so much to do.',
+        'ai':
+            'Project anxiety is common. Let\'s separate what you can control tonight (nothing) from what you can control tomorrow (your focused work). Would it help to write down your first task for tomorrow?',
       },
       {
         'user': 'I feel like I\'m not doing enough, not achieving enough.',
-        'ai': 'That\'s a heavy thought to carry into sleep. Let\'s reframe: what did you accomplish today, even small things? Our culture often overlooks daily progress in favor of big wins. You deserve credit for showing up.'
+        'ai':
+            'That\'s a heavy thought to carry into sleep. Let\'s reframe: what did you accomplish today, even small things? Our culture often overlooks daily progress in favor of big wins. You deserve credit for showing up.',
       },
       {
         'user': 'I\'m worried about money and bills.',
-        'ai': 'Financial stress is very real. Are there any bills due tonight that need immediate action? If not, let\'s acknowledge that worrying now won\'t change tomorrow\'s finances, but rest will help you think more clearly about solutions.'
+        'ai':
+            'Financial stress is very real. Are there any bills due tonight that need immediate action? If not, let\'s acknowledge that worrying now won\'t change tomorrow\'s finances, but rest will help you think more clearly about solutions.',
       },
       {
-        'user': 'I can\'t stop scrolling through social media and comparing myself to others.',
-        'ai': 'Social comparison is exhausting and rarely accurate - people share highlights, not struggles. What would it feel like to put the phone down and do something kind for yourself right now?'
+        'user':
+            'I can\'t stop scrolling through social media and comparing myself to others.',
+        'ai':
+            'Social comparison is exhausting and rarely accurate - people share highlights, not struggles. What would it feel like to put the phone down and do something kind for yourself right now?',
       },
       {
-        'user': 'I\'m thinking about a relationship issue. Should I have said something different?',
-        'ai': 'Relationship replay is common. The past conversation is done - you can\'t change it. But you can choose how to approach future conversations. Would it help to plan what you might say next time?'
+        'user':
+            'I\'m thinking about a relationship issue. Should I have said something different?',
+        'ai':
+            'Relationship replay is common. The past conversation is done - you can\'t change it. But you can choose how to approach future conversations. Would it help to plan what you might say next time?',
       },
       {
         'user': 'I feel restless and my mind won\'t quiet down.',
-        'ai': 'Mental restlessness often means your mind is processing the day. Let\'s try a progressive muscle relaxation - starting with your toes, tense and release each muscle group. This signals your body it\'s time to wind down.'
+        'ai':
+            'Mental restlessness often means your mind is processing the day. Let\'s try a progressive muscle relaxation - starting with your toes, tense and release each muscle group. This signals your body it\'s time to wind down.',
       },
       {
         'user': 'I\'m worried I won\'t wake up on time tomorrow.',
-        'ai': 'Have you set your alarm? If yes, trust your systems. If you\'d like extra assurance, you could set a backup alarm. But worrying about it won\'t help - your alarm will do its job.'
+        'ai':
+            'Have you set your alarm? If yes, trust your systems. If you\'d like extra assurance, you could set a backup alarm. But worrying about it won\'t help - your alarm will do its job.',
       },
       {
         'user': 'I keep thinking about everything I need to do this week.',
-        'ai': 'Week-ahead anxiety is overwhelming because you\'re trying to solve multiple days at once. Let\'s focus just on tomorrow. What\'s the one thing that would make tomorrow feel successful?'
+        'ai':
+            'Week-ahead anxiety is overwhelming because you\'re trying to solve multiple days at once. Let\'s focus just on tomorrow. What\'s the one thing that would make tomorrow feel successful?',
       },
     ];
 
@@ -226,13 +266,13 @@ class DevEndpoint extends Endpoint {
 
     await session.db.transaction((transaction) async {
       session.log('Starting data generation for 30 days...');
-      
+
       // Collections to store data for batch embedding generation
       final chatMessagesToEmbed = <String>[];
       final chatMessageRecords = <protocol.ChatMessage>[];
       final journalEntriesToEmbed = <String>[];
       final journalEntryRecords = <protocol.JournalEntry>[];
-      
+
       // Generate data for the last 30 days
       for (int i = 30; i >= 1; i--) {
         final date = now.subtract(Duration(days: i));
@@ -260,7 +300,8 @@ class DevEndpoint extends Endpoint {
         final remMinutes =
             (sleepDurationMinutes * (0.2 + random.nextDouble() * 0.05)).round();
         final awakeMinutes =
-            (sleepDurationMinutes * (0.05 + random.nextDouble() * 0.05)).round();
+            (sleepDurationMinutes * (0.05 + random.nextDouble() * 0.05))
+                .round();
         final lightMinutes =
             sleepDurationMinutes - deepMinutes - remMinutes - awakeMinutes;
 
@@ -294,7 +335,9 @@ class DevEndpoint extends Endpoint {
           restingHeartRate: 50 + random.nextInt(20),
           hrv: 30 + random.nextInt(70),
           respiratoryRate: 12 + random.nextInt(6),
-          interruptions: sleepQuality >= 4 ? random.nextInt(2) : random.nextInt(4),
+          interruptions: sleepQuality >= 4
+              ? random.nextInt(2)
+              : random.nextInt(4),
         );
 
         final savedSession = await protocol.SleepSession.db.insertRow(
@@ -305,58 +348,67 @@ class DevEndpoint extends Endpoint {
 
         // 2. Prepare Chat Messages for batch embedding
         if (usedButler) {
-          final conversation = chatConversations[random.nextInt(chatConversations.length)];
-          
+          final conversation =
+              chatConversations[random.nextInt(chatConversations.length)];
+
           final userContent = conversation['user']!;
           final aiContent = conversation['ai']!;
-          
+
           // Store for batch embedding
           chatMessagesToEmbed.add(userContent);
           chatMessagesToEmbed.add(aiContent);
-          
+
           // Create records (embeddings will be added later)
-          chatMessageRecords.add(protocol.ChatMessage(
-            userId: userId,
-            sessionId: savedSession.id.toString(),
-            role: 'user',
-            content: userContent,
-            timestamp: bedtime.subtract(const Duration(minutes: 5)),
-          ));
-          
-          chatMessageRecords.add(protocol.ChatMessage(
-            userId: userId,
-            sessionId: savedSession.id.toString(),
-            role: 'ai',
-            content: aiContent,
-            timestamp: bedtime.subtract(const Duration(minutes: 4)),
-          ));
+          chatMessageRecords.add(
+            protocol.ChatMessage(
+              userId: userId,
+              sessionId: savedSession.id.toString(),
+              role: 'user',
+              content: userContent,
+              timestamp: bedtime.subtract(const Duration(minutes: 5)),
+            ),
+          );
+
+          chatMessageRecords.add(
+            protocol.ChatMessage(
+              userId: userId,
+              sessionId: savedSession.id.toString(),
+              role: 'ai',
+              content: aiContent,
+              timestamp: bedtime.subtract(const Duration(minutes: 4)),
+            ),
+          );
         }
 
         // 3. Prepare Journal Entries for batch embedding
         if (random.nextDouble() < 0.75) {
-          final journalTemplate = journalTemplates[random.nextInt(journalTemplates.length)];
-          final journalContent = '${journalTemplate['title']} ${journalTemplate['content']}';
-          
+          final journalTemplate =
+              journalTemplates[random.nextInt(journalTemplates.length)];
+          final journalContent =
+              '${journalTemplate['title']} ${journalTemplate['content']}';
+
           // Store for batch embedding
           journalEntriesToEmbed.add(journalContent);
-          
+
           // Create record (embedding will be added later)
-          journalEntryRecords.add(protocol.JournalEntry(
-            userId: userId,
-            title: journalTemplate['title']!,
-            content: journalTemplate['content']!,
-            mood: journalTemplate['mood']!,
-            sleepSessionId: savedSession.id,
-            createdAt: bedtime.subtract(const Duration(minutes: 15)),
-            updatedAt: bedtime.subtract(const Duration(minutes: 15)),
-            entryDate: bedtime,
-          ));
+          journalEntryRecords.add(
+            protocol.JournalEntry(
+              userId: userId,
+              title: journalTemplate['title']!,
+              content: journalTemplate['content']!,
+              mood: journalTemplate['mood']!,
+              sleepSessionId: savedSession.id,
+              createdAt: bedtime.subtract(const Duration(minutes: 15)),
+              updatedAt: bedtime.subtract(const Duration(minutes: 15)),
+              entryDate: bedtime,
+            ),
+          );
         }
 
         // 4. Generate Thought Logs
         if (sessionRecord.thoughtsProcessed > 0) {
           final categories = thoughtData.keys.toList();
-          
+
           for (int t = 0; t < sessionRecord.thoughtsProcessed; t++) {
             final category = categories[random.nextInt(categories.length)];
             final thoughts = thoughtData[category]!;
@@ -380,9 +432,14 @@ class DevEndpoint extends Endpoint {
 
         // 5. Generate Sleep Insights
         if (i % 3 == 0 || i % 4 == 0) {
-          final insightTypes = ['quality', 'consistency', 'latency', 'duration'];
+          final insightTypes = [
+            'quality',
+            'consistency',
+            'latency',
+            'duration',
+          ];
           final insightType = insightTypes[random.nextInt(insightTypes.length)];
-          
+
           String metric = '';
           double value = 0;
           String description = '';
@@ -432,17 +489,22 @@ class DevEndpoint extends Endpoint {
           );
         }
       }
-      
+
       // BATCH GENERATE EMBEDDINGS - Much faster!
-      session.log('Generating embeddings in batches for ${chatMessagesToEmbed.length} chat messages and ${journalEntriesToEmbed.length} journal entries...');
-      
+      session.log(
+        'Generating embeddings in batches for ${chatMessagesToEmbed.length} chat messages and ${journalEntriesToEmbed.length} journal entries...',
+      );
+
       if (embeddingService != null) {
         try {
           // Generate all chat message embeddings in one batch
           if (chatMessagesToEmbed.isNotEmpty) {
-            session.log('Batch generating ${chatMessagesToEmbed.length} chat embeddings...');
-            final chatEmbeddings = await embeddingService.generateBatchEmbeddings(chatMessagesToEmbed);
-            
+            session.log(
+              'Batch generating ${chatMessagesToEmbed.length} chat embeddings...',
+            );
+            final chatEmbeddings = await embeddingService
+                .generateBatchEmbeddings(chatMessagesToEmbed);
+
             // Assign embeddings to chat message records
             for (int i = 0; i < chatMessageRecords.length; i++) {
               if (i < chatEmbeddings.length) {
@@ -451,12 +513,15 @@ class DevEndpoint extends Endpoint {
             }
             session.log('Chat embeddings generated successfully!');
           }
-          
+
           // Generate all journal entry embeddings in one batch
           if (journalEntriesToEmbed.isNotEmpty) {
-            session.log('Batch generating ${journalEntriesToEmbed.length} journal embeddings...');
-            final journalEmbeddings = await embeddingService.generateBatchEmbeddings(journalEntriesToEmbed);
-            
+            session.log(
+              'Batch generating ${journalEntriesToEmbed.length} journal embeddings...',
+            );
+            final journalEmbeddings = await embeddingService
+                .generateBatchEmbeddings(journalEntriesToEmbed);
+
             // Assign embeddings to journal entry records
             for (int i = 0; i < journalEntryRecords.length; i++) {
               if (i < journalEmbeddings.length) {
@@ -470,7 +535,7 @@ class DevEndpoint extends Endpoint {
           session.log('Continuing without embeddings...');
         }
       }
-      
+
       // Insert all chat messages with embeddings
       for (final chatMessage in chatMessageRecords) {
         await protocol.ChatMessage.db.insertRow(
@@ -479,7 +544,7 @@ class DevEndpoint extends Endpoint {
           transaction: transaction,
         );
       }
-      
+
       // Insert all journal entries with embeddings
       for (final journalEntry in journalEntryRecords) {
         await protocol.JournalEntry.db.insertRow(
@@ -488,8 +553,10 @@ class DevEndpoint extends Endpoint {
           transaction: transaction,
         );
       }
-      
-      session.log('Data generation complete! Generated 30 days of comprehensive data with batch-generated embeddings.');
+
+      session.log(
+        'Data generation complete! Generated 30 days of comprehensive data with batch-generated embeddings.',
+      );
     });
 
     return true;
@@ -543,14 +610,20 @@ class DevEndpoint extends Endpoint {
 
     // 1. Backfill Journal Entries in batches
     final allJournalEntries = await protocol.JournalEntry.db.find(session);
-    final journalEntries = allJournalEntries.where((e) => e.embedding == null).toList();
+    final journalEntries = allJournalEntries
+        .where((e) => e.embedding == null)
+        .toList();
 
-    session.log('Backfilling ${journalEntries.length} journal entries in batches...');
-    
+    session.log(
+      'Backfilling ${journalEntries.length} journal entries in batches...',
+    );
+
     if (journalEntries.isNotEmpty) {
-      final texts = journalEntries.map((e) => '${e.title ?? ''} ${e.content}').toList();
+      final texts = journalEntries
+          .map((e) => '${e.title ?? ''} ${e.content}')
+          .toList();
       final embeddings = await embeddingService.generateBatchEmbeddings(texts);
-      
+
       for (int i = 0; i < journalEntries.length; i++) {
         if (i < embeddings.length) {
           journalEntries[i].embedding = Vector(embeddings[i]);
@@ -562,14 +635,18 @@ class DevEndpoint extends Endpoint {
 
     // 2. Backfill Chat Messages in batches
     final allChatMessages = await protocol.ChatMessage.db.find(session);
-    final chatMessages = allChatMessages.where((m) => m.embedding == null).toList();
+    final chatMessages = allChatMessages
+        .where((m) => m.embedding == null)
+        .toList();
 
-    session.log('Backfilling ${chatMessages.length} chat messages in batches...');
-    
+    session.log(
+      'Backfilling ${chatMessages.length} chat messages in batches...',
+    );
+
     if (chatMessages.isNotEmpty) {
       final texts = chatMessages.map((m) => m.content).toList();
       final embeddings = await embeddingService.generateBatchEmbeddings(texts);
-      
+
       for (int i = 0; i < chatMessages.length; i++) {
         if (i < embeddings.length) {
           chatMessages[i].embedding = Vector(embeddings[i]);
