@@ -37,8 +37,12 @@ class NotificationService {
     final platform = _notificationsPlugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
     if (platform != null) {
-      await platform.requestNotificationsPermission();
-      await platform.requestExactAlarmsPermission();
+      try {
+        await platform.requestNotificationsPermission();
+        await platform.requestExactAlarmsPermission();
+      } catch (e) {
+        debugPrint('Error requesting notification permissions: $e');
+      }
     }
   }
 

@@ -33,6 +33,14 @@ abstract class SleepSession
     this.hrv,
     this.respiratoryRate,
     this.interruptions,
+    this.sleepDataSource,
+    this.deviceType,
+    this.deviceModel,
+    this.recordingMethod,
+    this.timeInBedMinutes,
+    this.sleepEfficiency,
+    this.unspecifiedSleepDuration,
+    this.wristTemperature,
   });
 
   factory SleepSession({
@@ -54,6 +62,14 @@ abstract class SleepSession
     int? hrv,
     int? respiratoryRate,
     int? interruptions,
+    String? sleepDataSource,
+    String? deviceType,
+    String? deviceModel,
+    String? recordingMethod,
+    int? timeInBedMinutes,
+    double? sleepEfficiency,
+    int? unspecifiedSleepDuration,
+    double? wristTemperature,
   }) = _SleepSessionImpl;
 
   factory SleepSession.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -80,6 +96,17 @@ abstract class SleepSession
       hrv: jsonSerialization['hrv'] as int?,
       respiratoryRate: jsonSerialization['respiratoryRate'] as int?,
       interruptions: jsonSerialization['interruptions'] as int?,
+      sleepDataSource: jsonSerialization['sleepDataSource'] as String?,
+      deviceType: jsonSerialization['deviceType'] as String?,
+      deviceModel: jsonSerialization['deviceModel'] as String?,
+      recordingMethod: jsonSerialization['recordingMethod'] as String?,
+      timeInBedMinutes: jsonSerialization['timeInBedMinutes'] as int?,
+      sleepEfficiency: (jsonSerialization['sleepEfficiency'] as num?)
+          ?.toDouble(),
+      unspecifiedSleepDuration:
+          jsonSerialization['unspecifiedSleepDuration'] as int?,
+      wristTemperature: (jsonSerialization['wristTemperature'] as num?)
+          ?.toDouble(),
     );
   }
 
@@ -124,6 +151,22 @@ abstract class SleepSession
 
   int? interruptions;
 
+  String? sleepDataSource;
+
+  String? deviceType;
+
+  String? deviceModel;
+
+  String? recordingMethod;
+
+  int? timeInBedMinutes;
+
+  double? sleepEfficiency;
+
+  int? unspecifiedSleepDuration;
+
+  double? wristTemperature;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -149,6 +192,14 @@ abstract class SleepSession
     int? hrv,
     int? respiratoryRate,
     int? interruptions,
+    String? sleepDataSource,
+    String? deviceType,
+    String? deviceModel,
+    String? recordingMethod,
+    int? timeInBedMinutes,
+    double? sleepEfficiency,
+    int? unspecifiedSleepDuration,
+    double? wristTemperature,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -173,6 +224,15 @@ abstract class SleepSession
       if (hrv != null) 'hrv': hrv,
       if (respiratoryRate != null) 'respiratoryRate': respiratoryRate,
       if (interruptions != null) 'interruptions': interruptions,
+      if (sleepDataSource != null) 'sleepDataSource': sleepDataSource,
+      if (deviceType != null) 'deviceType': deviceType,
+      if (deviceModel != null) 'deviceModel': deviceModel,
+      if (recordingMethod != null) 'recordingMethod': recordingMethod,
+      if (timeInBedMinutes != null) 'timeInBedMinutes': timeInBedMinutes,
+      if (sleepEfficiency != null) 'sleepEfficiency': sleepEfficiency,
+      if (unspecifiedSleepDuration != null)
+        'unspecifiedSleepDuration': unspecifiedSleepDuration,
+      if (wristTemperature != null) 'wristTemperature': wristTemperature,
     };
   }
 
@@ -199,6 +259,15 @@ abstract class SleepSession
       if (hrv != null) 'hrv': hrv,
       if (respiratoryRate != null) 'respiratoryRate': respiratoryRate,
       if (interruptions != null) 'interruptions': interruptions,
+      if (sleepDataSource != null) 'sleepDataSource': sleepDataSource,
+      if (deviceType != null) 'deviceType': deviceType,
+      if (deviceModel != null) 'deviceModel': deviceModel,
+      if (recordingMethod != null) 'recordingMethod': recordingMethod,
+      if (timeInBedMinutes != null) 'timeInBedMinutes': timeInBedMinutes,
+      if (sleepEfficiency != null) 'sleepEfficiency': sleepEfficiency,
+      if (unspecifiedSleepDuration != null)
+        'unspecifiedSleepDuration': unspecifiedSleepDuration,
+      if (wristTemperature != null) 'wristTemperature': wristTemperature,
     };
   }
 
@@ -254,6 +323,14 @@ class _SleepSessionImpl extends SleepSession {
     int? hrv,
     int? respiratoryRate,
     int? interruptions,
+    String? sleepDataSource,
+    String? deviceType,
+    String? deviceModel,
+    String? recordingMethod,
+    int? timeInBedMinutes,
+    double? sleepEfficiency,
+    int? unspecifiedSleepDuration,
+    double? wristTemperature,
   }) : super._(
          id: id,
          userId: userId,
@@ -273,6 +350,14 @@ class _SleepSessionImpl extends SleepSession {
          hrv: hrv,
          respiratoryRate: respiratoryRate,
          interruptions: interruptions,
+         sleepDataSource: sleepDataSource,
+         deviceType: deviceType,
+         deviceModel: deviceModel,
+         recordingMethod: recordingMethod,
+         timeInBedMinutes: timeInBedMinutes,
+         sleepEfficiency: sleepEfficiency,
+         unspecifiedSleepDuration: unspecifiedSleepDuration,
+         wristTemperature: wristTemperature,
        );
 
   /// Returns a shallow copy of this [SleepSession]
@@ -298,6 +383,14 @@ class _SleepSessionImpl extends SleepSession {
     Object? hrv = _Undefined,
     Object? respiratoryRate = _Undefined,
     Object? interruptions = _Undefined,
+    Object? sleepDataSource = _Undefined,
+    Object? deviceType = _Undefined,
+    Object? deviceModel = _Undefined,
+    Object? recordingMethod = _Undefined,
+    Object? timeInBedMinutes = _Undefined,
+    Object? sleepEfficiency = _Undefined,
+    Object? unspecifiedSleepDuration = _Undefined,
+    Object? wristTemperature = _Undefined,
   }) {
     return SleepSession(
       id: id is int? ? id : this.id,
@@ -330,6 +423,26 @@ class _SleepSessionImpl extends SleepSession {
           ? respiratoryRate
           : this.respiratoryRate,
       interruptions: interruptions is int? ? interruptions : this.interruptions,
+      sleepDataSource: sleepDataSource is String?
+          ? sleepDataSource
+          : this.sleepDataSource,
+      deviceType: deviceType is String? ? deviceType : this.deviceType,
+      deviceModel: deviceModel is String? ? deviceModel : this.deviceModel,
+      recordingMethod: recordingMethod is String?
+          ? recordingMethod
+          : this.recordingMethod,
+      timeInBedMinutes: timeInBedMinutes is int?
+          ? timeInBedMinutes
+          : this.timeInBedMinutes,
+      sleepEfficiency: sleepEfficiency is double?
+          ? sleepEfficiency
+          : this.sleepEfficiency,
+      unspecifiedSleepDuration: unspecifiedSleepDuration is int?
+          ? unspecifiedSleepDuration
+          : this.unspecifiedSleepDuration,
+      wristTemperature: wristTemperature is double?
+          ? wristTemperature
+          : this.wristTemperature,
     );
   }
 }
@@ -424,6 +537,51 @@ class SleepSessionUpdateTable extends _i1.UpdateTable<SleepSessionTable> {
     table.interruptions,
     value,
   );
+
+  _i1.ColumnValue<String, String> sleepDataSource(String? value) =>
+      _i1.ColumnValue(
+        table.sleepDataSource,
+        value,
+      );
+
+  _i1.ColumnValue<String, String> deviceType(String? value) => _i1.ColumnValue(
+    table.deviceType,
+    value,
+  );
+
+  _i1.ColumnValue<String, String> deviceModel(String? value) => _i1.ColumnValue(
+    table.deviceModel,
+    value,
+  );
+
+  _i1.ColumnValue<String, String> recordingMethod(String? value) =>
+      _i1.ColumnValue(
+        table.recordingMethod,
+        value,
+      );
+
+  _i1.ColumnValue<int, int> timeInBedMinutes(int? value) => _i1.ColumnValue(
+    table.timeInBedMinutes,
+    value,
+  );
+
+  _i1.ColumnValue<double, double> sleepEfficiency(double? value) =>
+      _i1.ColumnValue(
+        table.sleepEfficiency,
+        value,
+      );
+
+  _i1.ColumnValue<int, int> unspecifiedSleepDuration(int? value) =>
+      _i1.ColumnValue(
+        table.unspecifiedSleepDuration,
+        value,
+      );
+
+  _i1.ColumnValue<double, double> wristTemperature(double? value) =>
+      _i1.ColumnValue(
+        table.wristTemperature,
+        value,
+      );
 }
 
 class SleepSessionTable extends _i1.Table<int?> {
@@ -498,6 +656,38 @@ class SleepSessionTable extends _i1.Table<int?> {
       'interruptions',
       this,
     );
+    sleepDataSource = _i1.ColumnString(
+      'sleepDataSource',
+      this,
+    );
+    deviceType = _i1.ColumnString(
+      'deviceType',
+      this,
+    );
+    deviceModel = _i1.ColumnString(
+      'deviceModel',
+      this,
+    );
+    recordingMethod = _i1.ColumnString(
+      'recordingMethod',
+      this,
+    );
+    timeInBedMinutes = _i1.ColumnInt(
+      'timeInBedMinutes',
+      this,
+    );
+    sleepEfficiency = _i1.ColumnDouble(
+      'sleepEfficiency',
+      this,
+    );
+    unspecifiedSleepDuration = _i1.ColumnInt(
+      'unspecifiedSleepDuration',
+      this,
+    );
+    wristTemperature = _i1.ColumnDouble(
+      'wristTemperature',
+      this,
+    );
   }
 
   late final SleepSessionUpdateTable updateTable;
@@ -536,6 +726,22 @@ class SleepSessionTable extends _i1.Table<int?> {
 
   late final _i1.ColumnInt interruptions;
 
+  late final _i1.ColumnString sleepDataSource;
+
+  late final _i1.ColumnString deviceType;
+
+  late final _i1.ColumnString deviceModel;
+
+  late final _i1.ColumnString recordingMethod;
+
+  late final _i1.ColumnInt timeInBedMinutes;
+
+  late final _i1.ColumnDouble sleepEfficiency;
+
+  late final _i1.ColumnInt unspecifiedSleepDuration;
+
+  late final _i1.ColumnDouble wristTemperature;
+
   @override
   List<_i1.Column> get columns => [
     id,
@@ -556,6 +762,14 @@ class SleepSessionTable extends _i1.Table<int?> {
     hrv,
     respiratoryRate,
     interruptions,
+    sleepDataSource,
+    deviceType,
+    deviceModel,
+    recordingMethod,
+    timeInBedMinutes,
+    sleepEfficiency,
+    unspecifiedSleepDuration,
+    wristTemperature,
   ];
 }
 

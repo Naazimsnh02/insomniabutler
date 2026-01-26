@@ -53,5 +53,11 @@
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<!-- HealthKit Permissions -->
+		<key>NSHealthShareUsageDescription</key>
+		<string>Insomnia Butler needs access to your sleep data to provide personalized insights and track your sleep patterns.</string>
+		<key>NSHealthUpdateUsageDescription</key>
+		<string>Insomnia Butler saves your sleep sessions to HealthKit for a complete health picture.</string>
 	</dict>
+
 </plist>

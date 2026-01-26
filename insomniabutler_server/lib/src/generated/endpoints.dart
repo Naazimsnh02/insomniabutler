@@ -20,10 +20,11 @@ import '../endpoints/journal_endpoint.dart' as _i7;
 import '../endpoints/sleep_session_endpoint.dart' as _i8;
 import '../endpoints/thought_clearing_endpoint.dart' as _i9;
 import '../greetings/greeting_endpoint.dart' as _i10;
+import 'package:insomniabutler_server/src/generated/sleep_session.dart' as _i11;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i11;
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i12;
+import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+    as _i13;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -978,6 +979,25 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['userId'],
                   ),
         ),
+        'createSleepSession': _i1.MethodConnector(
+          name: 'createSleepSession',
+          params: {
+            'sleepSession': _i1.ParameterDescription(
+              name: 'sleepSession',
+              type: _i1.getType<_i11.SleepSession>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['sleepSession'] as _i8.SleepSessionEndpoint)
+                  .createSleepSession(
+                    session,
+                    params['sleepSession'],
+                  ),
+        ),
         'endSession': _i1.MethodConnector(
           name: 'endSession',
           params: {
@@ -1527,9 +1547,9 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    modules['serverpod_auth_idp'] = _i11.Endpoints()
+    modules['serverpod_auth_idp'] = _i12.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i12.Endpoints()
+    modules['serverpod_auth_core'] = _i13.Endpoints()
       ..initializeEndpoints(server);
   }
 }

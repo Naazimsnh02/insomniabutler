@@ -16,6 +16,14 @@ class SleepSessionEndpoint extends Endpoint {
     return await SleepSession.db.insertRow(session, sleepSession);
   }
 
+  /// Create a full sleep session (used for health data import)
+  Future<SleepSession> createSleepSession(
+    Session session,
+    SleepSession sleepSession,
+  ) async {
+    return await SleepSession.db.insertRow(session, sleepSession);
+  }
+
   /// End a sleep session with quality feedback
   Future<SleepSession?> endSession(
     Session session,

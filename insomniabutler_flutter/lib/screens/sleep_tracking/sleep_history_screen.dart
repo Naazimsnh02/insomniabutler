@@ -11,6 +11,9 @@ import '../../services/user_service.dart';
 import 'package:insomniabutler_client/insomniabutler_client.dart';
 import 'manual_log_screen.dart';
 import 'widgets/history_skeleton.dart';
+import '../../services/health_data_service.dart';
+import '../../services/sleep_sync_service.dart';
+import '../health/sleep_data_import_screen.dart';
 
 class SleepHistoryScreen extends StatefulWidget {
   const SleepHistoryScreen({super.key});
@@ -23,10 +26,18 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
   List<SleepSession> _sessions = [];
   bool _isLoading = true;
   bool _hasChanged = false;
+  
+  // Health data
+  final _healthService = HealthDataService();
+  late final SleepSyncService _syncService;
+  bool _healthConnected = false;
+  String? _filterDataSource; // null = all, 'manual', 'healthkit', 'healthconnect'
 
   @override
   void initState() {
     super.initState();
+    _syncService = SleepSyncService(_healthService, client);
+    _checkHealthConnection();
     _loadFromCache();
     _loadHistory();
   }
@@ -75,6 +86,22 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     }
   }
 
+  Future<void> _checkHealthConnection() async {
+    try {
+      final hasPermissions = await _healthService.hasPermissions();
+      if (mounted) {
+        setState(() => _healthConnected = hasPermissions);
+      }
+    } catch (e) {
+      debugPrint('Error checking health connection: $e');
+    }
+  }
+
+  List<SleepSession> get _filteredSessions {
+    if (_filterDataSource == null) return _sessions;
+    return _sessions.where((s) => s.sleepDataSource == _filterDataSource).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,7 +141,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                 Expanded(
                   child: _isLoading && _sessions.isEmpty
                       ? const HistorySkeleton()
-                      : _sessions.isEmpty
+                      : _filteredSessions.isEmpty
                       ? _buildEmptyState()
                       : RefreshIndicator(
                           onRefresh: _loadHistory,
@@ -125,9 +152,9 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                               AppSpacing.containerPadding,
                             ),
                             physics: const BouncingScrollPhysics(),
-                            itemCount: _sessions.length,
+                            itemCount: _filteredSessions.length,
                             itemBuilder: (context, index) =>
-                                _buildSessionCard(_sessions[index], index),
+                                _buildSessionCard(_filteredSessions[index], index),
                           ),
                         ),
                 ),
@@ -203,9 +230,33 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
               ),
             ],
           ),
-          _buildIconButton(
-            icon: Icons.refresh_rounded,
-            onTap: _loadHistory,
+          Row(
+            children: [
+              if (_healthConnected) ...[
+                _buildIconButton(
+                  icon: Icons.cloud_sync_rounded,
+                  onTap: () async {
+                    HapticHelper.lightImpact();
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SleepDataImportScreen(
+                          syncService: _syncService,
+                        ),
+                      ),
+                    );
+                    _loadHistory();
+                  },
+                ),
+                const SizedBox(width: 8),
+              ],
+              _buildIconButton(
+                icon: _filterDataSource == null 
+                    ? Icons.filter_list_rounded 
+                    : Icons.filter_list_off_rounded,
+                onTap: _showFilterOptions,
+              ),
+            ],
           ),
         ],
       ),
@@ -375,6 +426,42 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                       ),
                     ],
                   ),
+                  if (session.sleepDataSource != null) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          session.sleepDataSource == 'healthkit'
+                              ? Icons.favorite
+                              : session.sleepDataSource == 'healthconnect'
+                                  ? Icons.health_and_safety
+                                  : Icons.edit,
+                          size: 10,
+                          color: session.sleepDataSource == 'healthkit'
+                              ? const Color(0xFFFF2D55)
+                              : session.sleepDataSource == 'healthconnect'
+                                  ? const Color(0xFF00D4AA)
+                                  : AppColors.textTertiary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          session.sleepDataSource == 'healthkit'
+                              ? 'HealthKit'
+                              : session.sleepDataSource == 'healthconnect'
+                                  ? 'Health Connect'
+                                  : 'Manual',
+                          style: AppTextStyles.caption.copyWith(
+                            fontSize: 9,
+                            color: session.sleepDataSource == 'healthkit'
+                                ? const Color(0xFFFF2D55)
+                                : session.sleepDataSource == 'healthconnect'
+                                    ? const Color(0xFF00D4AA)
+                                    : AppColors.textTertiary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -422,5 +509,86 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     if (quality >= 4) return AppColors.accentSuccess;
     if (quality >= 3) return AppColors.accentAmber;
     return AppColors.accentPrimary;
+  }
+
+  void _showFilterOptions() {
+    HapticHelper.lightImpact();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: AppColors.bgSecondary,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Filter by Data Source',
+              style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            _buildFilterOption('All Sessions', null, Icons.all_inclusive),
+            _buildFilterOption('Manual Entries', 'manual', Icons.edit),
+            _buildFilterOption('HealthKit', 'healthkit', Icons.favorite),
+            _buildFilterOption('Health Connect', 'healthconnect', Icons.health_and_safety),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterOption(String label, String? value, IconData icon) {
+    final isSelected = _filterDataSource == value;
+    return GestureDetector(
+      onTap: () {
+        HapticHelper.lightImpact();
+        setState(() => _filterDataSource = value);
+        Navigator.pop(context);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? AppColors.accentPrimary.withOpacity(0.1) 
+              : AppColors.bgPrimary.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected 
+                ? AppColors.accentPrimary 
+                : Colors.white.withOpacity(0.1),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? AppColors.accentPrimary : AppColors.textSecondary,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: AppTextStyles.body.copyWith(
+                color: isSelected ? AppColors.accentPrimary : AppColors.textPrimary,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+            const Spacer(),
+            if (isSelected)
+              const Icon(
+                Icons.check_circle,
+                color: AppColors.accentPrimary,
+                size: 20,
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -18,6 +18,8 @@ import 'services/account_settings_service.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'services/notification_service.dart';
 import 'services/distraction_monitor_service.dart';
+import 'services/health_data_service.dart';
+import 'services/sleep_sync_service.dart';
 
 import 'dart:convert'; // Added for json.decode
 import 'dart:async'; // Added for unawaited
@@ -137,6 +139,24 @@ class _AppInitializerState extends State<AppInitializer> {
       _showOnboarding = !hasCompletedOnboarding;
       _isLoading = false;
     });
+
+    // Perform auto-sync in background (don't await, don't block UI)
+    if (hasCompletedOnboarding) {
+      _performAutoSync();
+    }
+  }
+
+  Future<void> _performAutoSync() async {
+    try {
+      final healthService = HealthDataService();
+      final syncService = SleepSyncService(healthService, client);
+      
+      // Auto-sync runs silently in background
+      await syncService.autoSync();
+    } catch (e) {
+      debugPrint('Auto-sync error: $e');
+      // Don't show error to user for auto-sync
+    }
   }
 
   Future<void> _completeOnboarding() async {

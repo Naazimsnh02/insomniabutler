@@ -33,6 +33,7 @@ dependencies:
   insomniabutler_client:
     path: ../insomniabutler_client
   intl: ^0.20.2
+  serverpod_auth_shared_flutter: 3.2.2
   serverpod_auth_idp_flutter: 3.2.2
   serverpod_flutter: 3.2.2
   shared_preferences: ^2.3.4
@@ -50,6 +51,8 @@ dependencies:
   flutter_local_notifications: ^18.0.0
   timezone: ^0.10.0
   flutter_timezone: ^5.0.0
+  health: ^13.2.1
+
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4

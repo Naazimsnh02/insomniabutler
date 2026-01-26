@@ -605,6 +605,15 @@ class EndpointSleepSession extends _i2.EndpointRef {
         {'userId': userId},
       );
 
+  /// Create a full sleep session (used for health data import)
+  _i3.Future<_i7.SleepSession> createSleepSession(
+    _i7.SleepSession sleepSession,
+  ) => caller.callServerEndpoint<_i7.SleepSession>(
+    'sleepSession',
+    'createSleepSession',
+    {'sleepSession': sleepSession},
+  );
+
   /// End a sleep session with quality feedback
   _i3.Future<_i7.SleepSession?> endSession(
     int sessionId,

@@ -24,4 +24,24 @@ fields:
   
   # New Metrics
   interruptions: int?
+  
+  # Health Platform Integration
+  sleepDataSource: String?       # 'manual', 'healthkit', 'healthconnect', device name
+  deviceType: String?             # 'watch', 'phone', 'band'
+  deviceModel: String?            # 'Apple Watch Series 9', 'Galaxy Watch 6'
+  recordingMethod: String?        # 'automatic', 'manual'
+  
+  # Enhanced Sleep Metrics
+  timeInBedMinutes: int?          # Total time from bedTime to wakeTime
+  sleepEfficiency: double?        # (total sleep / time in bed) * 100
+  unspecifiedSleepDuration: int?  # Sleep without stage classification
+  
+  # iOS-Specific (Apple Watch)
+  wristTemperature: double?       # Celsius
+
+indexes:
+  idx_sleep_sessions_data_source:
+    fields: sleepDataSource
+  idx_sleep_sessions_date_source:
+    fields: sessionDate, sleepDataSource
 

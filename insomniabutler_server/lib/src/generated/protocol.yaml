@@ -41,6 +41,7 @@ journal:
   - seedPrompts:
 sleepSession:
   - startSession:
+  - createSleepSession:
   - endSession:
   - markButlerUsed:
   - getUserSessions:

@@ -17,6 +17,10 @@ import '../distraction/distraction_settings_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:usage_stats/usage_stats.dart';
 import '../../services/notification_service.dart';
+import '../../services/health_data_service.dart';
+import '../../services/sleep_sync_service.dart';
+import '../health/health_connection_screen.dart';
+import 'package:intl/intl.dart';
 
 /// Account & Settings Screen
 /// Provides comprehensive account management, app settings, and user preferences
@@ -55,14 +59,23 @@ class _AccountScreenState extends State<AccountScreen> {
   bool _isBatteryOptimDisabled = false;
   bool _isExactAlarmGranted = false;
   
+  // Health data state
+  bool _healthDataConnected = false;
+  bool _healthAutoSync = false;
+  DateTime? _lastHealthSync;
+  final _healthService = HealthDataService();
+  late final SleepSyncService _syncService;
+  
   bool _isLoading = true;
   Map<String, dynamic>? _cachedStats;
 
   @override
   void initState() {
     super.initState();
+    _syncService = SleepSyncService(_healthService, client);
     _loadFromCache();
     _loadData();
+    _loadHealthStatus();
   }
 
   Future<void> _loadFromCache() async {
@@ -201,6 +214,24 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
+  Future<void> _loadHealthStatus() async {
+    try {
+      final hasPermissions = await _healthService.hasPermissions();
+      final autoSyncEnabled = await _syncService.isAutoSyncEnabled();
+      final lastSync = await _syncService.getLastSyncTime();
+
+      if (mounted) {
+        setState(() {
+          _healthDataConnected = hasPermissions;
+          _healthAutoSync = autoSyncEnabled;
+          _lastHealthSync = lastSync;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading health status: $e');
+    }
+  }
+
   String _getAccountAge() {
     if (_accountCreatedAt == null) return 'New';
     final days = DateTime.now().difference(_accountCreatedAt!).inDays;
@@ -275,6 +306,11 @@ class _AccountScreenState extends State<AccountScreen> {
                   _buildSectionHeader('Sleep Preferences'),
                   const SizedBox(height: AppSpacing.md),
                   _buildSleepPreferences(),
+                  const SizedBox(height: AppSpacing.xl),
+
+                  _buildSectionHeader('Health Data'),
+                  const SizedBox(height: AppSpacing.md),
+                  _buildHealthDataSettings(),
                   const SizedBox(height: AppSpacing.xl),
 
                   _buildSectionHeader('Notifications'),
@@ -560,6 +596,88 @@ class _AccountScreenState extends State<AccountScreen> {
               );
             },
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHealthDataSettings() {
+    return GlassCard(
+      padding: const EdgeInsets.all(12),
+      borderRadius: 24,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.08),
+      ),
+      child: Column(
+        children: [
+          _buildSettingRow(
+            icon: _healthDataConnected ? Icons.health_and_safety : Icons.health_and_safety_outlined,
+            title: 'Health Data Connection',
+            subtitle: _healthDataConnected 
+                ? 'Connected to ${Theme.of(context).platform == TargetPlatform.iOS ? "HealthKit" : "Health Connect"}'
+                : 'Connect to sync sleep data',
+            iconColor: _healthDataConnected ? const Color(0xFF4CAF50) : AppColors.textTertiary,
+            trailing: Icon(
+              _healthDataConnected ? Icons.check_circle : Icons.chevron_right_rounded,
+              color: _healthDataConnected ? const Color(0xFF4CAF50) : AppColors.textTertiary,
+              size: 20,
+            ),
+            onTap: () async {
+              HapticHelper.lightImpact();
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HealthConnectionScreen(
+                    healthService: _healthService,
+                    syncService: _syncService,
+                  ),
+                ),
+              );
+              _loadHealthStatus();
+            },
+          ),
+          if (_healthDataConnected) ...[
+            _buildDivider(),
+            _buildToggleRow(
+              icon: Icons.sync_rounded,
+              title: 'Auto-Sync',
+              subtitle: 'Automatically sync sleep data on app launch',
+              iconColor: const Color(0xFF2196F3),
+              value: _healthAutoSync,
+              onChanged: (value) async {
+                await HapticHelper.lightImpact();
+                await _syncService.setAutoSyncEnabled(value);
+                setState(() => _healthAutoSync = value);
+              },
+            ),
+            _buildDivider(),
+            _buildSettingRow(
+              icon: Icons.history_rounded,
+              title: 'Last Sync',
+              subtitle: _lastHealthSync != null
+                  ? DateFormat('MMM dd, yyyy HH:mm').format(_lastHealthSync!)
+                  : 'Never synced',
+              iconColor: const Color(0xFF9C27B0),
+              trailing: const SizedBox.shrink(),
+            ),
+            _buildDivider(),
+            _buildSettingRow(
+              icon: Icons.cloud_sync_rounded,
+              title: 'Manual Sync',
+              subtitle: 'Sync sleep data now',
+              iconColor: const Color(0xFF00BCD4),
+              trailing: const Icon(
+                Icons.sync_rounded,
+                color: AppColors.accentSkyBlue,
+                size: 20,
+              ),
+              onTap: () async {
+                HapticHelper.mediumImpact();
+                await _performManualSync();
+              },
+            ),
+          ],
         ],
       ),
     );
@@ -1329,6 +1447,58 @@ class _AccountScreenState extends State<AccountScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Bedtime set to ${picked.format(context)}')),
+        );
+      }
+    }
+  }
+
+  Future<void> _performManualSync() async {
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Perform sync for last 7 days
+      final result = await _syncService.syncLastNDays(7);
+
+      // Close loading dialog
+      if (mounted) Navigator.pop(context);
+
+      if (result != null && result.success) {
+        await _loadHealthStatus();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('✅ Synced ${result.sessionsImported} sessions'),
+              backgroundColor: const Color(0xFF4CAF50),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('❌ Sync failed: ${result?.errors.join(", ") ?? "Unknown error"}'),
+              backgroundColor: AppColors.accentError,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Close loading dialog if still open
+      if (mounted) Navigator.pop(context);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Error: $e'),
+            backgroundColor: AppColors.accentError,
+          ),
         );
       }
     }
