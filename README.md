@@ -1,3 +1,5 @@
+![Insomnia Butler Thumbnail](insomniabutler_flutter/assets/Thumbnail.png)
+
 # 💤 Insomnia Butler
 
 **Your Intelligent AI Thought Partner for Racing Minds at 2 AM**
@@ -46,7 +48,7 @@ Go beyond simple "hours slept" with high-fidelity metrics:
 - **Efficiency Scoring:** Dynamic calculation of your sleep quality and sleep consistency.
 - **Interruptions Tracking:** Log and analyze wake-up events during the night.
 
-### � Health Data Integration
+### 🏥 Health Data Integration
 Seamlessly sync your sleep data from your wearable devices:
 - **Apple Health (iOS):** Import sleep sessions from Apple Watch.
 - **Health Connect (Android):** Sync data from Oura, Fitbit, Samsung Health, and more.
@@ -55,7 +57,7 @@ Seamlessly sync your sleep data from your wearable devices:
   - **Manual Import:** Select specific date ranges to backfill your history.
   - **Data Source Badges:** Clearly see which device recorded your sleep (e.g., "Apple Watch", "Oura Ring").
 
-### �🎵 Immersive Sleep Sounds & Ambience
+### 🎵 Immersive Sleep Sounds & Ambience
 A curated library of high-quality audio landscapes.
 - **3D Glassmorphic Album Art:** Stunning visuals for every soundscape.
 - **Pro Playback Controls:** Seamless seeking, background playback, and fade-out timers.
@@ -79,10 +81,6 @@ A gentle notification system that detects when you open distracting apps (Social
 ### 💬 Session History & Context
 - **Chat Archives:** Review past conversations and advice from the Butler.
 - **Continuous Memory:** The AI remembers context from previous days to provide personalized support.
-
----
-
-> **[📄 Click here to view the detailed Feature Breakdown per Screen (FEATURES.md)](FEATURES.md)**
 
 ---
 
@@ -153,6 +151,22 @@ Insomnia Butler is designed to scale on AWS using a fully automated pipeline:
     .\run-migrations.ps1
     ```
     *Captures dynamic DNS and applies complex PostgreSQL migrations to RDS.*
+
+---
+
+3.  **Update Client Connection:**
+    - The migration script automatically updates `insomniabutler_flutter/assets/config.json` with the new Load Balancer URL.
+    - **ACTION REQUIRED:** Open `insomniabutler_flutter/lib/main.dart` and update the `serverUrl` variable to match your new ALB DNS manually, as the auto-loader logic may not be awaited.
+    ```dart
+    // Select the URL from run-migrations.ps1 output or config.json
+    String serverUrl = 'http://insomniabutler-alb-xxxx.us-east-1.elb.amazonaws.com/';
+    ```
+
+4.  **Rebuild Application:**
+    - Rebuild your Flutter application to ensure it connects to the production server:
+    ```bash
+    flutter run
+    ```
 
 ---
 

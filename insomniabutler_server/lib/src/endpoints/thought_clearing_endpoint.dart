@@ -80,7 +80,7 @@ class ThoughtClearingEndpoint extends Endpoint {
 
       // Provide both human readable and ISO 8601 for the AI
       messageToSend =
-          "[User Local Time: $formattedHour:$minute $period, ISO: ${userLocalTime.toIso8601String()}]\n$userMessage";
+          "[User Local Time: $formattedHour:$minute $period, ISO: ${userLocalTime.toIso8601String().replaceAll('Z', '')}]\n$userMessage";
     }
 
     // 2. Generate embedding for user message (semantic memory)

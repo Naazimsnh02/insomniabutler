@@ -127,7 +127,7 @@ void run(List<String> args) async {
       await session.db.unsafeQuery(
         'ALTER TABLE sleep_sessions ADD COLUMN IF NOT EXISTS "wristTemperature" double precision;',
       );
-      
+
       // Add indexes
       await session.db.unsafeQuery(
         'CREATE INDEX IF NOT EXISTS idx_sleep_sessions_data_source ON sleep_sessions("sleepDataSource");',
@@ -135,14 +135,13 @@ void run(List<String> args) async {
       await session.db.unsafeQuery(
         'CREATE INDEX IF NOT EXISTS idx_sleep_sessions_date_source ON sleep_sessions("sessionDate", "sleepDataSource");',
       );
-      
+
       session.log('✅ Sleep sessions table migration successful.');
     } catch (e) {
       session.log(
         'Warning: Sleep sessions migration skipped or failed (likely already exists): $e',
       );
     }
-
   } catch (e) {
     session.log(
       'Error during server initialization tasks: $e',

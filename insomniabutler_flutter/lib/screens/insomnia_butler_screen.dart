@@ -157,15 +157,43 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
     try {
       final messages = await client.thoughtClearing.getChatSessionMessages(_sessionId);
       
+      // Capture local messages that have enriched data (scheduled_at)
+      final localEnrichedMessages = _messages.where((m) => 
+        m.widgetType == 'reminder_card' && 
+        m.widgetData != null && 
+        m.widgetData!['scheduled_at'] != null
+      ).toList();
+
       // Map Serverpod ChatMessage to our local ChatMessage model
       final mappedMessages = messages.map((m) {
+        Map<String, dynamic>? widgetData = m.widgetData != null ? jsonDecode(m.widgetData!) : null;
+        
+        // Restore scheduled_at from local cache if available
+        if (m.widgetType == 'reminder_card' && widgetData != null) {
+          try {
+            // Find matching local message
+            final match = localEnrichedMessages.firstWhere((local) {
+               // Match by content and approximate timestamp (within 2 minutes to be safe against server/client clock drift)
+               return local.content == m.content && 
+                      (local.timestamp.difference(m.timestamp).abs().inMinutes < 2);
+            });
+            
+            // Merge enriched data
+            if (match.widgetData != null) {
+              widgetData!['scheduled_at'] = match.widgetData!['scheduled_at'];
+            }
+          } catch (_) {
+            // No match found, proceed with server data
+          }
+        }
+
         return ChatMessage(
           role: m.role,
           content: m.content,
           timestamp: m.timestamp,
           category: null, 
           widgetType: m.widgetType,
-          widgetData: m.widgetData != null ? jsonDecode(m.widgetData!) : null,
+          widgetData: widgetData,
         );
       }).toList();
 
@@ -390,14 +418,28 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         DateTime scheduledTime;
         final now = DateTime.now();
         
-        if (timeStr.contains('in')) {
+        if (timeStr.contains('in ')) {
           // Relative time handling
-          final minutes = int.tryParse(RegExp(r'\d+').firstMatch(timeStr)?.group(0) ?? '30') ?? 30;
-          scheduledTime = now.add(Duration(minutes: minutes));
+          final numberMatch = RegExp(r'\d+').firstMatch(timeStr);
+          final number = int.tryParse(numberMatch?.group(0) ?? '30') ?? 30;
+          
+          if (timeStr.contains('hour')) {
+            scheduledTime = now.add(Duration(hours: number));
+          } else {
+            // default to minutes
+            scheduledTime = now.add(Duration(minutes: number));
+          }
         } else {
           // Try parsing as ISO
-          var parsed = DateTime.tryParse(timeStr);
+          DateTime? parsed = DateTime.tryParse(timeStr);
           
+          // If the AI included 'Z' but meant local time, or if we want to ensure local interpretation
+          if (parsed != null && timeStr.endsWith('Z')) {
+            // If it has Z, try parsing without Z to treat as local
+            final localParsed = DateTime.tryParse(timeStr.replaceAll('Z', ''));
+            if (localParsed != null) parsed = localParsed;
+          }
+
           if (parsed == null) {
             // Try parsing as HH:mm or HH:mm:ss or similar patterns
             final timeMatch = RegExp(r'(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?', caseSensitive: false)
@@ -424,14 +466,34 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
         }
 
         await NotificationService.scheduleNotification(
-          id: DateTime.now().millisecond,
+          id: now.millisecondsSinceEpoch ~/ 1000,
           title: 'Butler Reminder',
           body: message,
           scheduledTime: scheduledTime,
         );
+
+        // Update the message state with the absolute calculated time for consistent display
+        if (mounted && _messages.isNotEmpty) {
+          int targetIndex = -1;
+          // Look for the last assistant message with a reminder_card
+          for (int i = _messages.length - 1; i >= 0; i--) {
+            if (_messages[i].role == 'assistant' && _messages[i].widgetType == 'reminder_card') {
+              targetIndex = i;
+              break;
+            }
+          }
+
+          if (targetIndex != -1) {
+            final msg = _messages[targetIndex];
+            final updatedData = Map<String, dynamic>.from(msg.widgetData ?? {});
+            updatedData['scheduled_at'] = scheduledTime.toIso8601String();
+            setState(() {
+              _messages[targetIndex] = msg.copyWith(widgetData: updatedData);
+            });
+            _saveToCache();
+          }
+        }
         
-        // Side effect only - message/widget persistence handled 
-        // by attaching to the main response bubble
         break;
         
       case 'block_app':
@@ -832,12 +894,24 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
               Builder(
                 builder: (context) {
                   String rawTime = data?['time'] ?? '';
+                  String? scheduledAt = data?['scheduled_at'];
                   String displayedTime = rawTime;
+                  
                   try {
-                    // Try to parse ISO format
-                    DateTime? parsed = DateTime.tryParse(rawTime);
+                    DateTime? parsed;
+                    if (scheduledAt != null) {
+                      parsed = DateTime.tryParse(scheduledAt);
+                    } else if (rawTime.isNotEmpty) {
+                      parsed = DateTime.tryParse(rawTime);
+                    }
+                    
                     if (parsed != null) {
                       displayedTime = DateFormat('h:mm a').format(parsed.toLocal());
+                      // If it's the same day, just show time. If tomorrow, add "Tomorrow"
+                      final now = DateTime.now();
+                      if (parsed.toLocal().day != now.day) {
+                        displayedTime = 'Tomorrow, $displayedTime';
+                      }
                     }
                   } catch (_) {}
                   

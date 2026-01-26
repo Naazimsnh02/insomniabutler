@@ -21,6 +21,9 @@ import '../../services/health_data_service.dart';
 import '../../services/sleep_sync_service.dart';
 import '../health/health_connection_screen.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter/services.dart';
 
 /// Account & Settings Screen
 /// Provides comprehensive account management, app settings, and user preferences
@@ -31,10 +34,10 @@ class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key, this.isTab = true, this.onDataChanged});
 
   @override
-  State<AccountScreen> createState() => _AccountScreenState();
+  AccountScreenState createState() => AccountScreenState();
 }
 
-class _AccountScreenState extends State<AccountScreen> {
+class AccountScreenState extends State<AccountScreen> {
   String _userName = 'User';
   String _userEmail = '';
   DateTime? _accountCreatedAt;
@@ -58,6 +61,10 @@ class _AccountScreenState extends State<AccountScreen> {
   bool _isNotificationGranted = false;
   bool _isBatteryOptimDisabled = false;
   bool _isExactAlarmGranted = false;
+  
+  // Reminders state
+  List<PendingNotificationRequest> _pendingReminders = [];
+  Map<int, DateTime> _scheduledTimes = {};
   
   // Health data state
   bool _healthDataConnected = false;
@@ -102,6 +109,10 @@ class _AccountScreenState extends State<AccountScreen> {
     } catch (e) {
       debugPrint('Error saving account cache: $e');
     }
+  }
+
+  Future<void> refreshData() async {
+    await _loadData();
   }
 
   Future<void> _loadData() async {
@@ -176,6 +187,7 @@ class _AccountScreenState extends State<AccountScreen> {
         _checkPermissionsStatus();
         _saveToCache(stats);
         await _syncNotifications();
+        await _loadPendingReminders();
       }
     } catch (e) {
       debugPrint('Error loading account data: $e');
@@ -229,6 +241,31 @@ class _AccountScreenState extends State<AccountScreen> {
       }
     } catch (e) {
       debugPrint('Error loading health status: $e');
+    }
+  }
+
+  Future<void> _loadPendingReminders() async {
+    try {
+      final pending = await NotificationService.getPendingNotifications();
+      // Filter for butler reminders (IDs > 1000)
+      final reminders = pending.where((p) => p.id > 1000).toList();
+      
+      final Map<int, DateTime> times = {};
+      for (var r in reminders) {
+        final time = await NotificationService.getScheduledTime(r.id);
+        if (time != null) {
+          times[r.id] = time;
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _pendingReminders = reminders;
+          _scheduledTimes = times;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading pending reminders: $e');
     }
   }
 
@@ -322,6 +359,22 @@ class _AccountScreenState extends State<AccountScreen> {
                   _buildSectionHeader('System Permissions'),
                   const SizedBox(height: AppSpacing.md),
                   _buildPermissionsManager(),
+                  const SizedBox(height: AppSpacing.xl),
+
+                  _buildSectionHeader(
+                    'Scheduled Reminders',
+                    action: IconButton(
+                      icon: const Icon(Icons.refresh_rounded, size: 16, color: AppColors.textTertiary),
+                      onPressed: () {
+                        HapticHelper.lightImpact();
+                        _loadPendingReminders();
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _buildScheduledReminders(),
                   const SizedBox(height: AppSpacing.xl),
 
                   _buildSectionHeader('Data & Privacy'),
@@ -535,17 +588,23 @@ class _AccountScreenState extends State<AccountScreen> {
     ).animate().fadeIn().scale(begin: const Offset(0.9, 0.9));
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, {Widget? action}) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 4),
-      child: Text(
-        title.toUpperCase(),
-        style: AppTextStyles.label.copyWith(
-          color: AppColors.textTertiary,
-          letterSpacing: 1.5,
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
-        ),
+      padding: const EdgeInsets.only(left: 4, bottom: 4, right: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title.toUpperCase(),
+            style: AppTextStyles.label.copyWith(
+              color: AppColors.textTertiary,
+              letterSpacing: 1.5,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          if (action != null) action,
+        ],
       ),
     );
   }
@@ -890,6 +949,88 @@ class _AccountScreenState extends State<AccountScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildScheduledReminders() {
+    if (_pendingReminders.isEmpty) {
+      return GlassCard(
+        padding: const EdgeInsets.all(20),
+        borderRadius: 24,
+        color: AppColors.bgSecondary.withOpacity(0.3),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.08),
+        ),
+        child: Center(
+          child: Column(
+            children: [
+              Icon(Icons.notifications_none_rounded, color: AppColors.textTertiary.withOpacity(0.5), size: 32),
+              const SizedBox(height: 12),
+              Text(
+                'No scheduled reminders',
+                style: AppTextStyles.bodySm.copyWith(color: AppColors.textTertiary),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Ask the Butler to set a reminder for you',
+                style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary.withOpacity(0.7), fontSize: 11),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return GlassCard(
+      padding: const EdgeInsets.all(12),
+      borderRadius: 24,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.08),
+      ),
+      child: Column(
+        children: _pendingReminders.asMap().entries.map((entry) {
+          final reminder = entry.value;
+          final isLast = entry.key == _pendingReminders.length - 1;
+          
+          return Column(
+            children: [
+              _buildSettingRow(
+                icon: Icons.notifications_active_rounded,
+                title: reminder.title ?? 'Reminder',
+                subtitle: _formatReminderSubtitle(reminder),
+                iconColor: AppColors.accentCyan,
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline_rounded, color: AppColors.accentError, size: 20),
+                  onPressed: () async {
+                    await HapticHelper.mediumImpact();
+                    await NotificationService.cancelNotification(reminder.id);
+                    await _loadPendingReminders();
+                  },
+                ),
+              ),
+              if (!isLast) _buildDivider(),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  String _formatReminderSubtitle(PendingNotificationRequest reminder) {
+    String subtitle = reminder.body ?? '';
+    final scheduledTime = _scheduledTimes[reminder.id];
+    
+    if (scheduledTime != null) {
+      final now = DateTime.now();
+      final isToday = scheduledTime.year == now.year &&
+          scheduledTime.month == now.month &&
+          scheduledTime.day == now.day;
+          
+      final datePattern = isToday ? 'h:mm a' : 'MMM dd, h:mm a';
+      final formattedDate = DateFormat(datePattern).format(scheduledTime);
+      subtitle = '$subtitle • $formattedDate';
+    }
+    return subtitle;
   }
 
   Widget _buildDevTools() {
@@ -1313,6 +1454,8 @@ class _AccountScreenState extends State<AccountScreen> {
     await _syncBedtimeNotification();
     await _syncInsightsNotification();
     await _syncJournalNotification();
+    // Debug: Print all pending notifications
+    await NotificationService.debugPrintPendingNotifications();
   }
 
   Future<void> _syncBedtimeNotification() async {
@@ -2061,22 +2204,30 @@ class _AccountScreenState extends State<AccountScreen> {
     
     if (type == 'usage') {
       await UsageStats.grantUsagePermission();
+    } else if (type == 'exact_alarm') {
+      // Open the exact alarm settings page directly
+      await _openExactAlarmSettings();
     } else if (permission != null) {
-      if (type == 'exact_alarm' && await permission.status.isGranted) {
-        // If already granted, the user might want to check settings manually
-        // Since we can't easily launch the specific Exact Alarm intent without a plugin,
-        // we offer to open general app settings.
-        _showSettingsDialog('Exact Alarms', 'This permission appears to serve "Granted".\n\nWould you like to open app settings to verify?');
-      } else {
-        final status = await permission.request();
-        if (status.isPermanentlyDenied) {
-          openAppSettings();
-        }
+      final status = await permission.request();
+      if (status.isPermanentlyDenied) {
+        openAppSettings();
       }
     }
     
     // Refresh status
     if (mounted) _checkPermissionsStatus();
+  }
+
+  Future<void> _openExactAlarmSettings() async {
+    try {
+      // Use Android intent to open exact alarm settings page
+      const platform = MethodChannel('com.example.insomniabutler_flutter/settings');
+      await platform.invokeMethod('openExactAlarmSettings');
+    } catch (e) {
+      debugPrint('Error opening exact alarm settings: $e');
+      // Fallback to general app settings
+      openAppSettings();
+    }
   }
 
   void _showSettingsDialog(String title, String content) {

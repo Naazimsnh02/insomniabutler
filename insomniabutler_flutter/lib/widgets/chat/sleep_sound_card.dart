@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:just_audio/just_audio.dart';
 import '../../core/theme.dart';
 import '../../models/sleep_sound.dart';
 import '../../services/audio_player_service.dart';
+import '../../services/sound_service.dart';
 
 /// Beautiful sleep sound playback card for chat
 /// Shows when AI plays a sleep sound

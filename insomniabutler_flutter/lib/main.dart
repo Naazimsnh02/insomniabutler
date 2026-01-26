@@ -56,7 +56,7 @@ void main() async {
 
   // Default server URL (fallback to AWS production)
   String serverUrl =
-      'http://insomniabutler-alb-475922987.us-east-1.elb.amazonaws.com/';
+      'http://insomniabutler-alb-475922987.us-east-1.elb.amazonaws.com:80/';
 
   client = Client(serverUrl)
     ..connectivityMonitor = FlutterConnectivityMonitor()
@@ -204,7 +204,7 @@ class _AppInitializerState extends State<AppInitializer> {
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: Image.asset(
-                            'assets/logo/splash_logo.png',
+                            'assets/logo/final_logo.png',
                             fit: BoxFit.contain,
                           ),
                         ),

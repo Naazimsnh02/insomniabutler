@@ -35,6 +35,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
     with SingleTickerProviderStateMixin {
   final _timerService = SleepTimerService();
   final GlobalKey<JournalScreenState> _journalKey = GlobalKey();
+  final GlobalKey<AccountScreenState> _accountKey = GlobalKey();
   final ScrollController _calendarScrollController = ScrollController();
   int _selectedNavIndex = 0;
   DateTime _selectedDate = DateTime.now();
@@ -587,6 +588,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         const SoundsScreen(),
         JournalScreen(isTab: true, key: _journalKey),
         AccountScreen(
+          key: _accountKey,
           isTab: true,
           onDataChanged: _refreshAllData,
         ),
@@ -1924,14 +1926,22 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           Positioned(
                 bottom: 30,
                 child: GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     HapticHelper.mediumImpact();
-                    Navigator.push(
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => const InsomniaButlerScreen(),
                       ),
                     );
+                    
+                    // Refresh active tab data when returning from Chat
+                    if (_selectedNavIndex == 2) {
+                      _journalKey.currentState?.loadData();
+                    } else if (_selectedNavIndex == 3) {
+                      _accountKey.currentState?.refreshData();
+                    }
+                    _refreshAllData(); // Refresh home stats too
                   },
                   child: Container(
                     width: 60,
@@ -2019,6 +2029,10 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           setState(() => _selectedNavIndex = index);
           if (index == 0) {
             _scrollToCurrentDate();
+          } else if (index == 2) {
+            _journalKey.currentState?.loadData();
+          } else if (index == 3) {
+            _accountKey.currentState?.refreshData();
           }
         },
         child: Container(
