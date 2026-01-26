@@ -56,5 +56,6 @@ thoughtClearing:
   - processThought:
   - getChatSessionMessages:
   - getChatHistory:
+  - deleteChatSession:
 greeting:
   - hello:

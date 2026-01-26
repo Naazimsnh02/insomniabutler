@@ -826,6 +826,19 @@ class EndpointThoughtClearing extends _i2.EndpointRef {
         'getChatHistory',
         {'userId': userId},
       );
+
+  /// Delete a chat session and all its messages
+  _i3.Future<bool> deleteChatSession(
+    int userId,
+    String sessionId,
+  ) => caller.callServerEndpoint<bool>(
+    'thoughtClearing',
+    'deleteChatSession',
+    {
+      'userId': userId,
+      'sessionId': sessionId,
+    },
+  );
 }
 
 /// This is an example endpoint that returns a greeting message through

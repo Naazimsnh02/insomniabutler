@@ -371,6 +371,25 @@ User Query: $messageToSend
     return history;
   }
 
+  /// Delete a chat session and all its messages
+  Future<bool> deleteChatSession(
+    Session session,
+    int userId,
+    String sessionId,
+  ) async {
+    try {
+      // Delete all messages in the session
+      await protocol.ChatMessage.db.deleteWhere(
+        session,
+        where: (t) => t.sessionId.equals(sessionId) & t.userId.equals(userId),
+      );
+      return true;
+    } catch (e) {
+      session.log('Error deleting chat session: $e');
+      return false;
+    }
+  }
+
   /// Extract thought category from user message and AI response
   String _extractCategory(String userMessage, String aiResponse) {
     // Combine both for better categorization

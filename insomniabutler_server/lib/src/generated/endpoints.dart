@@ -1475,6 +1475,32 @@ class Endpoints extends _i1.EndpointDispatch {
                         params['userId'],
                       ),
         ),
+        'deleteChatSession': _i1.MethodConnector(
+          name: 'deleteChatSession',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'sessionId': _i1.ParameterDescription(
+              name: 'sessionId',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['thoughtClearing'] as _i9.ThoughtClearingEndpoint)
+                      .deleteChatSession(
+                        session,
+                        params['userId'],
+                        params['sessionId'],
+                      ),
+        ),
       },
     );
     connectors['greeting'] = _i1.EndpointConnector(

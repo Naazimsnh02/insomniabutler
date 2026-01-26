@@ -121,10 +121,17 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#0A1125"
-  image: "assets/logo/splash_logo.png"
+  image: "assets/logo/final_logo.png"
+  
   android_12:
-    image: "assets/logo/splash_logo.png"
+    image: "assets/logo/final_logo.png"
     color: "#0A1125"
+    # icon_background_color: "#0A1125" # Optional: background color for the icon itself
+
   fullscreen: true
   android_gravity: center
   ios_content_mode: center
+  
+  # For Android 12+, the icon is always centered by the system.
+  # If it looks off-center, we might need to use the 'branding' property 
+  # for versions < 12, but for 12+ it's fixed in the middle.

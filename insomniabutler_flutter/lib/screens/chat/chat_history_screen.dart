@@ -73,6 +73,28 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
     }
   }
 
+  Future<void> _deleteSession(String sessionId) async {
+    try {
+      final userId = await UserService.getCurrentUserId();
+      if (userId == null) return;
+
+      final success = await client.thoughtClearing.deleteChatSession(userId, sessionId);
+      
+      if (success && mounted) {
+        setState(() {
+          _history.removeWhere((s) => s.sessionId == sessionId);
+        });
+        
+        // Update cache
+        final prefs = await SharedPreferences.getInstance();
+        final jsonStr = jsonEncode(_history.map((h) => h.toJson()).toList());
+        prefs.setString('chat_history_cache', jsonStr);
+      }
+    } catch (e) {
+      debugPrint('Error deleting session: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -269,104 +291,143 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: GlassCard(
-        onTap: () async {
-          await HapticHelper.lightImpact();
-          if (mounted) {
-            Navigator.pop(context, session.sessionId);
-          }
+      child: Dismissible(
+        key: Key(session.sessionId),
+        direction: DismissDirection.endToStart,
+        onDismissed: (direction) => _deleteSession(session.sessionId),
+        confirmDismiss: (direction) async {
+          HapticHelper.mediumImpact();
+          return await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              backgroundColor: AppColors.bgPrimary,
+              title: Text('Delete Conversation', style: AppTextStyles.h3),
+              content: Text(
+                'Are you sure you want to delete this session? This action cannot be undone.',
+                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text('Cancel', style: TextStyle(color: AppColors.textTertiary)),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Delete', style: TextStyle(color: AppColors.accentError)),
+                ),
+              ],
+            ),
+          );
         },
-        padding: const EdgeInsets.all(16),
-        borderRadius: 24,
-        color: AppColors.bgSecondary.withOpacity(0.3),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.08),
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: AppColors.accentError.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: const Icon(Icons.delete_outline_rounded, color: AppColors.accentError),
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                gradient: AppColors.gradientPrimary.withOpacity(0.1),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.accentPrimary.withOpacity(0.2),
-                  width: 1.5,
-                ),
-              ),
-              child: ClipOval(
-                child: Image.asset(
-                  'assets/logo/butler_logo.png',
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.psychology_rounded,
-                    color: AppColors.accentPrimary,
-                    size: 26,
+        child: GlassCard(
+          onTap: () async {
+            await HapticHelper.lightImpact();
+            if (mounted) {
+              Navigator.pop(context, session.sessionId);
+            }
+          },
+          padding: const EdgeInsets.all(16),
+          borderRadius: 24,
+          color: AppColors.bgSecondary.withOpacity(0.3),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.08),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  gradient: AppColors.gradientPrimary.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.accentPrimary.withOpacity(0.2),
+                    width: 1.5,
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    dateStr,
-                    style: AppTextStyles.label.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    session.lastMessage,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textTertiary,
-                      fontSize: 12,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.accentPrimary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '${session.messageCount}',
-                    style: AppTextStyles.caption.copyWith(
-                      fontWeight: FontWeight.bold,
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/logo/butler_logo.png',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.psychology_rounded,
                       color: AppColors.accentPrimary,
+                      size: 26,
                     ),
                   ),
-                  Text(
-                    'MSGS',
-                    style: AppTextStyles.caption.copyWith(
-                      fontSize: 8,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.accentPrimary.withOpacity(0.7),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: Colors.white.withOpacity(0.2),
-              size: 22,
-            ),
-          ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      dateStr,
+                      style: AppTextStyles.label.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      session.lastMessage,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textTertiary,
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.accentPrimary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${session.messageCount}',
+                      style: AppTextStyles.caption.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.accentPrimary,
+                      ),
+                    ),
+                    Text(
+                      'MSGS',
+                      style: AppTextStyles.caption.copyWith(
+                        fontSize: 8,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.accentPrimary.withOpacity(0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: Colors.white.withOpacity(0.2),
+                size: 22,
+              ),
+            ],
+          ),
         ),
       ),
     ).animate().fadeIn(delay: (index * 50).ms).slideX(begin: 0.1, end: 0);
