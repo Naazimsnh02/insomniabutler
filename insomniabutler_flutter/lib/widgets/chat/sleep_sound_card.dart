@@ -11,6 +11,7 @@ class SleepSoundCard extends StatefulWidget {
   final String? soundImagePath;
   final String? category;
   final SleepSound? sound;
+  final String? soundId;
 
   const SleepSoundCard({
     super.key,
@@ -18,6 +19,7 @@ class SleepSoundCard extends StatefulWidget {
     this.soundImagePath,
     this.category,
     this.sound,
+    this.soundId,
   });
 
   @override
@@ -266,45 +268,98 @@ class _SleepSoundCardState extends State<SleepSoundCard>
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               // Play/Pause button
-                              GestureDetector(
-                                onTap: () async {
-                                  if (isPlaying) {
-                                    await _audioService.pause();
-                                  } else {
-                                    if (widget.sound != null) {
-                                      await _audioService.play(widget.sound!);
-                                    } else {
-                                      await _audioService.resume();
-                                    }
-                                  }
-                                },
-                                child: Container(
-                                  width: 48,
-                                  height: 48,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        AppColors.accentPrimary.withOpacity(0.8),
-                                        AppColors.accentPrimary.withOpacity(0.6),
-                                      ],
-                                    ),
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppColors.accentPrimary.withOpacity(0.4),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
+                              StreamBuilder<ProcessingState>(
+                                stream: _audioService.processingStateStream,
+                                initialData: _audioService.processingState,
+                                builder: (context, processingSnapshot) {
+                                  final processingState =
+                                      processingSnapshot.data ??
+                                      ProcessingState.idle;
+                                  final isLoading =
+                                      processingState == ProcessingState.loading ||
+                                      processingState == ProcessingState.buffering;
+
+                                  return GestureDetector(
+                                    onTap: () async {
+                                      if (isLoading) return;
+
+                                      // If currently playing, pause
+                                      if (isPlaying) {
+                                        await _audioService.pause();
+                                        return;
+                                      }
+
+                                      // Try to play/resume
+                                      if (widget.sound != null) {
+                                        await _audioService.play(widget.sound!);
+                                      } else if (widget.soundId != null) {
+                                        // Try to find by ID
+                                        final sound = SoundService()
+                                            .getSoundById(widget.soundId!);
+                                        if (sound != null) {
+                                          await _audioService.play(sound);
+                                        } else {
+                                          await _audioService.resume();
+                                        }
+                                      } else {
+                                        // Final fallback: search by title
+                                        final sound = SoundService()
+                                            .findSoundByName(widget.soundTitle);
+                                        if (sound != null) {
+                                          await _audioService.play(sound);
+                                        } else {
+                                          await _audioService.resume();
+                                        }
+                                      }
+                                    },
+                                    child: Container(
+                                      width: 48,
+                                      height: 48,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            AppColors.accentPrimary.withOpacity(
+                                              0.8,
+                                            ),
+                                            AppColors.accentPrimary.withOpacity(
+                                              0.6,
+                                            ),
+                                          ],
+                                        ),
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColors.accentPrimary
+                                                .withOpacity(0.4),
+                                            blurRadius: 12,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                  child: Icon(
-                                    isPlaying
-                                        ? Icons.pause_rounded
-                                        : Icons.play_arrow_rounded,
-                                    color: Colors.white,
-                                    size: 28,
-                                  ),
-                                ),
+                                      child: Center(
+                                        child: isLoading
+                                            ? const SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                        Color
+                                                      >(Colors.white),
+                                                ),
+                                              )
+                                            : Icon(
+                                                isPlaying
+                                                    ? Icons.pause_rounded
+                                                    : Icons.play_arrow_rounded,
+                                                color: Colors.white,
+                                                size: 28,
+                                              ),
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                               const SizedBox(width: 16),
 

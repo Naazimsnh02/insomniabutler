@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
@@ -17,17 +18,64 @@ class BreathingExerciseWidget extends StatefulWidget {
 class _BreathingExerciseWidgetState extends State<BreathingExerciseWidget> {
   String _phase = 'Get Ready';
   bool _isActive = false;
+  bool _isCompleted = false;
+  Timer? _durationTimer;
+  int _remainingSeconds = 0;
 
   @override
   void initState() {
     super.initState();
+    _remainingSeconds = widget.durationMinutes * 60;
+  }
+
+  @override
+  void dispose() {
+    _durationTimer?.cancel();
+    super.dispose();
   }
 
   void _startExercise() {
     setState(() {
       _isActive = true;
+      _isCompleted = false;
       _phase = 'Inhale';
+      _remainingSeconds = widget.durationMinutes * 60;
     });
+
+    // Start countdown timer
+    _durationTimer?.cancel();
+    _durationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      setState(() {
+        _remainingSeconds--;
+      });
+
+      if (_remainingSeconds <= 0) {
+        timer.cancel();
+        _stopExercise();
+      }
+    });
+  }
+
+  void _stopExercise() {
+    if (!mounted) return;
+    
+    setState(() {
+      _isActive = false;
+      _isCompleted = true;
+      _phase = 'Complete';
+    });
+    _durationTimer?.cancel();
+  }
+
+  String _formatTime(int seconds) {
+    final minutes = seconds ~/ 60;
+    final secs = seconds % 60;
+    return '${minutes}:${secs.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -49,12 +97,44 @@ class _BreathingExerciseWidgetState extends State<BreathingExerciseWidget> {
           ),
           const SizedBox(height: 8),
           Text(
-            _isActive ? 'Follow the circle' : '${widget.durationMinutes} minute restorative exercise',
+            _isCompleted
+                ? 'Exercise complete! Well done.'
+                : _isActive
+                    ? 'Follow the circle • ${_formatTime(_remainingSeconds)}'
+                    : '${widget.durationMinutes} minute restorative exercise',
             style: AppTextStyles.bodySm.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 32),
           
-          if (!_isActive)
+          if (_isCompleted)
+            Column(
+              children: [
+                Icon(
+                  Icons.check_circle_rounded,
+                  size: 80,
+                  color: AppColors.accentCyan,
+                ).animate().fadeIn().scale(),
+                const SizedBox(height: 16),
+                Text(
+                  'You did great!',
+                  style: AppTextStyles.h3.copyWith(
+                    color: AppColors.accentCyan,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _startExercise,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accentPrimary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  ),
+                  child: const Text('Do Another Round'),
+                ),
+              ],
+            )
+          else if (!_isActive)
             ElevatedButton(
               onPressed: _startExercise,
               style: ElevatedButton.styleFrom(
@@ -77,6 +157,16 @@ class _BreathingExerciseWidgetState extends State<BreathingExerciseWidget> {
                     letterSpacing: 2,
                   ),
                 ).animate(key: ValueKey(_phase)).fadeIn().scale(),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: _stopExercise,
+                  child: Text(
+                    'Stop Exercise',
+                    style: AppTextStyles.bodySm.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
               ],
             ),
         ],
@@ -147,7 +237,7 @@ class _BreathingExerciseWidgetState extends State<BreathingExerciseWidget> {
               newPhase = 'Exhale';
             }
 
-            if (newPhase != _phase) {
+            if (newPhase != _phase && _isActive) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) setState(() => _phase = newPhase);
               });

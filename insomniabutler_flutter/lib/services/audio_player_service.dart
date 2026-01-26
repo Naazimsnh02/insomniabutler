@@ -19,16 +19,26 @@ class AudioPlayerService {
   Stream<bool> get isPlayingStream => _player.playingStream;
   Stream<Duration?> get positionStream => _player.positionStream;
   Stream<Duration?> get durationStream => _player.durationStream;
+  Stream<ProcessingState> get processingStateStream => _player.processingStateStream;
+  ProcessingState get processingState => _player.processingState;
 
   Future<void> play(SleepSound sound) async {
-    if (_currentSound?.id == sound.id && _player.playing) {
-      return;
-    }
-
     try {
+      // If it's already playing the same sound, just return
+      if (_currentSound?.id == sound.id && _player.playing) {
+        return;
+      }
+
+      // If it's the same sound but paused, just resume
+      if (_currentSound?.id == sound.id) {
+        await _player.play();
+        return;
+      }
+
       _currentSound = sound;
       _controller.add(_currentSound);
 
+      // Loading new audio source
       await _player.setAudioSource(
         AudioSource.uri(
           Uri.parse('asset:///${sound.assetPath}'),

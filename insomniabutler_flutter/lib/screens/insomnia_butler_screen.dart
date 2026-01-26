@@ -367,16 +367,19 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
     switch (action.command) {
       case 'play_sound':
         final soundName = params['sound_name'] as String?;
-        if (soundName != null) {
-          final sound = SoundService().findSoundByName(soundName);
+        final soundId = params['sound_id'] as String?;
+        if (soundName != null || soundId != null) {
+          var sound = soundId != null ? SoundService().getSoundById(soundId) : null;
+          if (sound == null && soundName != null) {
+            sound = SoundService().findSoundByName(soundName);
+          }
+          
           if (sound != null) {
-            // Then start playback - NO LONGER adding a separate message here 
-            // as it is now attached to the assistant's text response bubble
-            try {
-              await AudioPlayerService().play(sound);
-            } catch (e) {
-              debugPrint('Error playing sound in action: $e');
-            }
+            // Start playback without blocking the UI thread's next steps 
+            // of finishing the message processing
+            unawaited(AudioPlayerService().play(sound));
+          } else {
+            debugPrint('AI requested sound not found: $soundName / $soundId');
           }
         }
         break;
@@ -869,6 +872,7 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
           soundImagePath: sound?.imagePath ?? data?['sound_image'],
           category: sound?.category.displayName ?? data?['category'],
           sound: sound,
+          soundId: sound?.id ?? data?['sound_id'],
         );
       default:
         return const SizedBox.shrink();

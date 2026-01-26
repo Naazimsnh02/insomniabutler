@@ -35,7 +35,7 @@ A sophisticated chat interface powered by **Gemini** that acts as your personal 
 - **AI Actions:** The Butler can actively assist you by:
   - 🎵 **Playing Sleep Sounds** directly in the chat.
   - 📅 **Scheduling Reminders** for tomorrow so you can let go today.
-  - 🚫 **Blocking Distracting Apps** on your device to prevent doom-scrolling.
+  - 🚫 **Sending Gentle Nudges** when you open distracting apps during bedtime.
   - 🧘 **Launching Breathing Exercises** when it detects high anxiety.
 - **Context-Aware Memory:** Uses **Vector Embeddings (pgvector)** to remember your past worries and journals, providing continuity across sessions.
 
@@ -46,7 +46,16 @@ Go beyond simple "hours slept" with high-fidelity metrics:
 - **Efficiency Scoring:** Dynamic calculation of your sleep quality and sleep consistency.
 - **Interruptions Tracking:** Log and analyze wake-up events during the night.
 
-### 🎵 Immersive Sleep Sounds & Ambience
+### � Health Data Integration
+Seamlessly sync your sleep data from your wearable devices:
+- **Apple Health (iOS):** Import sleep sessions from Apple Watch.
+- **Health Connect (Android):** Sync data from Oura, Fitbit, Samsung Health, and more.
+- **Smart Synchronization:** 
+  - **Auto-Sync:** Background import on app launch.
+  - **Manual Import:** Select specific date ranges to backfill your history.
+  - **Data Source Badges:** Clearly see which device recorded your sleep (e.g., "Apple Watch", "Oura Ring").
+
+### �🎵 Immersive Sleep Sounds & Ambience
 A curated library of high-quality audio landscapes.
 - **3D Glassmorphic Album Art:** Stunning visuals for every soundscape.
 - **Pro Playback Controls:** Seamless seeking, background playback, and fade-out timers.
@@ -55,17 +64,17 @@ A curated library of high-quality audio landscapes.
 ### 🧘 Interactive Breathing Coach
 An integrated breathing widget featuring:
 - **Guided Visuals:** Expanding/contracting circles to pace your breath.
-- **Customizable Cycles:** Inhale, Hold, and Exhale timings (e.g., Box Breathing).
-- **Haptic Pacing:** Feel the rhythm of your breath without looking at the screen.
+- **Box Breathing Technique:** Proven 4-4-4 rhythm to reduce anxiety.
+- **Visual Pacing:** Follow the gentle animations to regulate your nervous system.
 
 ### 📅 Historical Intelligence & Analytics
-### 📅 Historical Intelligence & Analytics
-- **Monthly Calendar View:** Easily navigate through months of sleep and journal history.
-- **Weekly Trend Reports:** See progress in sleep latency and consistency.
-- **Mood Correlation:** Track how your morning mood correlates with your sleep architecture.
 
-### 🚫 Smart Distraction Blocker
-A robust nudging system that uses **High-Priority Notifications** to gently pull you away from blocked apps (Social Media, Games) during your scheduled bedtime.
+- **Monthly Calendar View:** Swipeable strip or full monthly view to see sleep consistency.
+- **Trend Insights:** Dashboard cards showing Sleep Latency improvement, Consistency Score %, and Streaks.
+- **Mood Tracker:** Log your daily mood to see how you feel after different sleep qualities.
+
+### 🚫 Smart Distraction Nudges
+A gentle notification system that detects when you open distracting apps (Social Media, Games) during your scheduled bedtime and sends high-priority reminders to help you stay on track with your sleep goals.
 
 ### 💬 Session History & Context
 - **Chat Archives:** Review past conversations and advice from the Butler.
@@ -81,7 +90,7 @@ A robust nudging system that uses **High-Priority Notifications** to gently pull
 
 | Layer | Technology |
 | :--- | :--- |
-| **Mobile App** | Flutter (Dart) with `flutter_animate` & `glass_kit` |
+| **Mobile App** | Flutter (Dart) with `flutter_animate`, `glass_kit` & `health` (HealthKit/Health Connect) |
 | **Backend** | Serverpod 3.0 (Dart) |
 | **AI Intelligence** | Google Gemini |
 | **Vector Search** | pgvector (PostgreSQL) for RAG |
