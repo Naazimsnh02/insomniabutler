@@ -15,32 +15,35 @@ import 'ai_action.dart' as _i2;
 import 'chat_message.dart' as _i3;
 import 'chat_session_info.dart' as _i4;
 import 'greetings/greeting.dart' as _i5;
-import 'journal_entry.dart' as _i6;
-import 'journal_insight.dart' as _i7;
-import 'journal_prompt.dart' as _i8;
-import 'journal_stats.dart' as _i9;
-import 'sleep_insight.dart' as _i10;
-import 'sleep_session.dart' as _i11;
-import 'thought_log.dart' as _i12;
-import 'thought_response.dart' as _i13;
-import 'user.dart' as _i14;
-import 'user_insights.dart' as _i15;
-import 'package:insomniabutler_client/src/protocol/sleep_session.dart' as _i16;
-import 'package:insomniabutler_client/src/protocol/journal_entry.dart' as _i17;
-import 'package:insomniabutler_client/src/protocol/journal_prompt.dart' as _i18;
+import 'int_wrapper.dart' as _i6;
+import 'journal_entry.dart' as _i7;
+import 'journal_insight.dart' as _i8;
+import 'journal_prompt.dart' as _i9;
+import 'journal_stats.dart' as _i10;
+import 'sleep_insight.dart' as _i11;
+import 'sleep_session.dart' as _i12;
+import 'thought_log.dart' as _i13;
+import 'thought_response.dart' as _i14;
+import 'user.dart' as _i15;
+import 'user_insights.dart' as _i16;
+import 'package:insomniabutler_client/src/protocol/sleep_insight.dart' as _i17;
+import 'package:insomniabutler_client/src/protocol/sleep_session.dart' as _i18;
+import 'package:insomniabutler_client/src/protocol/journal_entry.dart' as _i19;
+import 'package:insomniabutler_client/src/protocol/journal_prompt.dart' as _i20;
 import 'package:insomniabutler_client/src/protocol/journal_insight.dart'
-    as _i19;
-import 'package:insomniabutler_client/src/protocol/chat_message.dart' as _i20;
-import 'package:insomniabutler_client/src/protocol/chat_session_info.dart'
     as _i21;
-import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    as _i22;
-import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+import 'package:insomniabutler_client/src/protocol/chat_message.dart' as _i22;
+import 'package:insomniabutler_client/src/protocol/chat_session_info.dart'
     as _i23;
+import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
+    as _i24;
+import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+    as _i25;
 export 'ai_action.dart';
 export 'chat_message.dart';
 export 'chat_session_info.dart';
 export 'greetings/greeting.dart';
+export 'int_wrapper.dart';
 export 'journal_entry.dart';
 export 'journal_insight.dart';
 export 'journal_prompt.dart';
@@ -99,35 +102,38 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i5.Greeting) {
       return _i5.Greeting.fromJson(data) as T;
     }
-    if (t == _i6.JournalEntry) {
-      return _i6.JournalEntry.fromJson(data) as T;
+    if (t == _i6.IntWrapper) {
+      return _i6.IntWrapper.fromJson(data) as T;
     }
-    if (t == _i7.JournalInsight) {
-      return _i7.JournalInsight.fromJson(data) as T;
+    if (t == _i7.JournalEntry) {
+      return _i7.JournalEntry.fromJson(data) as T;
     }
-    if (t == _i8.JournalPrompt) {
-      return _i8.JournalPrompt.fromJson(data) as T;
+    if (t == _i8.JournalInsight) {
+      return _i8.JournalInsight.fromJson(data) as T;
     }
-    if (t == _i9.JournalStats) {
-      return _i9.JournalStats.fromJson(data) as T;
+    if (t == _i9.JournalPrompt) {
+      return _i9.JournalPrompt.fromJson(data) as T;
     }
-    if (t == _i10.SleepInsight) {
-      return _i10.SleepInsight.fromJson(data) as T;
+    if (t == _i10.JournalStats) {
+      return _i10.JournalStats.fromJson(data) as T;
     }
-    if (t == _i11.SleepSession) {
-      return _i11.SleepSession.fromJson(data) as T;
+    if (t == _i11.SleepInsight) {
+      return _i11.SleepInsight.fromJson(data) as T;
     }
-    if (t == _i12.ThoughtLog) {
-      return _i12.ThoughtLog.fromJson(data) as T;
+    if (t == _i12.SleepSession) {
+      return _i12.SleepSession.fromJson(data) as T;
     }
-    if (t == _i13.ThoughtResponse) {
-      return _i13.ThoughtResponse.fromJson(data) as T;
+    if (t == _i13.ThoughtLog) {
+      return _i13.ThoughtLog.fromJson(data) as T;
     }
-    if (t == _i14.User) {
-      return _i14.User.fromJson(data) as T;
+    if (t == _i14.ThoughtResponse) {
+      return _i14.ThoughtResponse.fromJson(data) as T;
     }
-    if (t == _i15.UserInsights) {
-      return _i15.UserInsights.fromJson(data) as T;
+    if (t == _i15.User) {
+      return _i15.User.fromJson(data) as T;
+    }
+    if (t == _i16.UserInsights) {
+      return _i16.UserInsights.fromJson(data) as T;
     }
     if (t == _i1.getType<_i2.AIAction?>()) {
       return (data != null ? _i2.AIAction.fromJson(data) : null) as T;
@@ -141,35 +147,38 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i1.getType<_i5.Greeting?>()) {
       return (data != null ? _i5.Greeting.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i6.JournalEntry?>()) {
-      return (data != null ? _i6.JournalEntry.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i6.IntWrapper?>()) {
+      return (data != null ? _i6.IntWrapper.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i7.JournalInsight?>()) {
-      return (data != null ? _i7.JournalInsight.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i7.JournalEntry?>()) {
+      return (data != null ? _i7.JournalEntry.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i8.JournalPrompt?>()) {
-      return (data != null ? _i8.JournalPrompt.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i8.JournalInsight?>()) {
+      return (data != null ? _i8.JournalInsight.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i9.JournalStats?>()) {
-      return (data != null ? _i9.JournalStats.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i9.JournalPrompt?>()) {
+      return (data != null ? _i9.JournalPrompt.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i10.SleepInsight?>()) {
-      return (data != null ? _i10.SleepInsight.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i10.JournalStats?>()) {
+      return (data != null ? _i10.JournalStats.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i11.SleepSession?>()) {
-      return (data != null ? _i11.SleepSession.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i11.SleepInsight?>()) {
+      return (data != null ? _i11.SleepInsight.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i12.ThoughtLog?>()) {
-      return (data != null ? _i12.ThoughtLog.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i12.SleepSession?>()) {
+      return (data != null ? _i12.SleepSession.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i13.ThoughtResponse?>()) {
-      return (data != null ? _i13.ThoughtResponse.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i13.ThoughtLog?>()) {
+      return (data != null ? _i13.ThoughtLog.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i14.User?>()) {
-      return (data != null ? _i14.User.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i14.ThoughtResponse?>()) {
+      return (data != null ? _i14.ThoughtResponse.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i15.UserInsights?>()) {
-      return (data != null ? _i15.UserInsights.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i15.User?>()) {
+      return (data != null ? _i15.User.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i16.UserInsights?>()) {
+      return (data != null ? _i16.UserInsights.fromJson(data) : null) as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
@@ -180,47 +189,53 @@ class Protocol extends _i1.SerializationManager {
           )
           as T;
     }
-    if (t == List<_i16.SleepSession>) {
+    if (t == List<_i17.SleepInsight>) {
       return (data as List)
-              .map((e) => deserialize<_i16.SleepSession>(e))
+              .map((e) => deserialize<_i17.SleepInsight>(e))
               .toList()
           as T;
     }
-    if (t == List<_i17.JournalEntry>) {
+    if (t == List<_i18.SleepSession>) {
       return (data as List)
-              .map((e) => deserialize<_i17.JournalEntry>(e))
+              .map((e) => deserialize<_i18.SleepSession>(e))
               .toList()
           as T;
     }
-    if (t == List<_i18.JournalPrompt>) {
+    if (t == List<_i19.JournalEntry>) {
       return (data as List)
-              .map((e) => deserialize<_i18.JournalPrompt>(e))
+              .map((e) => deserialize<_i19.JournalEntry>(e))
               .toList()
           as T;
     }
-    if (t == List<_i19.JournalInsight>) {
+    if (t == List<_i20.JournalPrompt>) {
       return (data as List)
-              .map((e) => deserialize<_i19.JournalInsight>(e))
+              .map((e) => deserialize<_i20.JournalPrompt>(e))
               .toList()
           as T;
     }
-    if (t == List<_i20.ChatMessage>) {
+    if (t == List<_i21.JournalInsight>) {
       return (data as List)
-              .map((e) => deserialize<_i20.ChatMessage>(e))
+              .map((e) => deserialize<_i21.JournalInsight>(e))
               .toList()
           as T;
     }
-    if (t == List<_i21.ChatSessionInfo>) {
+    if (t == List<_i22.ChatMessage>) {
       return (data as List)
-              .map((e) => deserialize<_i21.ChatSessionInfo>(e))
+              .map((e) => deserialize<_i22.ChatMessage>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i23.ChatSessionInfo>) {
+      return (data as List)
+              .map((e) => deserialize<_i23.ChatSessionInfo>(e))
               .toList()
           as T;
     }
     try {
-      return _i22.Protocol().deserialize<T>(data, t);
+      return _i24.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
-      return _i23.Protocol().deserialize<T>(data, t);
+      return _i25.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -231,16 +246,17 @@ class Protocol extends _i1.SerializationManager {
       _i3.ChatMessage => 'ChatMessage',
       _i4.ChatSessionInfo => 'ChatSessionInfo',
       _i5.Greeting => 'Greeting',
-      _i6.JournalEntry => 'JournalEntry',
-      _i7.JournalInsight => 'JournalInsight',
-      _i8.JournalPrompt => 'JournalPrompt',
-      _i9.JournalStats => 'JournalStats',
-      _i10.SleepInsight => 'SleepInsight',
-      _i11.SleepSession => 'SleepSession',
-      _i12.ThoughtLog => 'ThoughtLog',
-      _i13.ThoughtResponse => 'ThoughtResponse',
-      _i14.User => 'User',
-      _i15.UserInsights => 'UserInsights',
+      _i6.IntWrapper => 'IntWrapper',
+      _i7.JournalEntry => 'JournalEntry',
+      _i8.JournalInsight => 'JournalInsight',
+      _i9.JournalPrompt => 'JournalPrompt',
+      _i10.JournalStats => 'JournalStats',
+      _i11.SleepInsight => 'SleepInsight',
+      _i12.SleepSession => 'SleepSession',
+      _i13.ThoughtLog => 'ThoughtLog',
+      _i14.ThoughtResponse => 'ThoughtResponse',
+      _i15.User => 'User',
+      _i16.UserInsights => 'UserInsights',
       _ => null,
     };
   }
@@ -266,32 +282,34 @@ class Protocol extends _i1.SerializationManager {
         return 'ChatSessionInfo';
       case _i5.Greeting():
         return 'Greeting';
-      case _i6.JournalEntry():
+      case _i6.IntWrapper():
+        return 'IntWrapper';
+      case _i7.JournalEntry():
         return 'JournalEntry';
-      case _i7.JournalInsight():
+      case _i8.JournalInsight():
         return 'JournalInsight';
-      case _i8.JournalPrompt():
+      case _i9.JournalPrompt():
         return 'JournalPrompt';
-      case _i9.JournalStats():
+      case _i10.JournalStats():
         return 'JournalStats';
-      case _i10.SleepInsight():
+      case _i11.SleepInsight():
         return 'SleepInsight';
-      case _i11.SleepSession():
+      case _i12.SleepSession():
         return 'SleepSession';
-      case _i12.ThoughtLog():
+      case _i13.ThoughtLog():
         return 'ThoughtLog';
-      case _i13.ThoughtResponse():
+      case _i14.ThoughtResponse():
         return 'ThoughtResponse';
-      case _i14.User():
+      case _i15.User():
         return 'User';
-      case _i15.UserInsights():
+      case _i16.UserInsights():
         return 'UserInsights';
     }
-    className = _i22.Protocol().getClassNameForObject(data);
+    className = _i24.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_idp.$className';
     }
-    className = _i23.Protocol().getClassNameForObject(data);
+    className = _i25.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_core.$className';
     }
@@ -316,43 +334,46 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName == 'Greeting') {
       return deserialize<_i5.Greeting>(data['data']);
     }
+    if (dataClassName == 'IntWrapper') {
+      return deserialize<_i6.IntWrapper>(data['data']);
+    }
     if (dataClassName == 'JournalEntry') {
-      return deserialize<_i6.JournalEntry>(data['data']);
+      return deserialize<_i7.JournalEntry>(data['data']);
     }
     if (dataClassName == 'JournalInsight') {
-      return deserialize<_i7.JournalInsight>(data['data']);
+      return deserialize<_i8.JournalInsight>(data['data']);
     }
     if (dataClassName == 'JournalPrompt') {
-      return deserialize<_i8.JournalPrompt>(data['data']);
+      return deserialize<_i9.JournalPrompt>(data['data']);
     }
     if (dataClassName == 'JournalStats') {
-      return deserialize<_i9.JournalStats>(data['data']);
+      return deserialize<_i10.JournalStats>(data['data']);
     }
     if (dataClassName == 'SleepInsight') {
-      return deserialize<_i10.SleepInsight>(data['data']);
+      return deserialize<_i11.SleepInsight>(data['data']);
     }
     if (dataClassName == 'SleepSession') {
-      return deserialize<_i11.SleepSession>(data['data']);
+      return deserialize<_i12.SleepSession>(data['data']);
     }
     if (dataClassName == 'ThoughtLog') {
-      return deserialize<_i12.ThoughtLog>(data['data']);
+      return deserialize<_i13.ThoughtLog>(data['data']);
     }
     if (dataClassName == 'ThoughtResponse') {
-      return deserialize<_i13.ThoughtResponse>(data['data']);
+      return deserialize<_i14.ThoughtResponse>(data['data']);
     }
     if (dataClassName == 'User') {
-      return deserialize<_i14.User>(data['data']);
+      return deserialize<_i15.User>(data['data']);
     }
     if (dataClassName == 'UserInsights') {
-      return deserialize<_i15.UserInsights>(data['data']);
+      return deserialize<_i16.UserInsights>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
-      return _i22.Protocol().deserializeByClassName(data);
+      return _i24.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_core.')) {
       data['className'] = dataClassName.substring(20);
-      return _i23.Protocol().deserializeByClassName(data);
+      return _i25.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -367,10 +388,10 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i22.Protocol().mapRecordToJson(record);
+      return _i24.Protocol().mapRecordToJson(record);
     } catch (_) {}
     try {
-      return _i23.Protocol().mapRecordToJson(record);
+      return _i25.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }

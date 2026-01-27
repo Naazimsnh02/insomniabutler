@@ -20,29 +20,32 @@ import 'ai_action.dart' as _i5;
 import 'chat_message.dart' as _i6;
 import 'chat_session_info.dart' as _i7;
 import 'greetings/greeting.dart' as _i8;
-import 'journal_entry.dart' as _i9;
-import 'journal_insight.dart' as _i10;
-import 'journal_prompt.dart' as _i11;
-import 'journal_stats.dart' as _i12;
-import 'sleep_insight.dart' as _i13;
-import 'sleep_session.dart' as _i14;
-import 'thought_log.dart' as _i15;
-import 'thought_response.dart' as _i16;
-import 'user.dart' as _i17;
-import 'user_insights.dart' as _i18;
-import 'package:insomniabutler_server/src/generated/sleep_session.dart' as _i19;
-import 'package:insomniabutler_server/src/generated/journal_entry.dart' as _i20;
+import 'int_wrapper.dart' as _i9;
+import 'journal_entry.dart' as _i10;
+import 'journal_insight.dart' as _i11;
+import 'journal_prompt.dart' as _i12;
+import 'journal_stats.dart' as _i13;
+import 'sleep_insight.dart' as _i14;
+import 'sleep_session.dart' as _i15;
+import 'thought_log.dart' as _i16;
+import 'thought_response.dart' as _i17;
+import 'user.dart' as _i18;
+import 'user_insights.dart' as _i19;
+import 'package:insomniabutler_server/src/generated/sleep_insight.dart' as _i20;
+import 'package:insomniabutler_server/src/generated/sleep_session.dart' as _i21;
+import 'package:insomniabutler_server/src/generated/journal_entry.dart' as _i22;
 import 'package:insomniabutler_server/src/generated/journal_prompt.dart'
-    as _i21;
+    as _i23;
 import 'package:insomniabutler_server/src/generated/journal_insight.dart'
-    as _i22;
-import 'package:insomniabutler_server/src/generated/chat_message.dart' as _i23;
-import 'package:insomniabutler_server/src/generated/chat_session_info.dart'
     as _i24;
+import 'package:insomniabutler_server/src/generated/chat_message.dart' as _i25;
+import 'package:insomniabutler_server/src/generated/chat_session_info.dart'
+    as _i26;
 export 'ai_action.dart';
 export 'chat_message.dart';
 export 'chat_session_info.dart';
 export 'greetings/greeting.dart';
+export 'int_wrapper.dart';
 export 'journal_entry.dart';
 export 'journal_insight.dart';
 export 'journal_prompt.dart';
@@ -269,6 +272,74 @@ class Protocol extends _i1.SerializationManagerServer {
           isPrimary: false,
           vectorDistanceFunction: _i2.VectorDistanceFunction.l2,
           vectorColumnType: _i2.ColumnType.vector,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'journal_insights',
+      dartName: 'JournalInsight',
+      schema: 'public',
+      module: 'insomniabutler',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'journal_insights_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'insightType',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'message',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'confidence',
+          columnType: _i2.ColumnType.doublePrecision,
+          isNullable: false,
+          dartType: 'double',
+        ),
+        _i2.ColumnDefinition(
+          name: 'relatedEntryIds',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'generatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'journal_insights_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
         ),
       ],
       managed: true,
@@ -729,6 +800,30 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'DateTime?',
         ),
         _i2.ColumnDefinition(
+          name: 'sleepInsightsEnabled',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'sleepInsightsTime',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'journalInsightsEnabled',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'journalInsightsTime',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
           name: 'createdAt',
           columnType: _i2.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
@@ -797,35 +892,38 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i8.Greeting) {
       return _i8.Greeting.fromJson(data) as T;
     }
-    if (t == _i9.JournalEntry) {
-      return _i9.JournalEntry.fromJson(data) as T;
+    if (t == _i9.IntWrapper) {
+      return _i9.IntWrapper.fromJson(data) as T;
     }
-    if (t == _i10.JournalInsight) {
-      return _i10.JournalInsight.fromJson(data) as T;
+    if (t == _i10.JournalEntry) {
+      return _i10.JournalEntry.fromJson(data) as T;
     }
-    if (t == _i11.JournalPrompt) {
-      return _i11.JournalPrompt.fromJson(data) as T;
+    if (t == _i11.JournalInsight) {
+      return _i11.JournalInsight.fromJson(data) as T;
     }
-    if (t == _i12.JournalStats) {
-      return _i12.JournalStats.fromJson(data) as T;
+    if (t == _i12.JournalPrompt) {
+      return _i12.JournalPrompt.fromJson(data) as T;
     }
-    if (t == _i13.SleepInsight) {
-      return _i13.SleepInsight.fromJson(data) as T;
+    if (t == _i13.JournalStats) {
+      return _i13.JournalStats.fromJson(data) as T;
     }
-    if (t == _i14.SleepSession) {
-      return _i14.SleepSession.fromJson(data) as T;
+    if (t == _i14.SleepInsight) {
+      return _i14.SleepInsight.fromJson(data) as T;
     }
-    if (t == _i15.ThoughtLog) {
-      return _i15.ThoughtLog.fromJson(data) as T;
+    if (t == _i15.SleepSession) {
+      return _i15.SleepSession.fromJson(data) as T;
     }
-    if (t == _i16.ThoughtResponse) {
-      return _i16.ThoughtResponse.fromJson(data) as T;
+    if (t == _i16.ThoughtLog) {
+      return _i16.ThoughtLog.fromJson(data) as T;
     }
-    if (t == _i17.User) {
-      return _i17.User.fromJson(data) as T;
+    if (t == _i17.ThoughtResponse) {
+      return _i17.ThoughtResponse.fromJson(data) as T;
     }
-    if (t == _i18.UserInsights) {
-      return _i18.UserInsights.fromJson(data) as T;
+    if (t == _i18.User) {
+      return _i18.User.fromJson(data) as T;
+    }
+    if (t == _i19.UserInsights) {
+      return _i19.UserInsights.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.AIAction?>()) {
       return (data != null ? _i5.AIAction.fromJson(data) : null) as T;
@@ -839,35 +937,38 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i8.Greeting?>()) {
       return (data != null ? _i8.Greeting.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i9.JournalEntry?>()) {
-      return (data != null ? _i9.JournalEntry.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i9.IntWrapper?>()) {
+      return (data != null ? _i9.IntWrapper.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i10.JournalInsight?>()) {
-      return (data != null ? _i10.JournalInsight.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i10.JournalEntry?>()) {
+      return (data != null ? _i10.JournalEntry.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i11.JournalPrompt?>()) {
-      return (data != null ? _i11.JournalPrompt.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i11.JournalInsight?>()) {
+      return (data != null ? _i11.JournalInsight.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i12.JournalStats?>()) {
-      return (data != null ? _i12.JournalStats.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i12.JournalPrompt?>()) {
+      return (data != null ? _i12.JournalPrompt.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i13.SleepInsight?>()) {
-      return (data != null ? _i13.SleepInsight.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i13.JournalStats?>()) {
+      return (data != null ? _i13.JournalStats.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i14.SleepSession?>()) {
-      return (data != null ? _i14.SleepSession.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i14.SleepInsight?>()) {
+      return (data != null ? _i14.SleepInsight.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i15.ThoughtLog?>()) {
-      return (data != null ? _i15.ThoughtLog.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i15.SleepSession?>()) {
+      return (data != null ? _i15.SleepSession.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i16.ThoughtResponse?>()) {
-      return (data != null ? _i16.ThoughtResponse.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i16.ThoughtLog?>()) {
+      return (data != null ? _i16.ThoughtLog.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i17.User?>()) {
-      return (data != null ? _i17.User.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i17.ThoughtResponse?>()) {
+      return (data != null ? _i17.ThoughtResponse.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i18.UserInsights?>()) {
-      return (data != null ? _i18.UserInsights.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i18.User?>()) {
+      return (data != null ? _i18.User.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i19.UserInsights?>()) {
+      return (data != null ? _i19.UserInsights.fromJson(data) : null) as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
@@ -878,39 +979,45 @@ class Protocol extends _i1.SerializationManagerServer {
           )
           as T;
     }
-    if (t == List<_i19.SleepSession>) {
+    if (t == List<_i20.SleepInsight>) {
       return (data as List)
-              .map((e) => deserialize<_i19.SleepSession>(e))
+              .map((e) => deserialize<_i20.SleepInsight>(e))
               .toList()
           as T;
     }
-    if (t == List<_i20.JournalEntry>) {
+    if (t == List<_i21.SleepSession>) {
       return (data as List)
-              .map((e) => deserialize<_i20.JournalEntry>(e))
+              .map((e) => deserialize<_i21.SleepSession>(e))
               .toList()
           as T;
     }
-    if (t == List<_i21.JournalPrompt>) {
+    if (t == List<_i22.JournalEntry>) {
       return (data as List)
-              .map((e) => deserialize<_i21.JournalPrompt>(e))
+              .map((e) => deserialize<_i22.JournalEntry>(e))
               .toList()
           as T;
     }
-    if (t == List<_i22.JournalInsight>) {
+    if (t == List<_i23.JournalPrompt>) {
       return (data as List)
-              .map((e) => deserialize<_i22.JournalInsight>(e))
+              .map((e) => deserialize<_i23.JournalPrompt>(e))
               .toList()
           as T;
     }
-    if (t == List<_i23.ChatMessage>) {
+    if (t == List<_i24.JournalInsight>) {
       return (data as List)
-              .map((e) => deserialize<_i23.ChatMessage>(e))
+              .map((e) => deserialize<_i24.JournalInsight>(e))
               .toList()
           as T;
     }
-    if (t == List<_i24.ChatSessionInfo>) {
+    if (t == List<_i25.ChatMessage>) {
       return (data as List)
-              .map((e) => deserialize<_i24.ChatSessionInfo>(e))
+              .map((e) => deserialize<_i25.ChatMessage>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i26.ChatSessionInfo>) {
+      return (data as List)
+              .map((e) => deserialize<_i26.ChatSessionInfo>(e))
               .toList()
           as T;
     }
@@ -932,16 +1039,17 @@ class Protocol extends _i1.SerializationManagerServer {
       _i6.ChatMessage => 'ChatMessage',
       _i7.ChatSessionInfo => 'ChatSessionInfo',
       _i8.Greeting => 'Greeting',
-      _i9.JournalEntry => 'JournalEntry',
-      _i10.JournalInsight => 'JournalInsight',
-      _i11.JournalPrompt => 'JournalPrompt',
-      _i12.JournalStats => 'JournalStats',
-      _i13.SleepInsight => 'SleepInsight',
-      _i14.SleepSession => 'SleepSession',
-      _i15.ThoughtLog => 'ThoughtLog',
-      _i16.ThoughtResponse => 'ThoughtResponse',
-      _i17.User => 'User',
-      _i18.UserInsights => 'UserInsights',
+      _i9.IntWrapper => 'IntWrapper',
+      _i10.JournalEntry => 'JournalEntry',
+      _i11.JournalInsight => 'JournalInsight',
+      _i12.JournalPrompt => 'JournalPrompt',
+      _i13.JournalStats => 'JournalStats',
+      _i14.SleepInsight => 'SleepInsight',
+      _i15.SleepSession => 'SleepSession',
+      _i16.ThoughtLog => 'ThoughtLog',
+      _i17.ThoughtResponse => 'ThoughtResponse',
+      _i18.User => 'User',
+      _i19.UserInsights => 'UserInsights',
       _ => null,
     };
   }
@@ -967,25 +1075,27 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'ChatSessionInfo';
       case _i8.Greeting():
         return 'Greeting';
-      case _i9.JournalEntry():
+      case _i9.IntWrapper():
+        return 'IntWrapper';
+      case _i10.JournalEntry():
         return 'JournalEntry';
-      case _i10.JournalInsight():
+      case _i11.JournalInsight():
         return 'JournalInsight';
-      case _i11.JournalPrompt():
+      case _i12.JournalPrompt():
         return 'JournalPrompt';
-      case _i12.JournalStats():
+      case _i13.JournalStats():
         return 'JournalStats';
-      case _i13.SleepInsight():
+      case _i14.SleepInsight():
         return 'SleepInsight';
-      case _i14.SleepSession():
+      case _i15.SleepSession():
         return 'SleepSession';
-      case _i15.ThoughtLog():
+      case _i16.ThoughtLog():
         return 'ThoughtLog';
-      case _i16.ThoughtResponse():
+      case _i17.ThoughtResponse():
         return 'ThoughtResponse';
-      case _i17.User():
+      case _i18.User():
         return 'User';
-      case _i18.UserInsights():
+      case _i19.UserInsights():
         return 'UserInsights';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -1021,35 +1131,38 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'Greeting') {
       return deserialize<_i8.Greeting>(data['data']);
     }
+    if (dataClassName == 'IntWrapper') {
+      return deserialize<_i9.IntWrapper>(data['data']);
+    }
     if (dataClassName == 'JournalEntry') {
-      return deserialize<_i9.JournalEntry>(data['data']);
+      return deserialize<_i10.JournalEntry>(data['data']);
     }
     if (dataClassName == 'JournalInsight') {
-      return deserialize<_i10.JournalInsight>(data['data']);
+      return deserialize<_i11.JournalInsight>(data['data']);
     }
     if (dataClassName == 'JournalPrompt') {
-      return deserialize<_i11.JournalPrompt>(data['data']);
+      return deserialize<_i12.JournalPrompt>(data['data']);
     }
     if (dataClassName == 'JournalStats') {
-      return deserialize<_i12.JournalStats>(data['data']);
+      return deserialize<_i13.JournalStats>(data['data']);
     }
     if (dataClassName == 'SleepInsight') {
-      return deserialize<_i13.SleepInsight>(data['data']);
+      return deserialize<_i14.SleepInsight>(data['data']);
     }
     if (dataClassName == 'SleepSession') {
-      return deserialize<_i14.SleepSession>(data['data']);
+      return deserialize<_i15.SleepSession>(data['data']);
     }
     if (dataClassName == 'ThoughtLog') {
-      return deserialize<_i15.ThoughtLog>(data['data']);
+      return deserialize<_i16.ThoughtLog>(data['data']);
     }
     if (dataClassName == 'ThoughtResponse') {
-      return deserialize<_i16.ThoughtResponse>(data['data']);
+      return deserialize<_i17.ThoughtResponse>(data['data']);
     }
     if (dataClassName == 'User') {
-      return deserialize<_i17.User>(data['data']);
+      return deserialize<_i18.User>(data['data']);
     }
     if (dataClassName == 'UserInsights') {
-      return deserialize<_i18.UserInsights>(data['data']);
+      return deserialize<_i19.UserInsights>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -1089,18 +1202,20 @@ class Protocol extends _i1.SerializationManagerServer {
     switch (t) {
       case _i6.ChatMessage:
         return _i6.ChatMessage.t;
-      case _i9.JournalEntry:
-        return _i9.JournalEntry.t;
-      case _i11.JournalPrompt:
-        return _i11.JournalPrompt.t;
-      case _i13.SleepInsight:
-        return _i13.SleepInsight.t;
-      case _i14.SleepSession:
-        return _i14.SleepSession.t;
-      case _i15.ThoughtLog:
-        return _i15.ThoughtLog.t;
-      case _i17.User:
-        return _i17.User.t;
+      case _i10.JournalEntry:
+        return _i10.JournalEntry.t;
+      case _i11.JournalInsight:
+        return _i11.JournalInsight.t;
+      case _i12.JournalPrompt:
+        return _i12.JournalPrompt.t;
+      case _i14.SleepInsight:
+        return _i14.SleepInsight.t;
+      case _i15.SleepSession:
+        return _i15.SleepSession.t;
+      case _i16.ThoughtLog:
+        return _i16.ThoughtLog.t;
+      case _i18.User:
+        return _i18.User.t;
     }
     return null;
   }

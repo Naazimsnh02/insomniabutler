@@ -678,32 +678,38 @@ class _InsomniaButlerScreenState extends State<InsomniaButlerScreen>
 
           const Spacer(),
 
-          Column(
+          Row(
             children: [
-              Text(
-                'Insomnia Butler',
-                style: AppTextStyles.h3.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
-                  fontSize: 18,
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.accentPrimary.withOpacity(0.1),
+                  border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  image: const DecorationImage(
+                    image: AssetImage('assets/logo/butler_logo.png'),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-              const SizedBox(height: 2),
-              Row(
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: const BoxDecoration(
-                      color: AppColors.accentCyan,
-                      shape: BoxShape.circle,
+                  Text(
+                    'Insomnia Butler',
+                    style: AppTextStyles.h3.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      height: 1.1,
                     ),
                   ),
-                  const SizedBox(width: 6),
                   Text(
                     'Always here for you',
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.textTertiary,
+                      fontSize: 10,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

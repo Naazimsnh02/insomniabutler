@@ -1,3 +1,4 @@
+import 'package:insomniabutler_client/insomniabutler_client.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -52,6 +53,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   double _avgSleep = 0;
   int _streakDays = 0;
   int _totalSessions = 0;
+  List<SleepInsight> _personalSleepInsights = [];
   bool _isLoadingInsights = true;
   bool _showFullCalendar = false;
 
@@ -252,10 +254,12 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       final results = await Future.wait([
         client.insights.getUserInsights(userId),
         client.insights.getSleepTrend(userId, 30),
+        client.insights.getPersonalizedSleepInsights(userId),
       ]);
 
       final insights = results[0] as dynamic;
       final sessions = results[1] as List<dynamic>;
+      final personalInsights = results[2] as List<SleepInsight>;
 
       // Calculate streak
       int streak = 0;
@@ -407,6 +411,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
               : 0;
           _streakDays = streak;
           _totalSessions = insights.totalSessions;
+          _personalSleepInsights = personalInsights;
           _isLoadingInsights = false;
         });
         _saveToCache();
@@ -1846,10 +1851,69 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                   ),
                 ],
               ),
+              if (_personalSleepInsights.isNotEmpty) ...[
+                const SizedBox(height: 20),
+                ..._personalSleepInsights
+                    .take(3)
+                    .map((insight) => _buildPersonalInsightCard(insight)),
+              ],
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPersonalInsightCard(SleepInsight insight) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              image: DecorationImage(
+                image: AssetImage('assets/logo/butler_logo.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  insight.metric.toUpperCase(),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.accentSkyBlue,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
+                    fontSize: 9,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  insight.description,
+                  style: AppTextStyles.bodySm.copyWith(
+                    color: AppColors.textPrimary.withOpacity(0.9),
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

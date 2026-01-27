@@ -19,6 +19,10 @@ abstract class User implements _i1.SerializableModel {
     required this.name,
     this.sleepGoal,
     this.bedtimePreference,
+    required this.sleepInsightsEnabled,
+    this.sleepInsightsTime,
+    required this.journalInsightsEnabled,
+    this.journalInsightsTime,
     required this.createdAt,
   });
 
@@ -28,6 +32,10 @@ abstract class User implements _i1.SerializableModel {
     required String name,
     String? sleepGoal,
     DateTime? bedtimePreference,
+    required bool sleepInsightsEnabled,
+    String? sleepInsightsTime,
+    required bool journalInsightsEnabled,
+    String? journalInsightsTime,
     required DateTime createdAt,
   }) = _UserImpl;
 
@@ -42,6 +50,11 @@ abstract class User implements _i1.SerializableModel {
           : _i1.DateTimeJsonExtension.fromJson(
               jsonSerialization['bedtimePreference'],
             ),
+      sleepInsightsEnabled: jsonSerialization['sleepInsightsEnabled'] as bool,
+      sleepInsightsTime: jsonSerialization['sleepInsightsTime'] as String?,
+      journalInsightsEnabled:
+          jsonSerialization['journalInsightsEnabled'] as bool,
+      journalInsightsTime: jsonSerialization['journalInsightsTime'] as String?,
       createdAt: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['createdAt'],
       ),
@@ -61,6 +74,14 @@ abstract class User implements _i1.SerializableModel {
 
   DateTime? bedtimePreference;
 
+  bool sleepInsightsEnabled;
+
+  String? sleepInsightsTime;
+
+  bool journalInsightsEnabled;
+
+  String? journalInsightsTime;
+
   DateTime createdAt;
 
   /// Returns a shallow copy of this [User]
@@ -72,6 +93,10 @@ abstract class User implements _i1.SerializableModel {
     String? name,
     String? sleepGoal,
     DateTime? bedtimePreference,
+    bool? sleepInsightsEnabled,
+    String? sleepInsightsTime,
+    bool? journalInsightsEnabled,
+    String? journalInsightsTime,
     DateTime? createdAt,
   });
   @override
@@ -84,6 +109,11 @@ abstract class User implements _i1.SerializableModel {
       if (sleepGoal != null) 'sleepGoal': sleepGoal,
       if (bedtimePreference != null)
         'bedtimePreference': bedtimePreference?.toJson(),
+      'sleepInsightsEnabled': sleepInsightsEnabled,
+      if (sleepInsightsTime != null) 'sleepInsightsTime': sleepInsightsTime,
+      'journalInsightsEnabled': journalInsightsEnabled,
+      if (journalInsightsTime != null)
+        'journalInsightsTime': journalInsightsTime,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -103,6 +133,10 @@ class _UserImpl extends User {
     required String name,
     String? sleepGoal,
     DateTime? bedtimePreference,
+    required bool sleepInsightsEnabled,
+    String? sleepInsightsTime,
+    required bool journalInsightsEnabled,
+    String? journalInsightsTime,
     required DateTime createdAt,
   }) : super._(
          id: id,
@@ -110,6 +144,10 @@ class _UserImpl extends User {
          name: name,
          sleepGoal: sleepGoal,
          bedtimePreference: bedtimePreference,
+         sleepInsightsEnabled: sleepInsightsEnabled,
+         sleepInsightsTime: sleepInsightsTime,
+         journalInsightsEnabled: journalInsightsEnabled,
+         journalInsightsTime: journalInsightsTime,
          createdAt: createdAt,
        );
 
@@ -123,6 +161,10 @@ class _UserImpl extends User {
     String? name,
     Object? sleepGoal = _Undefined,
     Object? bedtimePreference = _Undefined,
+    bool? sleepInsightsEnabled,
+    Object? sleepInsightsTime = _Undefined,
+    bool? journalInsightsEnabled,
+    Object? journalInsightsTime = _Undefined,
     DateTime? createdAt,
   }) {
     return User(
@@ -133,6 +175,15 @@ class _UserImpl extends User {
       bedtimePreference: bedtimePreference is DateTime?
           ? bedtimePreference
           : this.bedtimePreference,
+      sleepInsightsEnabled: sleepInsightsEnabled ?? this.sleepInsightsEnabled,
+      sleepInsightsTime: sleepInsightsTime is String?
+          ? sleepInsightsTime
+          : this.sleepInsightsTime,
+      journalInsightsEnabled:
+          journalInsightsEnabled ?? this.journalInsightsEnabled,
+      journalInsightsTime: journalInsightsTime is String?
+          ? journalInsightsTime
+          : this.journalInsightsTime,
       createdAt: createdAt ?? this.createdAt,
     );
   }

@@ -17,21 +17,22 @@ import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
 import 'package:insomniabutler_client/src/protocol/user.dart' as _i5;
-import 'package:insomniabutler_client/src/protocol/user_insights.dart' as _i6;
-import 'package:insomniabutler_client/src/protocol/sleep_session.dart' as _i7;
-import 'package:insomniabutler_client/src/protocol/journal_entry.dart' as _i8;
-import 'package:insomniabutler_client/src/protocol/journal_prompt.dart' as _i9;
-import 'package:insomniabutler_client/src/protocol/journal_stats.dart' as _i10;
+import 'package:insomniabutler_client/src/protocol/sleep_insight.dart' as _i6;
+import 'package:insomniabutler_client/src/protocol/user_insights.dart' as _i7;
+import 'package:insomniabutler_client/src/protocol/sleep_session.dart' as _i8;
+import 'package:insomniabutler_client/src/protocol/journal_entry.dart' as _i9;
+import 'package:insomniabutler_client/src/protocol/journal_prompt.dart' as _i10;
+import 'package:insomniabutler_client/src/protocol/journal_stats.dart' as _i11;
 import 'package:insomniabutler_client/src/protocol/journal_insight.dart'
-    as _i11;
-import 'package:insomniabutler_client/src/protocol/thought_response.dart'
     as _i12;
-import 'package:insomniabutler_client/src/protocol/chat_message.dart' as _i13;
+import 'package:insomniabutler_client/src/protocol/thought_response.dart'
+    as _i13;
+import 'package:insomniabutler_client/src/protocol/chat_message.dart' as _i14;
 import 'package:insomniabutler_client/src/protocol/chat_session_info.dart'
-    as _i14;
-import 'package:insomniabutler_client/src/protocol/greetings/greeting.dart'
     as _i15;
-import 'protocol.dart' as _i16;
+import 'package:insomniabutler_client/src/protocol/greetings/greeting.dart'
+    as _i16;
+import 'protocol.dart' as _i17;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -288,16 +289,24 @@ class EndpointAuth extends _i2.EndpointRef {
 
   /// Update user preferences
   _i3.Future<_i5.User?> updatePreferences(
-    int userId,
+    int userId, {
     String? sleepGoal,
     DateTime? bedtimePreference,
-  ) => caller.callServerEndpoint<_i5.User?>(
+    bool? sleepInsightsEnabled,
+    String? sleepInsightsTime,
+    bool? journalInsightsEnabled,
+    String? journalInsightsTime,
+  }) => caller.callServerEndpoint<_i5.User?>(
     'auth',
     'updatePreferences',
     {
       'userId': userId,
       'sleepGoal': sleepGoal,
       'bedtimePreference': bedtimePreference,
+      'sleepInsightsEnabled': sleepInsightsEnabled,
+      'sleepInsightsTime': sleepInsightsTime,
+      'journalInsightsEnabled': journalInsightsEnabled,
+      'journalInsightsTime': journalInsightsTime,
     },
   );
 
@@ -368,19 +377,27 @@ class EndpointInsights extends _i2.EndpointRef {
   @override
   String get name => 'insights';
 
+  /// Get current personalized sleep insights (cached or newly generated)
+  _i3.Future<List<_i6.SleepInsight>> getPersonalizedSleepInsights(int userId) =>
+      caller.callServerEndpoint<List<_i6.SleepInsight>>(
+        'insights',
+        'getPersonalizedSleepInsights',
+        {'userId': userId},
+      );
+
   /// Get comprehensive user insights
-  _i3.Future<_i6.UserInsights> getUserInsights(int userId) =>
-      caller.callServerEndpoint<_i6.UserInsights>(
+  _i3.Future<_i7.UserInsights> getUserInsights(int userId) =>
+      caller.callServerEndpoint<_i7.UserInsights>(
         'insights',
         'getUserInsights',
         {'userId': userId},
       );
 
   /// Get weekly insights for a specific week
-  _i3.Future<_i6.UserInsights> getWeeklyInsights(
+  _i3.Future<_i7.UserInsights> getWeeklyInsights(
     int userId,
     DateTime weekStart,
-  ) => caller.callServerEndpoint<_i6.UserInsights>(
+  ) => caller.callServerEndpoint<_i7.UserInsights>(
     'insights',
     'getWeeklyInsights',
     {
@@ -398,10 +415,10 @@ class EndpointInsights extends _i2.EndpointRef {
       );
 
   /// Get sleep quality trend (last N days)
-  _i3.Future<List<_i7.SleepSession>> getSleepTrend(
+  _i3.Future<List<_i8.SleepSession>> getSleepTrend(
     int userId,
     int days,
-  ) => caller.callServerEndpoint<List<_i7.SleepSession>>(
+  ) => caller.callServerEndpoint<List<_i8.SleepSession>>(
     'insights',
     'getSleepTrend',
     {
@@ -427,7 +444,7 @@ class EndpointJournal extends _i2.EndpointRef {
   String get name => 'journal';
 
   /// Create a new journal entry
-  _i3.Future<_i8.JournalEntry> createEntry(
+  _i3.Future<_i9.JournalEntry> createEntry(
     int userId,
     String content, {
     String? title,
@@ -436,7 +453,7 @@ class EndpointJournal extends _i2.EndpointRef {
     String? tags,
     required bool isFavorite,
     DateTime? entryDate,
-  }) => caller.callServerEndpoint<_i8.JournalEntry>(
+  }) => caller.callServerEndpoint<_i9.JournalEntry>(
     'journal',
     'createEntry',
     {
@@ -452,7 +469,7 @@ class EndpointJournal extends _i2.EndpointRef {
   );
 
   /// Update an existing journal entry
-  _i3.Future<_i8.JournalEntry?> updateEntry(
+  _i3.Future<_i9.JournalEntry?> updateEntry(
     int entryId,
     int userId, {
     String? title,
@@ -460,7 +477,7 @@ class EndpointJournal extends _i2.EndpointRef {
     String? mood,
     String? tags,
     bool? isFavorite,
-  }) => caller.callServerEndpoint<_i8.JournalEntry?>(
+  }) => caller.callServerEndpoint<_i9.JournalEntry?>(
     'journal',
     'updateEntry',
     {
@@ -488,10 +505,10 @@ class EndpointJournal extends _i2.EndpointRef {
   );
 
   /// Get a single journal entry
-  _i3.Future<_i8.JournalEntry?> getEntry(
+  _i3.Future<_i9.JournalEntry?> getEntry(
     int entryId,
     int userId,
-  ) => caller.callServerEndpoint<_i8.JournalEntry?>(
+  ) => caller.callServerEndpoint<_i9.JournalEntry?>(
     'journal',
     'getEntry',
     {
@@ -501,13 +518,13 @@ class EndpointJournal extends _i2.EndpointRef {
   );
 
   /// Get user's journal entries with pagination
-  _i3.Future<List<_i8.JournalEntry>> getUserEntries(
+  _i3.Future<List<_i9.JournalEntry>> getUserEntries(
     int userId, {
     required int limit,
     required int offset,
     DateTime? startDate,
     DateTime? endDate,
-  }) => caller.callServerEndpoint<List<_i8.JournalEntry>>(
+  }) => caller.callServerEndpoint<List<_i9.JournalEntry>>(
     'journal',
     'getUserEntries',
     {
@@ -520,12 +537,12 @@ class EndpointJournal extends _i2.EndpointRef {
   );
 
   /// Search journal entries
-  _i3.Future<List<_i8.JournalEntry>> searchEntries(
+  _i3.Future<List<_i9.JournalEntry>> searchEntries(
     int userId,
     String query, {
     String? mood,
     String? tag,
-  }) => caller.callServerEndpoint<List<_i8.JournalEntry>>(
+  }) => caller.callServerEndpoint<List<_i9.JournalEntry>>(
     'journal',
     'searchEntries',
     {
@@ -537,10 +554,10 @@ class EndpointJournal extends _i2.EndpointRef {
   );
 
   /// Toggle favorite status
-  _i3.Future<_i8.JournalEntry?> toggleFavorite(
+  _i3.Future<_i9.JournalEntry?> toggleFavorite(
     int entryId,
     int userId,
-  ) => caller.callServerEndpoint<_i8.JournalEntry?>(
+  ) => caller.callServerEndpoint<_i9.JournalEntry?>(
     'journal',
     'toggleFavorite',
     {
@@ -550,32 +567,32 @@ class EndpointJournal extends _i2.EndpointRef {
   );
 
   /// Get daily prompts
-  _i3.Future<List<_i9.JournalPrompt>> getDailyPrompts(String category) =>
-      caller.callServerEndpoint<List<_i9.JournalPrompt>>(
+  _i3.Future<List<_i10.JournalPrompt>> getDailyPrompts(String category) =>
+      caller.callServerEndpoint<List<_i10.JournalPrompt>>(
         'journal',
         'getDailyPrompts',
         {'category': category},
       );
 
   /// Get all active prompts
-  _i3.Future<List<_i9.JournalPrompt>> getAllPrompts() =>
-      caller.callServerEndpoint<List<_i9.JournalPrompt>>(
+  _i3.Future<List<_i10.JournalPrompt>> getAllPrompts() =>
+      caller.callServerEndpoint<List<_i10.JournalPrompt>>(
         'journal',
         'getAllPrompts',
         {},
       );
 
   /// Get journal statistics
-  _i3.Future<_i10.JournalStats> getJournalStats(int userId) =>
-      caller.callServerEndpoint<_i10.JournalStats>(
+  _i3.Future<_i11.JournalStats> getJournalStats(int userId) =>
+      caller.callServerEndpoint<_i11.JournalStats>(
         'journal',
         'getJournalStats',
         {'userId': userId},
       );
 
   /// Get AI-powered insights
-  _i3.Future<List<_i11.JournalInsight>> getJournalInsights(int userId) =>
-      caller.callServerEndpoint<List<_i11.JournalInsight>>(
+  _i3.Future<List<_i12.JournalInsight>> getJournalInsights(int userId) =>
+      caller.callServerEndpoint<List<_i12.JournalInsight>>(
         'journal',
         'getJournalInsights',
         {'userId': userId},
@@ -598,30 +615,30 @@ class EndpointSleepSession extends _i2.EndpointRef {
   String get name => 'sleepSession';
 
   /// Start a new sleep session
-  _i3.Future<_i7.SleepSession> startSession(int userId) =>
-      caller.callServerEndpoint<_i7.SleepSession>(
+  _i3.Future<_i8.SleepSession> startSession(int userId) =>
+      caller.callServerEndpoint<_i8.SleepSession>(
         'sleepSession',
         'startSession',
         {'userId': userId},
       );
 
   /// Create a full sleep session (used for health data import)
-  _i3.Future<_i7.SleepSession> createSleepSession(
-    _i7.SleepSession sleepSession,
-  ) => caller.callServerEndpoint<_i7.SleepSession>(
+  _i3.Future<_i8.SleepSession> createSleepSession(
+    _i8.SleepSession sleepSession,
+  ) => caller.callServerEndpoint<_i8.SleepSession>(
     'sleepSession',
     'createSleepSession',
     {'sleepSession': sleepSession},
   );
 
   /// End a sleep session with quality feedback
-  _i3.Future<_i7.SleepSession?> endSession(
+  _i3.Future<_i8.SleepSession?> endSession(
     int sessionId,
     int sleepQuality,
     String morningMood,
     int? sleepLatencyMinutes, {
     int? interruptions,
-  }) => caller.callServerEndpoint<_i7.SleepSession?>(
+  }) => caller.callServerEndpoint<_i8.SleepSession?>(
     'sleepSession',
     'endSession',
     {
@@ -647,10 +664,10 @@ class EndpointSleepSession extends _i2.EndpointRef {
   );
 
   /// Get user's sleep sessions with optional limit
-  _i3.Future<List<_i7.SleepSession>> getUserSessions(
+  _i3.Future<List<_i8.SleepSession>> getUserSessions(
     int userId,
     int limit,
-  ) => caller.callServerEndpoint<List<_i7.SleepSession>>(
+  ) => caller.callServerEndpoint<List<_i8.SleepSession>>(
     'sleepSession',
     'getUserSessions',
     {
@@ -660,26 +677,26 @@ class EndpointSleepSession extends _i2.EndpointRef {
   );
 
   /// Get the most recent active session for a user
-  _i3.Future<_i7.SleepSession?> getActiveSession(int userId) =>
-      caller.callServerEndpoint<_i7.SleepSession?>(
+  _i3.Future<_i8.SleepSession?> getActiveSession(int userId) =>
+      caller.callServerEndpoint<_i8.SleepSession?>(
         'sleepSession',
         'getActiveSession',
         {'userId': userId},
       );
 
   /// Get last night's session
-  _i3.Future<_i7.SleepSession?> getLastNightSession(int userId) =>
-      caller.callServerEndpoint<_i7.SleepSession?>(
+  _i3.Future<_i8.SleepSession?> getLastNightSession(int userId) =>
+      caller.callServerEndpoint<_i8.SleepSession?>(
         'sleepSession',
         'getLastNightSession',
         {'userId': userId},
       );
 
   /// Get session for a specific date
-  _i3.Future<_i7.SleepSession?> getSessionForDate(
+  _i3.Future<_i8.SleepSession?> getSessionForDate(
     int userId,
     DateTime date,
-  ) => caller.callServerEndpoint<_i7.SleepSession?>(
+  ) => caller.callServerEndpoint<_i8.SleepSession?>(
     'sleepSession',
     'getSessionForDate',
     {
@@ -689,10 +706,10 @@ class EndpointSleepSession extends _i2.EndpointRef {
   );
 
   /// Update sleep latency for a session
-  _i3.Future<_i7.SleepSession?> updateSleepLatency(
+  _i3.Future<_i8.SleepSession?> updateSleepLatency(
     int sessionId,
     int latencyMinutes,
-  ) => caller.callServerEndpoint<_i7.SleepSession?>(
+  ) => caller.callServerEndpoint<_i8.SleepSession?>(
     'sleepSession',
     'updateSleepLatency',
     {
@@ -702,7 +719,7 @@ class EndpointSleepSession extends _i2.EndpointRef {
   );
 
   /// Log a manual sleep session (retroactive)
-  _i3.Future<_i7.SleepSession> logManualSession(
+  _i3.Future<_i8.SleepSession> logManualSession(
     int userId,
     DateTime bedTime,
     DateTime wakeTime,
@@ -716,7 +733,7 @@ class EndpointSleepSession extends _i2.EndpointRef {
     int? hrv,
     int? respiratoryRate,
     int? interruptions,
-  }) => caller.callServerEndpoint<_i7.SleepSession>(
+  }) => caller.callServerEndpoint<_i8.SleepSession>(
     'sleepSession',
     'logManualSession',
     {
@@ -737,7 +754,7 @@ class EndpointSleepSession extends _i2.EndpointRef {
   );
 
   /// Update an existing sleep session
-  _i3.Future<_i7.SleepSession?> updateSession(
+  _i3.Future<_i8.SleepSession?> updateSession(
     int sessionId,
     DateTime bedTime,
     DateTime wakeTime,
@@ -751,7 +768,7 @@ class EndpointSleepSession extends _i2.EndpointRef {
     int? hrv,
     int? respiratoryRate,
     int? interruptions,
-  }) => caller.callServerEndpoint<_i7.SleepSession?>(
+  }) => caller.callServerEndpoint<_i8.SleepSession?>(
     'sleepSession',
     'updateSession',
     {
@@ -780,10 +797,10 @@ class EndpointSleepSession extends _i2.EndpointRef {
       );
 
   /// Update mood for the user's latest session
-  _i3.Future<_i7.SleepSession?> updateMoodForLatestSession(
+  _i3.Future<_i8.SleepSession?> updateMoodForLatestSession(
     int userId,
     String mood,
-  ) => caller.callServerEndpoint<_i7.SleepSession?>(
+  ) => caller.callServerEndpoint<_i8.SleepSession?>(
     'sleepSession',
     'updateMoodForLatestSession',
     {
@@ -802,13 +819,13 @@ class EndpointThoughtClearing extends _i2.EndpointRef {
   String get name => 'thoughtClearing';
 
   /// Process a user's thought through AI and return categorized response
-  _i3.Future<_i12.ThoughtResponse> processThought(
+  _i3.Future<_i13.ThoughtResponse> processThought(
     int userId,
     String userMessage,
     String sessionId,
     int currentReadiness, {
     DateTime? userLocalTime,
-  }) => caller.callServerEndpoint<_i12.ThoughtResponse>(
+  }) => caller.callServerEndpoint<_i13.ThoughtResponse>(
     'thoughtClearing',
     'processThought',
     {
@@ -821,16 +838,16 @@ class EndpointThoughtClearing extends _i2.EndpointRef {
   );
 
   /// Get conversation history for a session
-  _i3.Future<List<_i13.ChatMessage>> getChatSessionMessages(String sessionId) =>
-      caller.callServerEndpoint<List<_i13.ChatMessage>>(
+  _i3.Future<List<_i14.ChatMessage>> getChatSessionMessages(String sessionId) =>
+      caller.callServerEndpoint<List<_i14.ChatMessage>>(
         'thoughtClearing',
         'getChatSessionMessages',
         {'sessionId': sessionId},
       );
 
   /// Get list of all chat sessions for a user
-  _i3.Future<List<_i14.ChatSessionInfo>> getChatHistory(int userId) =>
-      caller.callServerEndpoint<List<_i14.ChatSessionInfo>>(
+  _i3.Future<List<_i15.ChatSessionInfo>> getChatHistory(int userId) =>
+      caller.callServerEndpoint<List<_i15.ChatSessionInfo>>(
         'thoughtClearing',
         'getChatHistory',
         {'userId': userId},
@@ -860,8 +877,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i15.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i15.Greeting>(
+  _i3.Future<_i16.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i16.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -899,7 +916,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i16.Protocol(),
+         _i17.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,

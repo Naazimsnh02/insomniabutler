@@ -1,8 +1,44 @@
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
+import '../services/insight_service.dart';
 
 /// Analytics and insights endpoint for sleep intelligence
 class InsightsEndpoint extends Endpoint {
+  /// Get current personalized sleep insights (cached or newly generated)
+  Future<List<SleepInsight>> getPersonalizedSleepInsights(
+    Session session,
+    int userId,
+  ) async {
+    final now = DateTime.now().toUtc();
+    final oneDayAgo = now.subtract(const Duration(hours: 24));
+
+    // 1. Check for cached insights from the last 24 hours
+    final cached = await SleepInsight.db.find(
+      session,
+      where: (t) => t.userId.equals(userId) & (t.generatedAt > oneDayAgo),
+      orderBy: (t) => t.generatedAt,
+      orderDescending: true,
+    );
+
+    if (cached.isNotEmpty) {
+      session.log('Returning ${cached.length} cached sleep insights for user $userId');
+      return cached;
+    }
+
+    session.log('No cached sleep insights for user $userId, generating new ones...');
+
+    // 2. If no cache, trigger generation now (for new users or first time)
+    await InsightService.generateSleepInsights(session, userId);
+
+    // 3. Return the newly generated insights
+    return await SleepInsight.db.find(
+      session,
+      where: (t) => t.userId.equals(userId) & (t.generatedAt > oneDayAgo),
+      orderBy: (t) => t.generatedAt,
+      orderDescending: true,
+    );
+  }
+
   /// Get comprehensive user insights
   Future<UserInsights> getUserInsights(Session session, int userId) async {
     // Get sessions with and without Butler

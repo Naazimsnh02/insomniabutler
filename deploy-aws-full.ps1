@@ -188,6 +188,8 @@ Set-ContentUtf8NoBom "aws-deployment-state.json" ($state | ConvertTo-Json)
 
 if (Test-Path "insomniabutler_server") {
     Set-Location "insomniabutler_server"
+    Write-Info "Generating Serverpod code..."
+    serverpod generate
     docker build -t "$PROJECT-server" .
     Set-Location ".."
 }

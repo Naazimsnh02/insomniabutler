@@ -1,0 +1,3 @@
+class: IntWrapper
+fields:
+  value: int

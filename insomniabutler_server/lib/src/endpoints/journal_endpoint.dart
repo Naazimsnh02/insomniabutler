@@ -3,6 +3,7 @@ import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import '../services/gemini_service.dart';
 import '../services/embedding_service.dart';
+import '../services/insight_service.dart';
 import 'dart:convert';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
@@ -331,142 +332,34 @@ class JournalEndpoint extends Endpoint {
     Session session,
     int userId,
   ) async {
-    final insights = <JournalInsight>[];
-    final stats = await getJournalStats(session, userId);
-
-    // 1. Hard Statistics (Always meaningful)
-    if (stats.currentStreak >= 3) {
-      insights.add(
-        JournalInsight(
-          insightType: 'streak',
-          message:
-              '🏆 ${stats.currentStreak}-day streak! Consistency is your superpower for better sleep.',
-          confidence: 1.0,
-        ),
-      );
-    }
-
-    // Get recent entries for AI analysis
-    final recentEntries = await JournalEntry.db.find(
+    // 1. Check for cached insights from the last 24 hours
+    final now = DateTime.now().toUtc();
+    final oneDayAgo = now.subtract(const Duration(hours: 24));
+    
+    final cached = await JournalInsight.db.find(
       session,
-      where: (t) => t.userId.equals(userId),
-      orderBy: (t) => t.entryDate,
+      where: (t) => t.userId.equals(userId) & (t.generatedAt > oneDayAgo),
+      orderBy: (t) => t.generatedAt,
       orderDescending: true,
-      limit: 10,
     );
 
-    if (recentEntries.isEmpty) {
-      return insights;
+    if (cached.isNotEmpty) {
+      session.log('Returning ${cached.length} cached journal insights for user $userId');
+      return cached;
     }
 
-    // 2. Try AI Analysis
-    try {
-      final gemini = _getGeminiService(session);
-      // Check if we have a valid key (mock check since we return empty service above)
-      // Actually simple check: if empty key, GeminiService might fail or we interpret it.
-      // Let's rely on try-catch.
+    session.log('No cached journal insights for user $userId, generating new ones...');
 
-      if (gemini.isConfigured) {
-        final entriesText = recentEntries
-            .map(
-              (e) =>
-                  'Date: ${e.entryDate.toString().split(' ')[0]}, Mood: ${e.mood ?? "N/A"}, Title: ${e.title ?? "N/A"}, Content: ${e.content}',
-            )
-            .join('\n---\n');
+    // 2. If no cache, trigger generation now
+    await InsightService.generateJournalInsights(session, userId);
 
-        final prompt =
-            '''
-Analyze these recent journal entries from a user struggling with sleep/insomnia.
-Provide 2-3 personalized, empathetic insights or specific advice based on patterns in their writing, mood, and daily events.
-Focus on connections between their day, feelings, and sleep.
-Return ONLY a raw JSON array of objects (no markdown, no backticks).
-Structure: [{"insightType": "string", "message": "string", "confidence": number}]
-Example types: "pattern", "advice", "observation".
-Keep messages concise (under 25 words).
-
-Entries:
-$entriesText
-''';
-
-        final response = await gemini.model.generateContent([
-          Content.text(
-            'You are an expert sleep psychologist and data analyst.\n\nUser: $prompt',
-          ),
-        ]);
-        final aiResponse = response.text ?? '';
-
-        // Clean response of markdown if present
-        var jsonStr = aiResponse.trim();
-        if (jsonStr.startsWith('```json')) {
-          jsonStr = jsonStr.replaceAll('```json', '').replaceAll('```', '');
-        } else if (jsonStr.startsWith('```')) {
-          jsonStr = jsonStr.replaceAll('```', '');
-        }
-
-        final List<dynamic> aiData = jsonDecode(jsonStr);
-        for (var item in aiData) {
-          insights.add(
-            JournalInsight(
-              insightType: item['insightType'] ?? 'ai_insight',
-              message: item['message'] ?? '',
-              confidence: (item['confidence'] as num?)?.toDouble() ?? 0.8,
-            ),
-          );
-        }
-
-        // If AI was successful, we return here (plus stats).
-        // We can skip rule-based if we have enough AI insights.
-        if (insights.length >= 2) {
-          return insights;
-        }
-      }
-    } catch (e) {
-      session.log('Error generating AI insights: $e', level: LogLevel.error);
-      // Fall through to rule-based
-    }
-
-    // 3. Fallback / Supplemental Rule-based Insights (if AI failed or gave few results)
-
-    // Frequency
-    final weekAgo = DateTime.now().toUtc().subtract(const Duration(days: 7));
-    final thisWeekCount = recentEntries
-        .where((e) => e.entryDate.isAfter(weekAgo))
-        .length;
-
-    if (thisWeekCount >= 3) {
-      insights.add(
-        JournalInsight(
-          insightType: 'frequency',
-          message:
-              '✨ You journaled $thisWeekCount times this week. Keeping this habit helps clear your mind.',
-          confidence: 0.8,
-        ),
-      );
-    }
-
-    // Mood Patterns (Simple Mode)
-    final moodCounts = <String, int>{};
-    for (var entry in recentEntries) {
-      if (entry.mood != null) {
-        moodCounts[entry.mood!] = (moodCounts[entry.mood!] ?? 0) + 1;
-      }
-    }
-
-    if (moodCounts.isNotEmpty) {
-      final dominantMood = moodCounts.entries.reduce(
-        (a, b) => a.value > b.value ? a : b,
-      );
-      insights.add(
-        JournalInsight(
-          insightType: 'mood',
-          message:
-              '💭 Your recurring mood is "${dominantMood.key}". Noticing this pattern is the first step.',
-          confidence: 0.7,
-        ),
-      );
-    }
-
-    return insights;
+    // 3. Return the newly generated insights
+    return await JournalInsight.db.find(
+      session,
+      where: (t) => t.userId.equals(userId) & (t.generatedAt > oneDayAgo),
+      orderBy: (t) => t.generatedAt,
+      orderDescending: true,
+    );
   }
 
   /// Seed initial prompts (call once during setup)

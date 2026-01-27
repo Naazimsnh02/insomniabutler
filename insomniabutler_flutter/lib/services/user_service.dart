@@ -109,16 +109,28 @@ class UserService {
   static Future<User?> updateSleepPreferences({
     String? sleepGoal,
     DateTime? bedtimePreference,
+    bool? sleepInsightsEnabled,
+    String? sleepInsightsTime,
+    bool? journalInsightsEnabled,
+    String? journalInsightsTime,
   }) async {
     final userId = await getCurrentUserId();
     if (userId == null) return null;
 
     try {
-      return await client.auth.updatePreferences(
+      final updated = await client.auth.updatePreferences(
         userId,
-        sleepGoal,
-        bedtimePreference,
+        sleepGoal: sleepGoal,
+        bedtimePreference: bedtimePreference,
+        sleepInsightsEnabled: sleepInsightsEnabled,
+        sleepInsightsTime: sleepInsightsTime,
+        journalInsightsEnabled: journalInsightsEnabled,
+        journalInsightsTime: journalInsightsTime,
       );
+      if (updated != null) {
+        _currentUser = updated;
+      }
+      return updated;
     } catch (e) {
       debugPrint('Error updating sleep preferences: $e');
       return null;

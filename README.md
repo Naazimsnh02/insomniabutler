@@ -76,7 +76,14 @@ An integrated breathing widget featuring:
 - **Mood Tracker:** Log your daily mood to see how you feel after different sleep qualities.
 
 ### 🚫 Smart Distraction Nudges
-A gentle notification system that detects when you open distracting apps (Social Media, Games) during your scheduled bedtime and sends high-priority reminders to help you stay on track with your sleep goals.
+Intelligent notification system that detects when you open distracting apps (social media, games) during your scheduled bedtime window and sends gentle high-priority reminders to help you stay on track with your sleep goals.
+
+### 📅 Daily Butler's Insights
+The Butler doesn't just track data; it provides scheduled, proactive wisdom.
+- **Automated AI Analysis**: Every day at your preferred time, the Butler analyzes your latest sleep metrics and journal entries using Gemini AI.
+- **Scheduled Background Jobs**: Leverages **Serverpod FutureCalls** to handle generation in the background without user intervention.
+- **Performance Caching**: All insights are cached in a dedicated database schema, providing instant access to the latest "Butler's Tips."
+- **User-Defined Preferences**: Toggle insights for Sleep or Journals and set specific notification times through the Account dashboard.
 
 ### 💬 Session History & Context
 - **Chat Archives:** Review past conversations and advice from the Butler.
@@ -115,6 +122,7 @@ A gentle notification system that detects when you open distracting apps (Social
 
 2.  **Configure Environment:**
     - Navigate to `insomniabutler_server/config/`
+    - Copy `passwords.template.yaml` to `passwords.yaml` if it doesn't exist.
     - Update `passwords.yaml` with your `geminiApiKey` and database credentials.
 
 3.  **Spin up Postgres with pgvector:**

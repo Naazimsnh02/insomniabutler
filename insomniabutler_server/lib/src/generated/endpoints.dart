@@ -361,6 +361,26 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<DateTime?>(),
               nullable: true,
             ),
+            'sleepInsightsEnabled': _i1.ParameterDescription(
+              name: 'sleepInsightsEnabled',
+              type: _i1.getType<bool?>(),
+              nullable: true,
+            ),
+            'sleepInsightsTime': _i1.ParameterDescription(
+              name: 'sleepInsightsTime',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'journalInsightsEnabled': _i1.ParameterDescription(
+              name: 'journalInsightsEnabled',
+              type: _i1.getType<bool?>(),
+              nullable: true,
+            ),
+            'journalInsightsTime': _i1.ParameterDescription(
+              name: 'journalInsightsTime',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -370,8 +390,12 @@ class Endpoints extends _i1.EndpointDispatch {
                   (endpoints['auth'] as _i4.AuthEndpoint).updatePreferences(
                     session,
                     params['userId'],
-                    params['sleepGoal'],
-                    params['bedtimePreference'],
+                    sleepGoal: params['sleepGoal'],
+                    bedtimePreference: params['bedtimePreference'],
+                    sleepInsightsEnabled: params['sleepInsightsEnabled'],
+                    sleepInsightsTime: params['sleepInsightsTime'],
+                    journalInsightsEnabled: params['journalInsightsEnabled'],
+                    journalInsightsTime: params['journalInsightsTime'],
                   ),
         ),
         'updateUserProfile': _i1.MethodConnector(
@@ -494,6 +518,25 @@ class Endpoints extends _i1.EndpointDispatch {
       name: 'insights',
       endpoint: endpoints['insights']!,
       methodConnectors: {
+        'getPersonalizedSleepInsights': _i1.MethodConnector(
+          name: 'getPersonalizedSleepInsights',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['insights'] as _i6.InsightsEndpoint)
+                  .getPersonalizedSleepInsights(
+                    session,
+                    params['userId'],
+                  ),
+        ),
         'getUserInsights': _i1.MethodConnector(
           name: 'getUserInsights',
           params: {

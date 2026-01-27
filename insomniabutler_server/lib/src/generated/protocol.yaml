@@ -21,6 +21,7 @@ dev:
   - clearUserData:
   - backfillEmbeddings:
 insights:
+  - getPersonalizedSleepInsights:
   - getUserInsights:
   - getWeeklyInsights:
   - getThoughtCategoryBreakdown:

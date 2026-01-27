@@ -5,4 +5,8 @@ fields:
   name: String
   sleepGoal: String?
   bedtimePreference: DateTime?
+  sleepInsightsEnabled: bool
+  sleepInsightsTime: String?
+  journalInsightsEnabled: bool
+  journalInsightsTime: String?
   createdAt: DateTime

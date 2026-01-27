@@ -791,6 +791,8 @@ class AccountScreenState extends State<AccountScreen> {
                 onSet: (val) async {
                   await AccountSettingsService.setInsightsTime(val);
                   _insightsTime = val;
+                  await UserService.updateSleepPreferences(
+                      sleepInsightsTime: val);
                 },
                 onSync: _syncInsightsNotification,
               ),
@@ -801,6 +803,8 @@ class AccountScreenState extends State<AccountScreen> {
               await AccountSettingsService.setInsightsNotifications(value);
               setState(() => _insightsNotifications = value);
               await _syncInsightsNotification();
+              await UserService.updateSleepPreferences(
+                  sleepInsightsEnabled: value);
             },
           ),
           _buildDivider(),
@@ -817,6 +821,8 @@ class AccountScreenState extends State<AccountScreen> {
                 onSet: (val) async {
                   await AccountSettingsService.setJournalTime(val);
                   _journalTime = val;
+                  await UserService.updateSleepPreferences(
+                      journalInsightsTime: val);
                 },
                 onSync: _syncJournalNotification,
               ),
@@ -827,6 +833,8 @@ class AccountScreenState extends State<AccountScreen> {
               await AccountSettingsService.setJournalNotifications(value);
               setState(() => _journalNotifications = value);
               await _syncJournalNotification();
+              await UserService.updateSleepPreferences(
+                  journalInsightsEnabled: value);
             },
           ),
         ],

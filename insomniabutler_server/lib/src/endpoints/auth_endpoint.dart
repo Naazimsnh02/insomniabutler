@@ -1,5 +1,6 @@
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart' as protocol;
+import '../services/insight_service.dart';
 
 /// Authentication endpoint for user registration and login
 class AuthEndpoint extends Endpoint {
@@ -18,14 +19,34 @@ class AuthEndpoint extends Endpoint {
 
     if (existing != null) return null;
 
-    // Create user
+    // Create user with default insight settings
     var user = protocol.User(
       email: email,
       name: name,
+      sleepInsightsEnabled: true,
+      sleepInsightsTime: '09:00',
+      journalInsightsEnabled: true,
+      journalInsightsTime: '21:00',
       createdAt: DateTime.now(),
     );
 
-    return await protocol.User.db.insertRow(session, user);
+    final savedUser = await protocol.User.db.insertRow(session, user);
+
+    if (savedUser.id != null) {
+      // Schedule initial insight jobs
+      await session.serverpod.futureCallWithDelay(
+        'SleepInsightCall',
+        protocol.IntWrapper(value: savedUser.id!),
+        InsightService.calculateDelay(savedUser.sleepInsightsTime),
+      );
+      await session.serverpod.futureCallWithDelay(
+        'JournalInsightCall',
+        protocol.IntWrapper(value: savedUser.id!),
+        InsightService.calculateDelay(savedUser.journalInsightsTime),
+      );
+    }
+
+    return savedUser;
   }
 
   /// Login user by email
@@ -45,20 +66,58 @@ class AuthEndpoint extends Endpoint {
   /// Update user preferences
   Future<protocol.User?> updatePreferences(
     Session session,
-    int userId,
+    int userId, {
     String? sleepGoal,
     DateTime? bedtimePreference,
-  ) async {
+    bool? sleepInsightsEnabled,
+    String? sleepInsightsTime,
+    bool? journalInsightsEnabled,
+    String? journalInsightsTime,
+  }) async {
     var user = await protocol.User.db.findById(session, userId);
 
     if (user == null) return null;
 
+    final oldSleepEnabled = user.sleepInsightsEnabled;
+    final oldSleepTime = user.sleepInsightsTime;
+    final oldJournalEnabled = user.journalInsightsEnabled;
+    final oldJournalTime = user.journalInsightsTime;
+
     var updated = user.copyWith(
       sleepGoal: sleepGoal ?? user.sleepGoal,
       bedtimePreference: bedtimePreference ?? user.bedtimePreference,
+      sleepInsightsEnabled: sleepInsightsEnabled ?? user.sleepInsightsEnabled,
+      sleepInsightsTime: sleepInsightsTime ?? user.sleepInsightsTime,
+      journalInsightsEnabled:
+          journalInsightsEnabled ?? user.journalInsightsEnabled,
+      journalInsightsTime: journalInsightsTime ?? user.journalInsightsTime,
     );
 
-    return await protocol.User.db.updateRow(session, updated);
+    final savedUser = await protocol.User.db.updateRow(session, updated);
+
+    // Re-schedule jobs if settings changed
+    if (savedUser.id != null) {
+      if ((sleepInsightsEnabled == true && !oldSleepEnabled) ||
+          (sleepInsightsTime != null && sleepInsightsTime != oldSleepTime)) {
+        await session.serverpod.futureCallWithDelay(
+          'SleepInsightCall',
+          protocol.IntWrapper(value: savedUser.id!),
+          InsightService.calculateDelay(savedUser.sleepInsightsTime),
+        );
+      }
+
+      if ((journalInsightsEnabled == true && !oldJournalEnabled) ||
+          (journalInsightsTime != null &&
+              journalInsightsTime != oldJournalTime)) {
+        await session.serverpod.futureCallWithDelay(
+          'JournalInsightCall',
+          protocol.IntWrapper(value: savedUser.id!),
+          InsightService.calculateDelay(savedUser.journalInsightsTime),
+        );
+      }
+    }
+
+    return savedUser;
   }
 
   /// Update user profile (name)

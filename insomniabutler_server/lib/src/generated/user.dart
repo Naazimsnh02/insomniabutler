@@ -19,6 +19,10 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     required this.name,
     this.sleepGoal,
     this.bedtimePreference,
+    required this.sleepInsightsEnabled,
+    this.sleepInsightsTime,
+    required this.journalInsightsEnabled,
+    this.journalInsightsTime,
     required this.createdAt,
   });
 
@@ -28,6 +32,10 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     required String name,
     String? sleepGoal,
     DateTime? bedtimePreference,
+    required bool sleepInsightsEnabled,
+    String? sleepInsightsTime,
+    required bool journalInsightsEnabled,
+    String? journalInsightsTime,
     required DateTime createdAt,
   }) = _UserImpl;
 
@@ -42,6 +50,11 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
           : _i1.DateTimeJsonExtension.fromJson(
               jsonSerialization['bedtimePreference'],
             ),
+      sleepInsightsEnabled: jsonSerialization['sleepInsightsEnabled'] as bool,
+      sleepInsightsTime: jsonSerialization['sleepInsightsTime'] as String?,
+      journalInsightsEnabled:
+          jsonSerialization['journalInsightsEnabled'] as bool,
+      journalInsightsTime: jsonSerialization['journalInsightsTime'] as String?,
       createdAt: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['createdAt'],
       ),
@@ -63,6 +76,14 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
 
   DateTime? bedtimePreference;
 
+  bool sleepInsightsEnabled;
+
+  String? sleepInsightsTime;
+
+  bool journalInsightsEnabled;
+
+  String? journalInsightsTime;
+
   DateTime createdAt;
 
   @override
@@ -77,6 +98,10 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     String? name,
     String? sleepGoal,
     DateTime? bedtimePreference,
+    bool? sleepInsightsEnabled,
+    String? sleepInsightsTime,
+    bool? journalInsightsEnabled,
+    String? journalInsightsTime,
     DateTime? createdAt,
   });
   @override
@@ -89,6 +114,11 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       if (sleepGoal != null) 'sleepGoal': sleepGoal,
       if (bedtimePreference != null)
         'bedtimePreference': bedtimePreference?.toJson(),
+      'sleepInsightsEnabled': sleepInsightsEnabled,
+      if (sleepInsightsTime != null) 'sleepInsightsTime': sleepInsightsTime,
+      'journalInsightsEnabled': journalInsightsEnabled,
+      if (journalInsightsTime != null)
+        'journalInsightsTime': journalInsightsTime,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -103,6 +133,11 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       if (sleepGoal != null) 'sleepGoal': sleepGoal,
       if (bedtimePreference != null)
         'bedtimePreference': bedtimePreference?.toJson(),
+      'sleepInsightsEnabled': sleepInsightsEnabled,
+      if (sleepInsightsTime != null) 'sleepInsightsTime': sleepInsightsTime,
+      'journalInsightsEnabled': journalInsightsEnabled,
+      if (journalInsightsTime != null)
+        'journalInsightsTime': journalInsightsTime,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -146,6 +181,10 @@ class _UserImpl extends User {
     required String name,
     String? sleepGoal,
     DateTime? bedtimePreference,
+    required bool sleepInsightsEnabled,
+    String? sleepInsightsTime,
+    required bool journalInsightsEnabled,
+    String? journalInsightsTime,
     required DateTime createdAt,
   }) : super._(
          id: id,
@@ -153,6 +192,10 @@ class _UserImpl extends User {
          name: name,
          sleepGoal: sleepGoal,
          bedtimePreference: bedtimePreference,
+         sleepInsightsEnabled: sleepInsightsEnabled,
+         sleepInsightsTime: sleepInsightsTime,
+         journalInsightsEnabled: journalInsightsEnabled,
+         journalInsightsTime: journalInsightsTime,
          createdAt: createdAt,
        );
 
@@ -166,6 +209,10 @@ class _UserImpl extends User {
     String? name,
     Object? sleepGoal = _Undefined,
     Object? bedtimePreference = _Undefined,
+    bool? sleepInsightsEnabled,
+    Object? sleepInsightsTime = _Undefined,
+    bool? journalInsightsEnabled,
+    Object? journalInsightsTime = _Undefined,
     DateTime? createdAt,
   }) {
     return User(
@@ -176,6 +223,15 @@ class _UserImpl extends User {
       bedtimePreference: bedtimePreference is DateTime?
           ? bedtimePreference
           : this.bedtimePreference,
+      sleepInsightsEnabled: sleepInsightsEnabled ?? this.sleepInsightsEnabled,
+      sleepInsightsTime: sleepInsightsTime is String?
+          ? sleepInsightsTime
+          : this.sleepInsightsTime,
+      journalInsightsEnabled:
+          journalInsightsEnabled ?? this.journalInsightsEnabled,
+      journalInsightsTime: journalInsightsTime is String?
+          ? journalInsightsTime
+          : this.journalInsightsTime,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -205,6 +261,30 @@ class UserUpdateTable extends _i1.UpdateTable<UserTable> {
         value,
       );
 
+  _i1.ColumnValue<bool, bool> sleepInsightsEnabled(bool value) =>
+      _i1.ColumnValue(
+        table.sleepInsightsEnabled,
+        value,
+      );
+
+  _i1.ColumnValue<String, String> sleepInsightsTime(String? value) =>
+      _i1.ColumnValue(
+        table.sleepInsightsTime,
+        value,
+      );
+
+  _i1.ColumnValue<bool, bool> journalInsightsEnabled(bool value) =>
+      _i1.ColumnValue(
+        table.journalInsightsEnabled,
+        value,
+      );
+
+  _i1.ColumnValue<String, String> journalInsightsTime(String? value) =>
+      _i1.ColumnValue(
+        table.journalInsightsTime,
+        value,
+      );
+
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _i1.ColumnValue(
         table.createdAt,
@@ -231,6 +311,22 @@ class UserTable extends _i1.Table<int?> {
       'bedtimePreference',
       this,
     );
+    sleepInsightsEnabled = _i1.ColumnBool(
+      'sleepInsightsEnabled',
+      this,
+    );
+    sleepInsightsTime = _i1.ColumnString(
+      'sleepInsightsTime',
+      this,
+    );
+    journalInsightsEnabled = _i1.ColumnBool(
+      'journalInsightsEnabled',
+      this,
+    );
+    journalInsightsTime = _i1.ColumnString(
+      'journalInsightsTime',
+      this,
+    );
     createdAt = _i1.ColumnDateTime(
       'createdAt',
       this,
@@ -247,6 +343,14 @@ class UserTable extends _i1.Table<int?> {
 
   late final _i1.ColumnDateTime bedtimePreference;
 
+  late final _i1.ColumnBool sleepInsightsEnabled;
+
+  late final _i1.ColumnString sleepInsightsTime;
+
+  late final _i1.ColumnBool journalInsightsEnabled;
+
+  late final _i1.ColumnString journalInsightsTime;
+
   late final _i1.ColumnDateTime createdAt;
 
   @override
@@ -256,6 +360,10 @@ class UserTable extends _i1.Table<int?> {
     name,
     sleepGoal,
     bedtimePreference,
+    sleepInsightsEnabled,
+    sleepInsightsTime,
+    journalInsightsEnabled,
+    journalInsightsTime,
     createdAt,
   ];
 }

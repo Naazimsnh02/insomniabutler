@@ -17,20 +17,22 @@ import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i4;
 import 'package:insomniabutler_server/src/generated/user.dart' as _i5;
-import 'package:insomniabutler_server/src/generated/user_insights.dart' as _i6;
-import 'package:insomniabutler_server/src/generated/sleep_session.dart' as _i7;
-import 'package:insomniabutler_server/src/generated/journal_entry.dart' as _i8;
-import 'package:insomniabutler_server/src/generated/journal_prompt.dart' as _i9;
-import 'package:insomniabutler_server/src/generated/journal_stats.dart' as _i10;
+import 'package:insomniabutler_server/src/generated/sleep_insight.dart' as _i6;
+import 'package:insomniabutler_server/src/generated/user_insights.dart' as _i7;
+import 'package:insomniabutler_server/src/generated/sleep_session.dart' as _i8;
+import 'package:insomniabutler_server/src/generated/journal_entry.dart' as _i9;
+import 'package:insomniabutler_server/src/generated/journal_prompt.dart'
+    as _i10;
+import 'package:insomniabutler_server/src/generated/journal_stats.dart' as _i11;
 import 'package:insomniabutler_server/src/generated/journal_insight.dart'
-    as _i11;
-import 'package:insomniabutler_server/src/generated/thought_response.dart'
     as _i12;
-import 'package:insomniabutler_server/src/generated/chat_message.dart' as _i13;
+import 'package:insomniabutler_server/src/generated/thought_response.dart'
+    as _i13;
+import 'package:insomniabutler_server/src/generated/chat_message.dart' as _i14;
 import 'package:insomniabutler_server/src/generated/chat_session_info.dart'
-    as _i14;
-import 'package:insomniabutler_server/src/generated/greetings/greeting.dart'
     as _i15;
+import 'package:insomniabutler_server/src/generated/greetings/greeting.dart'
+    as _i16;
 import 'package:insomniabutler_server/src/generated/protocol.dart';
 import 'package:insomniabutler_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -602,10 +604,14 @@ class _AuthEndpoint {
 
   _i3.Future<_i5.User?> updatePreferences(
     _i1.TestSessionBuilder sessionBuilder,
-    int userId,
+    int userId, {
     String? sleepGoal,
     DateTime? bedtimePreference,
-  ) async {
+    bool? sleepInsightsEnabled,
+    String? sleepInsightsTime,
+    bool? journalInsightsEnabled,
+    String? journalInsightsTime,
+  }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
@@ -621,6 +627,10 @@ class _AuthEndpoint {
             'userId': userId,
             'sleepGoal': sleepGoal,
             'bedtimePreference': bedtimePreference,
+            'sleepInsightsEnabled': sleepInsightsEnabled,
+            'sleepInsightsTime': sleepInsightsTime,
+            'journalInsightsEnabled': journalInsightsEnabled,
+            'journalInsightsTime': journalInsightsTime,
           }),
           serializationManager: _serializationManager,
         );
@@ -848,7 +858,38 @@ class _InsightsEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i6.UserInsights> getUserInsights(
+  _i3.Future<List<_i6.SleepInsight>> getPersonalizedSleepInsights(
+    _i1.TestSessionBuilder sessionBuilder,
+    int userId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'insights',
+            method: 'getPersonalizedSleepInsights',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'insights',
+          methodName: 'getPersonalizedSleepInsights',
+          parameters: _i1.testObjectToJson({'userId': userId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i6.SleepInsight>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i7.UserInsights> getUserInsights(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
   ) async {
@@ -871,7 +912,7 @@ class _InsightsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i6.UserInsights>);
+                as _i3.Future<_i7.UserInsights>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -879,7 +920,7 @@ class _InsightsEndpoint {
     });
   }
 
-  _i3.Future<_i6.UserInsights> getWeeklyInsights(
+  _i3.Future<_i7.UserInsights> getWeeklyInsights(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
     DateTime weekStart,
@@ -906,7 +947,7 @@ class _InsightsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i6.UserInsights>);
+                as _i3.Future<_i7.UserInsights>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -945,7 +986,7 @@ class _InsightsEndpoint {
     });
   }
 
-  _i3.Future<List<_i7.SleepSession>> getSleepTrend(
+  _i3.Future<List<_i8.SleepSession>> getSleepTrend(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
     int days,
@@ -972,7 +1013,7 @@ class _InsightsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i7.SleepSession>>);
+                as _i3.Future<List<_i8.SleepSession>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1022,7 +1063,7 @@ class _JournalEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i8.JournalEntry> createEntry(
+  _i3.Future<_i9.JournalEntry> createEntry(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
     String content, {
@@ -1061,7 +1102,7 @@ class _JournalEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i8.JournalEntry>);
+                as _i3.Future<_i9.JournalEntry>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1069,7 +1110,7 @@ class _JournalEndpoint {
     });
   }
 
-  _i3.Future<_i8.JournalEntry?> updateEntry(
+  _i3.Future<_i9.JournalEntry?> updateEntry(
     _i1.TestSessionBuilder sessionBuilder,
     int entryId,
     int userId, {
@@ -1106,7 +1147,7 @@ class _JournalEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i8.JournalEntry?>);
+                as _i3.Future<_i9.JournalEntry?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1149,7 +1190,7 @@ class _JournalEndpoint {
     });
   }
 
-  _i3.Future<_i8.JournalEntry?> getEntry(
+  _i3.Future<_i9.JournalEntry?> getEntry(
     _i1.TestSessionBuilder sessionBuilder,
     int entryId,
     int userId,
@@ -1176,7 +1217,7 @@ class _JournalEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i8.JournalEntry?>);
+                as _i3.Future<_i9.JournalEntry?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1184,7 +1225,7 @@ class _JournalEndpoint {
     });
   }
 
-  _i3.Future<List<_i8.JournalEntry>> getUserEntries(
+  _i3.Future<List<_i9.JournalEntry>> getUserEntries(
     _i1.TestSessionBuilder sessionBuilder,
     int userId, {
     required int limit,
@@ -1217,7 +1258,7 @@ class _JournalEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i8.JournalEntry>>);
+                as _i3.Future<List<_i9.JournalEntry>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1225,7 +1266,7 @@ class _JournalEndpoint {
     });
   }
 
-  _i3.Future<List<_i8.JournalEntry>> searchEntries(
+  _i3.Future<List<_i9.JournalEntry>> searchEntries(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
     String query, {
@@ -1256,7 +1297,7 @@ class _JournalEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i8.JournalEntry>>);
+                as _i3.Future<List<_i9.JournalEntry>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1264,7 +1305,7 @@ class _JournalEndpoint {
     });
   }
 
-  _i3.Future<_i8.JournalEntry?> toggleFavorite(
+  _i3.Future<_i9.JournalEntry?> toggleFavorite(
     _i1.TestSessionBuilder sessionBuilder,
     int entryId,
     int userId,
@@ -1291,7 +1332,7 @@ class _JournalEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i8.JournalEntry?>);
+                as _i3.Future<_i9.JournalEntry?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1299,7 +1340,7 @@ class _JournalEndpoint {
     });
   }
 
-  _i3.Future<List<_i9.JournalPrompt>> getDailyPrompts(
+  _i3.Future<List<_i10.JournalPrompt>> getDailyPrompts(
     _i1.TestSessionBuilder sessionBuilder,
     String category,
   ) async {
@@ -1322,7 +1363,7 @@ class _JournalEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i9.JournalPrompt>>);
+                as _i3.Future<List<_i10.JournalPrompt>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1330,7 +1371,7 @@ class _JournalEndpoint {
     });
   }
 
-  _i3.Future<List<_i9.JournalPrompt>> getAllPrompts(
+  _i3.Future<List<_i10.JournalPrompt>> getAllPrompts(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -1352,7 +1393,7 @@ class _JournalEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i9.JournalPrompt>>);
+                as _i3.Future<List<_i10.JournalPrompt>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1360,7 +1401,7 @@ class _JournalEndpoint {
     });
   }
 
-  _i3.Future<_i10.JournalStats> getJournalStats(
+  _i3.Future<_i11.JournalStats> getJournalStats(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
   ) async {
@@ -1383,7 +1424,7 @@ class _JournalEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i10.JournalStats>);
+                as _i3.Future<_i11.JournalStats>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1391,7 +1432,7 @@ class _JournalEndpoint {
     });
   }
 
-  _i3.Future<List<_i11.JournalInsight>> getJournalInsights(
+  _i3.Future<List<_i12.JournalInsight>> getJournalInsights(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
   ) async {
@@ -1414,7 +1455,7 @@ class _JournalEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i11.JournalInsight>>);
+                as _i3.Future<List<_i12.JournalInsight>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1461,7 +1502,7 @@ class _SleepSessionEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i7.SleepSession> startSession(
+  _i3.Future<_i8.SleepSession> startSession(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
   ) async {
@@ -1484,7 +1525,7 @@ class _SleepSessionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i7.SleepSession>);
+                as _i3.Future<_i8.SleepSession>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1492,9 +1533,9 @@ class _SleepSessionEndpoint {
     });
   }
 
-  _i3.Future<_i7.SleepSession> createSleepSession(
+  _i3.Future<_i8.SleepSession> createSleepSession(
     _i1.TestSessionBuilder sessionBuilder,
-    _i7.SleepSession sleepSession,
+    _i8.SleepSession sleepSession,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1515,7 +1556,7 @@ class _SleepSessionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i7.SleepSession>);
+                as _i3.Future<_i8.SleepSession>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1523,7 +1564,7 @@ class _SleepSessionEndpoint {
     });
   }
 
-  _i3.Future<_i7.SleepSession?> endSession(
+  _i3.Future<_i8.SleepSession?> endSession(
     _i1.TestSessionBuilder sessionBuilder,
     int sessionId,
     int sleepQuality,
@@ -1556,7 +1597,7 @@ class _SleepSessionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i7.SleepSession?>);
+                as _i3.Future<_i8.SleepSession?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1599,7 +1640,7 @@ class _SleepSessionEndpoint {
     });
   }
 
-  _i3.Future<List<_i7.SleepSession>> getUserSessions(
+  _i3.Future<List<_i8.SleepSession>> getUserSessions(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
     int limit,
@@ -1626,7 +1667,7 @@ class _SleepSessionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i7.SleepSession>>);
+                as _i3.Future<List<_i8.SleepSession>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1634,7 +1675,7 @@ class _SleepSessionEndpoint {
     });
   }
 
-  _i3.Future<_i7.SleepSession?> getActiveSession(
+  _i3.Future<_i8.SleepSession?> getActiveSession(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
   ) async {
@@ -1657,7 +1698,7 @@ class _SleepSessionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i7.SleepSession?>);
+                as _i3.Future<_i8.SleepSession?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1665,7 +1706,7 @@ class _SleepSessionEndpoint {
     });
   }
 
-  _i3.Future<_i7.SleepSession?> getLastNightSession(
+  _i3.Future<_i8.SleepSession?> getLastNightSession(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
   ) async {
@@ -1688,7 +1729,7 @@ class _SleepSessionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i7.SleepSession?>);
+                as _i3.Future<_i8.SleepSession?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1696,7 +1737,7 @@ class _SleepSessionEndpoint {
     });
   }
 
-  _i3.Future<_i7.SleepSession?> getSessionForDate(
+  _i3.Future<_i8.SleepSession?> getSessionForDate(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
     DateTime date,
@@ -1723,7 +1764,7 @@ class _SleepSessionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i7.SleepSession?>);
+                as _i3.Future<_i8.SleepSession?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1731,7 +1772,7 @@ class _SleepSessionEndpoint {
     });
   }
 
-  _i3.Future<_i7.SleepSession?> updateSleepLatency(
+  _i3.Future<_i8.SleepSession?> updateSleepLatency(
     _i1.TestSessionBuilder sessionBuilder,
     int sessionId,
     int latencyMinutes,
@@ -1758,7 +1799,7 @@ class _SleepSessionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i7.SleepSession?>);
+                as _i3.Future<_i8.SleepSession?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1766,7 +1807,7 @@ class _SleepSessionEndpoint {
     });
   }
 
-  _i3.Future<_i7.SleepSession> logManualSession(
+  _i3.Future<_i8.SleepSession> logManualSession(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
     DateTime bedTime,
@@ -1815,7 +1856,7 @@ class _SleepSessionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i7.SleepSession>);
+                as _i3.Future<_i8.SleepSession>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1823,7 +1864,7 @@ class _SleepSessionEndpoint {
     });
   }
 
-  _i3.Future<_i7.SleepSession?> updateSession(
+  _i3.Future<_i8.SleepSession?> updateSession(
     _i1.TestSessionBuilder sessionBuilder,
     int sessionId,
     DateTime bedTime,
@@ -1872,7 +1913,7 @@ class _SleepSessionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i7.SleepSession?>);
+                as _i3.Future<_i8.SleepSession?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1911,7 +1952,7 @@ class _SleepSessionEndpoint {
     });
   }
 
-  _i3.Future<_i7.SleepSession?> updateMoodForLatestSession(
+  _i3.Future<_i8.SleepSession?> updateMoodForLatestSession(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
     String mood,
@@ -1938,7 +1979,7 @@ class _SleepSessionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i7.SleepSession?>);
+                as _i3.Future<_i8.SleepSession?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1957,7 +1998,7 @@ class _ThoughtClearingEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i12.ThoughtResponse> processThought(
+  _i3.Future<_i13.ThoughtResponse> processThought(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
     String userMessage,
@@ -1990,7 +2031,7 @@ class _ThoughtClearingEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i12.ThoughtResponse>);
+                as _i3.Future<_i13.ThoughtResponse>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1998,7 +2039,7 @@ class _ThoughtClearingEndpoint {
     });
   }
 
-  _i3.Future<List<_i13.ChatMessage>> getChatSessionMessages(
+  _i3.Future<List<_i14.ChatMessage>> getChatSessionMessages(
     _i1.TestSessionBuilder sessionBuilder,
     String sessionId,
   ) async {
@@ -2021,7 +2062,7 @@ class _ThoughtClearingEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i13.ChatMessage>>);
+                as _i3.Future<List<_i14.ChatMessage>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2029,7 +2070,7 @@ class _ThoughtClearingEndpoint {
     });
   }
 
-  _i3.Future<List<_i14.ChatSessionInfo>> getChatHistory(
+  _i3.Future<List<_i15.ChatSessionInfo>> getChatHistory(
     _i1.TestSessionBuilder sessionBuilder,
     int userId,
   ) async {
@@ -2052,7 +2093,7 @@ class _ThoughtClearingEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i14.ChatSessionInfo>>);
+                as _i3.Future<List<_i15.ChatSessionInfo>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2106,7 +2147,7 @@ class _GreetingEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i15.Greeting> hello(
+  _i3.Future<_i16.Greeting> hello(
     _i1.TestSessionBuilder sessionBuilder,
     String name,
   ) async {
@@ -2129,7 +2170,7 @@ class _GreetingEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i15.Greeting>);
+                as _i3.Future<_i16.Greeting>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

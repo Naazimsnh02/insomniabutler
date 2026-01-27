@@ -1,6 +1,9 @@
 class: JournalInsight
+table: journal_insights
 fields:
+  userId: int
   insightType: String
   message: String
   confidence: double
   relatedEntryIds: String?
+  generatedAt: DateTime

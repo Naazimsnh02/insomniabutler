@@ -3,8 +3,9 @@ BEGIN;
 --
 -- ACTION ALTER TABLE
 --
-CREATE INDEX "idx_sleep_sessions_data_source" ON "sleep_sessions" USING btree ("sleepDataSource");
-CREATE INDEX "idx_sleep_sessions_date_source" ON "sleep_sessions" USING btree ("sessionDate", "sleepDataSource");
+CREATE INDEX IF NOT EXISTS "idx_sleep_sessions_data_source" ON "sleep_sessions" USING btree ("sleepDataSource");
+CREATE INDEX IF NOT EXISTS "idx_sleep_sessions_date_source" ON "sleep_sessions" USING btree ("sessionDate", "sleepDataSource");
+
 
 --
 -- MIGRATION VERSION FOR insomniabutler
