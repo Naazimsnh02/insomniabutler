@@ -576,7 +576,12 @@ class _TimerPickerSheet extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.bgSecondary,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border(
+          top: BorderSide(
+            color: Colors.white.withOpacity(0.12),
+            width: 1.2,
+          ),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -609,6 +614,10 @@ class _TimerPickerSheet extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 borderRadius: 20,
                 color: AppColors.bgPrimary.withOpacity(0.4),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.12),
+                  width: 1.2,
+                ),
                 onTap: () {
                   HapticHelper.mediumImpact();
                   onTimerSelected(Duration(minutes: time['value'] as int));

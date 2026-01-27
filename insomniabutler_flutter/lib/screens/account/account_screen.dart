@@ -377,14 +377,14 @@ class AccountScreenState extends State<AccountScreen> {
                   _buildScheduledReminders(),
                   const SizedBox(height: AppSpacing.xl),
 
-                  _buildSectionHeader('Data & Privacy'),
-                  const SizedBox(height: AppSpacing.md),
-                  _buildDataPrivacy(),
-                  const SizedBox(height: AppSpacing.xl),
-
                   _buildSectionHeader('Support & About'),
                   const SizedBox(height: AppSpacing.md),
                   _buildSupportAbout(),
+                  const SizedBox(height: AppSpacing.xl),
+
+                  _buildSectionHeader('Danger Zone'),
+                  const SizedBox(height: AppSpacing.md),
+                  _buildDangerZone(),
                   const SizedBox(height: AppSpacing.xl),
 
                   // _buildSectionHeader('Developer Tools'),
@@ -842,7 +842,7 @@ class AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  Widget _buildDataPrivacy() {
+  Widget _buildDangerZone() {
     return GlassCard(
       padding: const EdgeInsets.all(12),
       borderRadius: 24,
@@ -852,38 +852,6 @@ class AccountScreenState extends State<AccountScreen> {
       ),
       child: Column(
         children: [
-          _buildSettingRow(
-            icon: Icons.download_rounded,
-            title: 'Export Sleep Data',
-            subtitle: 'Download your data as CSV',
-            iconColor: const Color(0xFF7986CB),
-            trailing: const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.textTertiary,
-              size: 20,
-            ),
-            onTap: () {
-              HapticHelper.lightImpact();
-              _showExportDialog();
-            },
-          ),
-          _buildDivider(),
-          _buildSettingRow(
-            icon: Icons.cleaning_services_rounded,
-            title: 'Clear Cache',
-            subtitle: 'Free up storage space',
-            iconColor: const Color(0xFFE57373),
-            trailing: const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.textTertiary,
-              size: 20,
-            ),
-            onTap: () {
-              HapticHelper.lightImpact();
-              _showClearCacheDialog();
-            },
-          ),
-          _buildDivider(),
           _buildSettingRow(
             icon: Icons.delete_forever_rounded,
             title: 'Delete Account',
@@ -1655,51 +1623,6 @@ class AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  void _showExportDialog() {
-    // TODO: Implement data export
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Data export coming soon')),
-    );
-  }
-
-  void _showClearCacheDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.bgPrimary,
-        title: const Text(
-          'Clear Cache?',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'This will clear temporary files and free up storage space.',
-          style: TextStyle(color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              await AccountSettingsService.clearAllSettings();
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Cache cleared successfully')),
-              );
-            },
-            child: const Text(
-              'Clear',
-              style: TextStyle(color: AppColors.accentPrimary),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showLogoutDialog() {
     showDialog(

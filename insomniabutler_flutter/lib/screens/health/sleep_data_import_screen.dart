@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../services/sleep_sync_service.dart';
 import '../../utils/haptic_helper.dart';
 import '../../widgets/glass_card.dart';
+import '../../widgets/primary_button.dart';
 import '../../core/theme.dart';
 
 class SleepDataImportScreen extends StatefulWidget {
@@ -151,17 +152,9 @@ class _SleepDataImportScreenState extends State<SleepDataImportScreen> {
                 const SizedBox(height: 32),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
+                  child: PrimaryButton(
                     onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accentPrimary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Text('Back to Journey', style: TextStyle(fontWeight: FontWeight.bold)),
+                    text: 'Back to Journey',
                   ),
                 ),
               ],
@@ -203,173 +196,251 @@ class _SleepDataImportScreenState extends State<SleepDataImportScreen> {
     );
   }
 
-  Widget _buildStatRow(IconData icon, String label, String value) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: AppColors.textTertiary),
-          const SizedBox(width: 12),
-          Text(label, style: AppTextStyles.bodySm),
-          const Spacer(),
-          Text(value, style: AppTextStyles.label.copyWith(fontSize: 16, color: AppColors.accentPrimary)),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     final daysDiff = _endDate.difference(_startDate).inDays;
 
-    return Container(
-      decoration: const BoxDecoration(gradient: AppColors.bgMainGradient),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
+    return Stack(
+      children: [
+        // Decorative background elements
+        Positioned(
+          top: -100,
+          right: -50,
+          child: Container(
+            width: 300,
+            height: 300,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.accentPrimary.withOpacity(0.04),
+            ),
+          ).animate().fadeIn(duration: 1200.ms),
+        ),
+        Positioned(
+          bottom: 100,
+          left: -80,
+          child: Container(
+            width: 250,
+            height: 250,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.accentLavender.withOpacity(0.03),
+            ),
+          ).animate().fadeIn(delay: 400.ms, duration: 1200.ms),
+        ),
+
+        Scaffold(
           backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Text(
-            'Sync Health Data',
-            style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          centerTitle: true,
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              Text(
-                'Historical Sync',
-                style: AppTextStyles.h2.copyWith(fontWeight: FontWeight.bold),
-              ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1),
-              const SizedBox(height: 8),
-              Text(
-                'Select a date range to import sleep data from your connected health platforms.',
-                style: AppTextStyles.body.copyWith(color: AppColors.textTertiary, fontSize: 15),
-              ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
-              const SizedBox(height: 32),
-              
-              Text(
-                'Range Configuration',
-                style: AppTextStyles.label.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
-              ).animate().fadeIn(delay: 200.ms),
-              const SizedBox(height: 12),
-              
-              GlassCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      _buildDateSelectorRow(
-                        label: 'Sync from',
-                        date: _startDate,
-                        onTap: _selectStartDate,
-                        icon: Icons.calendar_today_rounded,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Divider(color: AppColors.divider.withOpacity(0.5), height: 1),
-                      ),
-                      _buildDateSelectorRow(
-                        label: 'Until',
-                        date: _endDate,
-                        onTap: _selectEndDate,
-                        icon: Icons.event_rounded,
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: AppColors.accentPrimary.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.accentPrimary.withOpacity(0.15)),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.timer_outlined, size: 16, color: AppColors.accentPrimary),
-                            const SizedBox(width: 8),
-                            Text(
-                              '$daysDiff Days Selected',
-                              style: AppTextStyles.label.copyWith(color: AppColors.accentPrimary, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ).animate().fadeIn(delay: 300.ms).scale(begin: const Offset(0.98, 0.98)),
-              
-              const SizedBox(height: 32),
-              Text(
-                'Presets',
-                style: AppTextStyles.label.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
-              ).animate().fadeIn(delay: 400.ms),
-              const SizedBox(height: 12),
-              
-              Row(
+          body: Container(
+            decoration: const BoxDecoration(gradient: AppColors.bgMainGradient),
+            child: SafeArea(
+              child: Column(
                 children: [
-                  Expanded(child: _buildPresetButton('7 Days', 7)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildPresetButton('30 Days', 30)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildPresetButton('90 Days', 90)),
-                ],
-              ).animate().fadeIn(delay: 450.ms),
-              
-              const SizedBox(height: 48),
-              
-              SizedBox(
-                width: double.infinity,
-                height: 60,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: AppColors.gradientPrimary,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: AppShadows.selectionGlow,
-                  ),
-                  child: ElevatedButton(
-                    onPressed: _isImporting ? null : _importData,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    ),
-                    child: _isImporting
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-                          )
-                        : const Text(
-                            'Begin Discovery',
-                            style: TextStyle(
-                              fontSize: 18,
+                  _buildTopBar(),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 12),
+                          Text(
+                            'Historical Sync',
+                            style: AppTextStyles.h2.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: 0.5,
+                              letterSpacing: -1.0,
                             ),
-                          ),
+                          ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.1, end: 0),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Select a date range to import sleep data from your connected health platforms.',
+                            style: AppTextStyles.body.copyWith(color: AppColors.textTertiary, fontSize: 15),
+                          ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
+                          const SizedBox(height: 32),
+                          
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4),
+                            child: Text(
+                              'RANGE CONFIGURATION',
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.textTertiary,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.5,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ).animate().fadeIn(delay: 200.ms),
+                          const SizedBox(height: 12),
+                          
+                          GlassCard(
+                            borderRadius: 28,
+                            color: AppColors.bgSecondary.withOpacity(0.3),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.12),
+                              width: 1.2,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                children: [
+                                  _buildDateSelectorRow(
+                                    label: 'Sync from',
+                                    date: _startDate,
+                                    onTap: _selectStartDate,
+                                    icon: Icons.calendar_today_rounded,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    child: Divider(color: Colors.white.withOpacity(0.08), height: 1),
+                                  ),
+                                  _buildDateSelectorRow(
+                                    label: 'Until',
+                                    date: _endDate,
+                                    onTap: _selectEndDate,
+                                    icon: Icons.event_rounded,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.accentPrimary.withOpacity(0.08),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(color: AppColors.accentPrimary.withOpacity(0.15)),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(Icons.timer_outlined, size: 16, color: AppColors.accentPrimary),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '$daysDiff days selected'.toUpperCase(),
+                                          style: AppTextStyles.label.copyWith(
+                                            color: AppColors.accentPrimary,
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 11,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.05, end: 0),
+                          
+                          const SizedBox(height: 32),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4),
+                            child: Text(
+                              'PRESETS',
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.textTertiary,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.5,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ).animate().fadeIn(delay: 400.ms),
+                          const SizedBox(height: 12),
+                          
+                          Row(
+                            children: [
+                              Expanded(child: _buildPresetButton('7 Days', 7)),
+                              const SizedBox(width: 12),
+                              Expanded(child: _buildPresetButton('30 Days', 30)),
+                              const SizedBox(width: 12),
+                              Expanded(child: _buildPresetButton('90 Days', 90)),
+                            ],
+                          ).animate().fadeIn(delay: 450.ms),
+                          
+                          const SizedBox(height: 80), // Space for button
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ).animate().fadeIn(delay: 550.ms),
-              const SizedBox(height: 32),
-            ],
+                  _buildBottomAction(),
+                ],
+              ),
+            ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildTopBar() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.containerPadding,
+        AppSpacing.lg,
+        AppSpacing.containerPadding,
+        AppSpacing.md,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildIconButton(
+            icon: Icons.arrow_back_ios_new_rounded,
+            onTap: () => Navigator.pop(context),
+          ),
+          Text(
+            'Sync Health Data',
+            style: AppTextStyles.h3.copyWith(
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+              fontSize: 18,
+            ),
+          ),
+          const SizedBox(width: 48), // Spacer
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: GlassCard(
+        padding: const EdgeInsets.all(12),
+        borderRadius: 14,
+        color: AppColors.bgSecondary.withOpacity(0.4),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.12),
+          width: 1.2,
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+          size: 20,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomAction() {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.containerPadding),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.bgPrimary.withOpacity(0),
+            AppColors.bgPrimary,
+          ],
+        ),
+      ),
+      child: PrimaryButton(
+        text: _isImporting ? 'Discovering...' : 'Begin Discovery',
+        isLoading: _isImporting,
+        onPressed: _importData,
+        icon: Icons.sync_rounded,
       ),
     );
   }
@@ -382,33 +453,45 @@ class _SleepDataImportScreenState extends State<SleepDataImportScreen> {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 6),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(12),
+                color: AppColors.accentPrimary.withOpacity(0.1),
+                shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 20, color: AppColors.accentPrimary),
+              child: Icon(icon, size: 18, color: AppColors.accentPrimary),
             ),
             const SizedBox(width: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)),
+                Text(
+                  label.toUpperCase(), 
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textTertiary,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.0,
+                    fontSize: 9,
+                  ),
+                ),
                 const SizedBox(height: 2),
                 Text(
                   DateFormat('MMMM d, yyyy').format(date),
-                  style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+                  style: AppTextStyles.body.copyWith(
+                    color: Colors.white, 
+                    fontWeight: FontWeight.bold, 
+                    fontSize: 16,
+                  ),
                 ),
               ],
             ),
             const Spacer(),
-            Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textDisabled),
+            Icon(Icons.chevron_right_rounded, size: 20, color: Colors.white.withOpacity(0.2)),
           ],
         ),
       ),
@@ -425,25 +508,77 @@ class _SleepDataImportScreenState extends State<SleepDataImportScreen> {
           _startDate = _endDate.subtract(Duration(days: days));
         });
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.accentPrimary.withOpacity(0.15) : AppColors.bgSecondary.withOpacity(0.4),
-          borderRadius: BorderRadius.circular(16),
+          gradient: isSelected ? AppColors.gradientPrimary : null,
+          color: isSelected ? null : AppColors.bgSecondary.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: isSelected ? AppColors.accentPrimary.withOpacity(0.5) : Colors.white.withOpacity(0.05),
-            width: 1.5,
+            color: isSelected 
+              ? AppColors.accentPrimary.withOpacity(0.6) 
+              : Colors.white.withOpacity(0.12),
+            width: isSelected ? 2 : 1.2,
           ),
+          boxShadow: isSelected ? [
+            BoxShadow(
+              color: AppColors.accentPrimary.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ] : null,
         ),
         child: Center(
           child: Text(
             label,
             style: AppTextStyles.label.copyWith(
               color: isSelected ? Colors.white : AppColors.textSecondary,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              fontSize: 13,
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildStatRow(IconData icon, String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.06)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.accentPrimary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 16, color: AppColors.accentPrimary),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            label, 
+            style: AppTextStyles.bodySm.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            value, 
+            style: AppTextStyles.h3.copyWith(
+              fontSize: 18, 
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

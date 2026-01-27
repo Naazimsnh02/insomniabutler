@@ -98,10 +98,11 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
       onTap: onTap,
       child: GlassCard(
         padding: const EdgeInsets.all(12),
-        borderRadius: 12,
+        borderRadius: 14,
         color: AppColors.bgSecondary.withOpacity(0.4),
         border: Border.all(
-          color: Colors.white.withOpacity(0.15),
+          color: Colors.white.withOpacity(0.12),
+          width: 1.2,
         ),
         child: Icon(
           icon,
@@ -147,7 +148,7 @@ class _SleepTimerScreenState extends State<SleepTimerScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
+                  color: Colors.white.withOpacity(0.12),
                   width: 1.5,
                 ),
                 color: Colors.white.withOpacity(0.03),
@@ -321,6 +322,12 @@ class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
             AppColors.bgPrimary,
           ],
         ),
+        border: Border(
+          top: BorderSide(
+            color: Colors.white.withOpacity(0.12),
+            width: 1.2,
+          ),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -384,8 +391,8 @@ class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
                     border: Border.all(
                       color: isSelected
                           ? AppColors.accentPrimary.withOpacity(0.6)
-                          : Colors.white.withOpacity(0.1),
-                      width: isSelected ? 2 : 1.5,
+                          : Colors.white.withOpacity(0.12),
+                      width: isSelected ? 2 : 1.2,
                     ),
                     boxShadow: isSelected
                         ? [
@@ -466,8 +473,8 @@ class _WakeUpFeedbackSheetState extends State<_WakeUpFeedbackSheet> {
                   border: Border.all(
                     color: isSelected
                         ? AppColors.accentSkyBlue.withOpacity(0.6)
-                        : Colors.white.withOpacity(0.1),
-                    width: isSelected ? 2 : 1.5,
+                        : Colors.white.withOpacity(0.12),
+                    width: isSelected ? 2 : 1.2,
                   ),
                 ),
                 child: Center(

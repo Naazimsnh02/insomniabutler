@@ -39,7 +39,8 @@ class _NewHomeScreenState extends State<NewHomeScreen>
   final GlobalKey<AccountScreenState> _accountKey = GlobalKey();
   final ScrollController _calendarScrollController = ScrollController();
   int _selectedNavIndex = 0;
-  DateTime _selectedDate = DateTime.now();
+  // Default to yesterday's date to show the most recent completed sleep session (last night)
+  DateTime _selectedDate = DateTime.now().subtract(const Duration(days: 1));
   String? _selectedMood;
   final Map<String, Map<String, dynamic>> _dataCache = {};
 
@@ -304,15 +305,10 @@ class _NewHomeScreenState extends State<NewHomeScreen>
         _selectedDate.day,
       );
 
-      dynamic targetSession;
-      if (selectedDayOnly.isAtSameMomentAs(today)) {
-        targetSession = await client.sleepSession.getLastNightSession(userId);
-      } else {
-        targetSession = await client.sleepSession.getSessionForDate(
-          userId,
-          _selectedDate,
-        );
-      }
+      final targetSession = await client.sleepSession.getSessionForDate(
+        userId,
+        _selectedDate,
+      );
 
       Duration? duration;
       double efficiency = 0.0;
@@ -780,26 +776,25 @@ class _NewHomeScreenState extends State<NewHomeScreen>
       );
     }
 
-    final now = DateTime.now();
+    // Generate days centered around the selected date
+    // Show 3 days before and 3 days after the selected date (7 days total)
     final days = List.generate(
       7,
-      (index) => now.subtract(
-        Duration(days: 6 - index),
-      ), // Show last 7 days including today
+      (index) => _selectedDate.subtract(Duration(days: 3)).add(Duration(days: index)),
     );
 
     return SliverToBoxAdapter(
       child: SizedBox(
         height: 80,
         child: ListView.builder(
-          controller: _calendarScrollController,
+          // Removed controller to avoid conflicts when jumping dates
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           itemCount: days.length,
           itemBuilder: (context, index) {
             final date = days[index];
             final isSelected = isSameDay(date, _selectedDate);
-            final isToday = isSameDay(date, now);
+            final isToday = isSameDay(date, DateTime.now());
 
             return GestureDetector(
               onTap: () {

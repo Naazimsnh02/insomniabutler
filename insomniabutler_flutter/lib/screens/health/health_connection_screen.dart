@@ -2,6 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../services/health_data_service.dart';
 import '../../services/sleep_sync_service.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import '../../core/theme.dart';
+import '../../widgets/glass_card.dart';
+import '../../widgets/primary_button.dart';
+import '../../utils/haptic_helper.dart';
 
 class HealthConnectionScreen extends StatefulWidget {
   final HealthDataService healthService;
@@ -123,257 +128,346 @@ class _HealthConnectionScreenState extends State<HealthConnectionScreen> {
   @override
   Widget build(BuildContext context) {
     final platformName = Platform.isIOS ? 'Apple HealthKit' : 'Health Connect';
-    final platformIcon = Platform.isIOS ? Icons.favorite : Icons.health_and_safety;
+    final platformIcon = Platform.isIOS ? Icons.favorite_rounded : Icons.health_and_safety_rounded;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A1125),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Health Data Connection',
-          style: TextStyle(color: Colors.white),
+    return Stack(
+      children: [
+        // Decorative background elements
+        Positioned(
+          top: -100,
+          left: -50,
+          child: Container(
+            width: 300,
+            height: 300,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.accentPrimary.withOpacity(0.04),
+            ),
+          ).animate().fadeIn(duration: 1200.ms),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+        Positioned(
+          bottom: 100,
+          right: -80,
+          child: Container(
+            width: 250,
+            height: 250,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.accentLavender.withOpacity(0.03),
+            ),
+          ).animate().fadeIn(delay: 400.ms, duration: 1200.ms),
         ),
-      ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF6C5CE7)),
-            )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Container(
+            decoration: const BoxDecoration(gradient: AppColors.bgMainGradient),
+            child: SafeArea(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Platform Icon
-                  Center(
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1A1F3A),
-                        borderRadius: BorderRadius.circular(60),
-                        border: Border.all(
-                          color: _isConnected
-                              ? const Color(0xFF00D4AA)
-                              : const Color(0xFF6C5CE7),
-                          width: 3,
-                        ),
-                      ),
-                      child: Icon(
-                        platformIcon,
-                        size: 60,
-                        color: _isConnected
-                            ? const Color(0xFF00D4AA)
-                            : const Color(0xFF6C5CE7),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+                  _buildTopBar(),
+                  Expanded(
+                    child: _isLoading
+                        ? Center(
+                            child: const CircularProgressIndicator(color: AppColors.accentPrimary)
+                                .animate()
+                                .fadeIn(),
+                          )
+                        : SingleChildScrollView(
+                            physics: const BouncingScrollPhysics(),
+                            padding: const EdgeInsets.all(AppSpacing.containerPadding),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 20),
+                                // Platform Icon & Name
+                                Center(
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: 100,
+                                        height: 100,
+                                        decoration: BoxDecoration(
+                                          color: (_isConnected ? AppColors.accentPrimary : AppColors.accentLavender)
+                                              .withOpacity(0.1),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: (_isConnected ? AppColors.accentPrimary : AppColors.accentLavender)
+                                                .withOpacity(0.2),
+                                            width: 2,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: (_isConnected ? AppColors.accentPrimary : AppColors.accentLavender)
+                                                  .withOpacity(0.1),
+                                              blurRadius: 20,
+                                              spreadRadius: 5,
+                                            )
+                                          ],
+                                        ),
+                                        child: Icon(
+                                          platformIcon,
+                                          size: 48,
+                                          color: _isConnected ? AppColors.accentPrimary : AppColors.accentLavender,
+                                        ),
+                                      ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
+                                      const SizedBox(height: 20),
+                                      Text(
+                                        platformName,
+                                        style: AppTextStyles.h1.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: -1.0,
+                                        ),
+                                      ).animate().fadeIn(delay: 200.ms),
+                                      const SizedBox(height: 8),
+                                      // Connection Status Badge
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: (_isConnected ? AppColors.accentPrimary : AppColors.textTertiary)
+                                              .withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(20),
+                                          border: Border.all(
+                                            color: (_isConnected ? AppColors.accentPrimary : AppColors.textTertiary)
+                                                .withOpacity(0.2),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              width: 6,
+                                              height: 6,
+                                              decoration: BoxDecoration(
+                                                color: _isConnected ? AppColors.accentPrimary : AppColors.textTertiary,
+                                                shape: BoxShape.circle,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              _isConnected ? 'CONNECTED' : 'NOT CONNECTED',
+                                              style: AppTextStyles.caption.copyWith(
+                                                color: _isConnected ? AppColors.accentPrimary : AppColors.textTertiary,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: 1.0,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ).animate().fadeIn(delay: 300.ms),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 40),
 
-                  // Platform Name
-                  Center(
-                    child: Text(
-                      platformName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                                // Error Message
+                                if (_errorMessage != null) ...[
+                                  GlassCard(
+                                    color: AppColors.error.withOpacity(0.1),
+                                    border: Border.all(color: AppColors.error.withOpacity(0.2)),
+                                    padding: const EdgeInsets.all(16),
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.error_outline_rounded, color: AppColors.error),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            _errorMessage!,
+                                            style: AppTextStyles.bodySm.copyWith(color: AppColors.error),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ).animate().shake(),
+                                  const SizedBox(height: 24),
+                                ],
 
-                  // Connection Status
-                  Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _isConnected
-                            ? const Color(0xFF00D4AA).withOpacity(0.2)
-                            : const Color(0xFF6C5CE7).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        _isConnected ? '✓ Connected' : 'Not Connected',
-                        style: TextStyle(
-                          color: _isConnected
-                              ? const Color(0xFF00D4AA)
-                              : const Color(0xFF6C5CE7),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
+                                // Benefits Section
+                                _buildBenefitsSection(),
+                                const SizedBox(height: 24),
 
-                  // Error Message
-                  if (_errorMessage != null) ...[
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.red.withOpacity(0.3)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.error_outline, color: Colors.red),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              _errorMessage!,
-                              style: const TextStyle(color: Colors.red),
+                                // Privacy Section
+                                _buildPrivacySection(),
+                                const SizedBox(height: 100), // Space for button
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-
-                  // Benefits Section
-                  _buildBenefitsSection(),
-                  const SizedBox(height: 32),
-
-                  // Privacy Section
-                  _buildPrivacySection(),
-                  const SizedBox(height: 32),
-
-                  // Action Button
-                  if (!_isConnected)
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: _connectHealthData,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF6C5CE7),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Connect Health Data',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: OutlinedButton(
-                        onPressed: _disconnect,
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.red),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Disconnect',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                          ),
-                        ),
-                      ),
-                    ),
+                  ),
+                  _buildBottomAction(),
                 ],
               ),
             ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildBenefitsSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1F3A),
-        borderRadius: BorderRadius.circular(16),
+  Widget _buildTopBar() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.containerPadding,
+        AppSpacing.lg,
+        AppSpacing.containerPadding,
+        AppSpacing.md,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'What you get:',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
+          _buildIconButton(
+            icon: Icons.arrow_back_ios_new_rounded,
+            onTap: () => Navigator.pop(context),
+          ),
+          Text(
+            'Health Connection',
+            style: AppTextStyles.h3.copyWith(
               fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+              fontSize: 18,
             ),
           ),
-          const SizedBox(height: 16),
-          _buildBenefitItem(
-            Icons.bedtime,
-            'Automatic Sleep Tracking',
-            'Your sleep data syncs automatically from your device',
-          ),
-          _buildBenefitItem(
-            Icons.insights,
-            'Detailed Sleep Stages',
-            'See deep, light, REM, and awake periods',
-          ),
-          _buildBenefitItem(
-            Icons.favorite,
-            'Health Metrics',
-            'Heart rate, HRV, and respiratory rate during sleep',
-          ),
-          _buildBenefitItem(
-            Icons.analytics,
-            'Better Insights',
-            'More accurate data leads to better recommendations',
-          ),
+          const SizedBox(width: 48), // Spacer
         ],
       ),
     );
   }
 
-  Widget _buildBenefitItem(IconData icon, String title, String description) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
+  Widget _buildIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: GlassCard(
+        padding: const EdgeInsets.all(12),
+        borderRadius: 14,
+        color: AppColors.bgSecondary.withOpacity(0.4),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.12),
+          width: 1.2,
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+          size: 20,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomAction() {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.containerPadding),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.bgPrimary.withOpacity(0),
+            AppColors.bgPrimary,
+          ],
+        ),
+      ),
+      child: _isConnected
+          ? GlassButton(
+              text: 'Disconnect Service',
+              onPressed: () {
+                HapticHelper.mediumImpact();
+                _disconnect();
+              },
+              icon: Icons.link_off_rounded,
+            )
+          : PrimaryButton(
+              text: 'Connect Health Data',
+              isLoading: _isLoading,
+              onPressed: () {
+                HapticHelper.mediumImpact();
+                _connectHealthData();
+              },
+              icon: Icons.link_rounded,
+            ),
+    );
+  }
+
+  Widget _buildBenefitsSection() {
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      borderRadius: 28,
+      color: AppColors.bgSecondary.withOpacity(0.3),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.12),
+        width: 1.2,
+      ),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF6C5CE7).withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
+          Text(
+            'The Benefits'.toUpperCase(),
+            style: AppTextStyles.label.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
+              fontSize: 11,
+              color: AppColors.textTertiary,
             ),
-            child: Icon(icon, color: const Color(0xFF6C5CE7), size: 20),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(height: 24),
+          _buildBenefitItem(
+            Icons.bedtime_rounded,
+            'Sync Automatically',
+            'Your sleep data flows effortlessly from your device',
+          ),
+          _buildBenefitItem(
+            Icons.insights_rounded,
+            'Detailed Stages',
+            'Deep, light, REM, and restoration analysis',
+          ),
+          _buildBenefitItem(
+            Icons.favorite_rounded,
+            'Vitals Analysis',
+            'Track heart rate and HRV trends during sleep',
+          ),
+          _buildBenefitItem(
+            Icons.analytics_rounded,
+            'AI Optimization',
+            'More data results in more precise sleep coaching',
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0);
+  }
+
+  Widget _buildBenefitItem(IconData icon, String title, String description) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.accentPrimary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: AppColors.accentPrimary, size: 20),
+          ),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: AppTextStyles.body.copyWith(
                     color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
                   ),
                 ),
-                const SizedBox(height: 4),
                 Text(
                   description,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
-                    fontSize: 14,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textTertiary,
+                    fontSize: 12,
                   ),
                 ),
               ],
@@ -385,46 +479,42 @@ class _HealthConnectionScreenState extends State<HealthConnectionScreen> {
   }
 
   Widget _buildPrivacySection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF00D4AA).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFF00D4AA).withOpacity(0.3),
-        ),
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      borderRadius: 28,
+      color: AppColors.accentCyan.withOpacity(0.04),
+      border: Border.all(
+        color: AppColors.accentCyan.withOpacity(0.15),
+        width: 1.2,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.lock, color: Color(0xFF00D4AA)),
-              SizedBox(width: 8),
+              const Icon(Icons.lock_rounded, color: AppColors.accentCyan, size: 18),
+              const SizedBox(width: 12),
               Text(
-                'Your Privacy Matters',
-                style: TextStyle(
-                  color: Color(0xFF00D4AA),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                'PRIVACY FIRST',
+                style: AppTextStyles.label.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.5,
+                  fontSize: 11,
+                  color: AppColors.accentCyan,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Text(
-            '• All health data stays on your device\n'
-            '• You control what data is shared\n'
-            '• Data is only synced when you choose\n'
-            '• You can disconnect anytime',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-              fontSize: 14,
+            'Your health data is processed locally and securely. You maintain full control over what is shared and can disconnect at any time.',
+            style: AppTextStyles.bodySm.copyWith(
+              color: AppColors.textSecondary,
               height: 1.6,
             ),
           ),
         ],
       ),
-    );
+    ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1, end: 0);
   }
 }

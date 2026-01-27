@@ -216,6 +216,7 @@ class SleepSessionEndpoint extends Endpoint {
     final updated = sleepSession.copyWith(
       bedTime: bedTime,
       wakeTime: wakeTime,
+      sessionDate: bedTime, // Update session date if bed time changes
       sleepQuality: sleepQuality,
       sleepLatencyMinutes: sleepLatencyMinutes,
       deepSleepDuration: deepSleepDuration,
