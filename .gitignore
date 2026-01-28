@@ -30,6 +30,10 @@ ecs-trust-policy.json
 aws-deployment-state.json
 task-def-final.json
 
+# Production configuration (contains sensitive data)
+insomniabutler_server/config/production.yaml
+insomniabutler_flutter/assets/config.json
+
 # Tooling
 .dart_tool/
 .packages

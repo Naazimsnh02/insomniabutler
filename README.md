@@ -144,33 +144,40 @@ The Butler doesn't just track data; it provides scheduled, proactive wisdom.
 
 ---
 
-## ☁️ Cloud Deployment (AWS)
+## 🚀 Deployment
 
-Insomnia Butler is designed to scale on AWS using a fully automated pipeline:
+### AWS Production Deployment
 
-1.  **Infrastructure Provisioning:**
+1. **Configure Production Server:**
+   ```bash
+   cp insomniabutler_server/config/production.yaml.template insomniabutler_server/config/production.yaml
+   ```
+   Edit `production.yaml` with your actual values:
+   - Replace `your-domain.com` with your actual domain
+   - Update database host and credentials
+   - Set Redis configuration if needed
+
+2. **Infrastructure Provisioning:**
     ```powershell
     .\deploy-aws-full.ps1 -GeminiApiKey "YOUR_KEY"
     ```
     *Creates ALB, ECS Services, RDS Instance, and ECR Repositories.*
 
-2.  **Database Sync:**
+3. **Database Sync:**
     ```powershell
     .\run-migrations.ps1
     ```
     *Captures dynamic DNS and applies complex PostgreSQL migrations to RDS.*
 
----
-
-3.  **Update Client Connection:**
+4. **Update Client Connection:**
     - The migration script automatically updates `insomniabutler_flutter/assets/config.json` with the new Load Balancer URL.
     - **ACTION REQUIRED:** Open `insomniabutler_flutter/lib/main.dart` and update the `serverUrl` variable to match your new ALB DNS manually, as the auto-loader logic may not be awaited.
     ```dart
     // Select the URL from run-migrations.ps1 output or config.json
-    String serverUrl = 'http://insomniabutler-alb-xxxx.us-east-1.elb.amazonaws.com/';
+    String serverUrl = 'https://your-domain.com/';
     ```
 
-4.  **Rebuild Application:**
+5. **Rebuild Application:**
     - Rebuild your Flutter application to ensure it connects to the production server:
     ```bash
     flutter run

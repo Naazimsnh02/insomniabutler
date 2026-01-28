@@ -18,31 +18,42 @@ class InsightService {
     final weekAgo = now.subtract(const Duration(days: 7));
     final sessions = await SleepSession.db.find(
       session,
-      where: (t) => t.userId.equals(userId) & t.sessionDate.between(weekAgo, now),
+      where: (t) =>
+          t.userId.equals(userId) & t.sessionDate.between(weekAgo, now),
       orderBy: (t) => t.sessionDate,
       orderDescending: true,
     );
 
     if (sessions.isEmpty) {
-      session.log('No sleep sessions found for user $userId to generate insights.');
+      session.log(
+        'No sleep sessions found for user $userId to generate insights.',
+      );
       return;
     }
 
     try {
-      final apiKey = session.passwords['geminiApiKey'] ?? Platform.environment['GEMINI_API_KEY'];
+      final apiKey =
+          session.passwords['geminiApiKey'] ??
+          Platform.environment['GEMINI_API_KEY'];
       if (apiKey == null || apiKey.isEmpty) return;
       final gemini = GeminiService(apiKey);
 
-      final sessionData = sessions.map((s) => {
-        'date': s.sessionDate.toString().split(' ')[0],
-        'duration': '${s.wakeTime?.difference(s.bedTime).inMinutes ?? 0} mins',
-        'latency': s.sleepLatencyMinutes ?? 'N/A',
-        'quality': s.sleepQuality ?? 'N/A',
-        'source': s.sleepDataSource ?? 'Manual',
-        'mood': s.morningMood ?? 'N/A',
-      }).toList();
+      final sessionData = sessions
+          .map(
+            (s) => {
+              'date': s.sessionDate.toString().split(' ')[0],
+              'duration':
+                  '${s.wakeTime?.difference(s.bedTime).inMinutes ?? 0} mins',
+              'latency': s.sleepLatencyMinutes ?? 'N/A',
+              'quality': s.sleepQuality ?? 'N/A',
+              'source': s.sleepDataSource ?? 'Manual',
+              'mood': s.morningMood ?? 'N/A',
+            },
+          )
+          .toList();
 
-      final prompt = '''
+      final prompt =
+          '''
 Analyze these recent sleep sessions for a user.
 Include BOTH manual entries and synced data.
 Provide 1-2 personalized, actionable insights or "Butler's Tips" for better sleep tonight.
@@ -82,14 +93,19 @@ ${jsonEncode(sessionData)}
           ),
         );
       }
-      session.log('Successfully generated ${aiData.length} sleep insights for user $userId');
+      session.log(
+        'Successfully generated ${aiData.length} sleep insights for user $userId',
+      );
     } catch (e) {
       session.log('Error generating sleep insights: $e', level: LogLevel.error);
     }
   }
 
   /// Generate and cache journal insights for a specific user
-  static Future<void> generateJournalInsights(Session session, int userId) async {
+  static Future<void> generateJournalInsights(
+    Session session,
+    int userId,
+  ) async {
     final user = await User.db.findById(session, userId);
     if (user == null || !user.journalInsightsEnabled) return;
 
@@ -109,12 +125,16 @@ ${jsonEncode(sessionData)}
     final weekAgo = now.subtract(const Duration(days: 7));
 
     // 1. Rule-based Insights (Fast & Reliable)
-    
+
     // Streak Calculation
     int currentStreak = 0;
     DateTime? lastDate;
     for (var entry in allEntries) {
-      final entryDate = DateTime(entry.entryDate.year, entry.entryDate.month, entry.entryDate.day);
+      final entryDate = DateTime(
+        entry.entryDate.year,
+        entry.entryDate.month,
+        entry.entryDate.day,
+      );
       if (lastDate == null) {
         final today = DateTime(now.year, now.month, now.day);
         if (today.difference(entryDate).inDays <= 1) {
@@ -142,21 +162,25 @@ ${jsonEncode(sessionData)}
         JournalInsight(
           userId: userId,
           insightType: 'streak',
-          message: '🏆 $currentStreak-day streak! Consistency is your superpower for better sleep.',
+          message:
+              '🏆 $currentStreak-day streak! Consistency is your superpower for better sleep.',
           confidence: 1.0,
           generatedAt: now,
         ),
       );
     }
 
-    final thisWeekCount = allEntries.where((e) => e.entryDate.isAfter(weekAgo)).length;
+    final thisWeekCount = allEntries
+        .where((e) => e.entryDate.isAfter(weekAgo))
+        .length;
     if (thisWeekCount >= 3) {
       await JournalInsight.db.insertRow(
         session,
         JournalInsight(
           userId: userId,
           insightType: 'habit',
-          message: '🔥 logged $thisWeekCount entries this week. Clear mind, better sleep.',
+          message:
+              '🔥 logged $thisWeekCount entries this week. Clear mind, better sleep.',
           confidence: 1.0,
           generatedAt: now,
         ),
@@ -165,15 +189,22 @@ ${jsonEncode(sessionData)}
 
     // 2. AI Analysis (Deep)
     try {
-      final apiKey = session.passwords['geminiApiKey'] ?? Platform.environment['GEMINI_API_KEY'];
+      final apiKey =
+          session.passwords['geminiApiKey'] ??
+          Platform.environment['GEMINI_API_KEY'];
       if (apiKey == null || apiKey.isEmpty) return;
       final gemini = GeminiService(apiKey);
 
-      final entriesText = allEntries.take(10).map((e) => 
-        'Date: ${e.entryDate.toString().split(' ')[0]}, Mood: ${e.mood ?? "N/A"}, Title: ${e.title ?? "N/A"}, Content: ${e.content}'
-      ).join('\n---\n');
+      final entriesText = allEntries
+          .take(10)
+          .map(
+            (e) =>
+                'Date: ${e.entryDate.toString().split(' ')[0]}, Mood: ${e.mood ?? "N/A"}, Title: ${e.title ?? "N/A"}, Content: ${e.content}',
+          )
+          .join('\n---\n');
 
-      final prompt = '''
+      final prompt =
+          '''
 Analyze these recent journal entries.
 Provide 2 personalized insights or observations about their mental state or patterns.
 Return ONLY a raw JSON array of objects.
@@ -211,24 +242,30 @@ $entriesText
         );
         aiCount++;
       }
-      session.log('Successfully generated $aiCount AI journal insights for user $userId');
+      session.log(
+        'Successfully generated $aiCount AI journal insights for user $userId',
+      );
     } catch (e) {
-      session.log('Error generating AI journal insights: $e', level: LogLevel.error);
+      session.log(
+        'Error generating AI journal insights: $e',
+        level: LogLevel.error,
+      );
     }
   }
 
   /// Calculate the delay until the next target time (HH:mm)
   static Duration calculateDelay(String? timeStr) {
-    if (timeStr == null || !timeStr.contains(':')) return const Duration(hours: 24);
-    
+    if (timeStr == null || !timeStr.contains(':'))
+      return const Duration(hours: 24);
+
     try {
       final parts = timeStr.split(':');
       final hour = int.parse(parts[0]);
       final minute = int.parse(parts[1]);
-      
+
       final now = DateTime.now();
       final target = DateTime(now.year, now.month, now.day, hour, minute);
-      
+
       var diff = target.difference(now);
       if (diff.isNegative) {
         // If the time has already passed today, schedule for tomorrow

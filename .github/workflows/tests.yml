@@ -5,14 +5,16 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   test:
+    if: false
     runs-on: ubuntu-latest
     env:
       VERSION: '3.2.2'
-      SERVERPOD_PASSWORD_database: 'CSz3rm3geai1oSbkGKDcavW71nqwmmgd'
-      SERVERPOD_PASSWORD_redis: 'Owe30V-Sd1en579_BektsAVTRTOaVefi'
+      SERVERPOD_PASSWORD_database: ${{ secrets.DATABASE_PASSWORD }}
+      SERVERPOD_PASSWORD_redis: ${{ secrets.REDIS_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v4

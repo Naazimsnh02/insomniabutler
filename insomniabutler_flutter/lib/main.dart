@@ -54,9 +54,8 @@ void main() async {
     ),
   );
 
-  // Default server URL (fallback to AWS production)
-  String serverUrl =
-      'http://insomniabutler-alb-475922987.us-east-1.elb.amazonaws.com:80/';
+  // Default server URL (fallback to local development)
+  String serverUrl = 'http://localhost:8080/';
 
   client = Client(serverUrl)
     ..connectivityMonitor = FlutterConnectivityMonitor()

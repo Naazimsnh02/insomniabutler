@@ -21,11 +21,15 @@ class InsightsEndpoint extends Endpoint {
     );
 
     if (cached.isNotEmpty) {
-      session.log('Returning ${cached.length} cached sleep insights for user $userId');
+      session.log(
+        'Returning ${cached.length} cached sleep insights for user $userId',
+      );
       return cached;
     }
 
-    session.log('No cached sleep insights for user $userId, generating new ones...');
+    session.log(
+      'No cached sleep insights for user $userId, generating new ones...',
+    );
 
     // 2. If no cache, trigger generation now (for new users or first time)
     await InsightService.generateSleepInsights(session, userId);

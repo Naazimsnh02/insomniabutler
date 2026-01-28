@@ -335,7 +335,7 @@ class JournalEndpoint extends Endpoint {
     // 1. Check for cached insights from the last 24 hours
     final now = DateTime.now().toUtc();
     final oneDayAgo = now.subtract(const Duration(hours: 24));
-    
+
     final cached = await JournalInsight.db.find(
       session,
       where: (t) => t.userId.equals(userId) & (t.generatedAt > oneDayAgo),
@@ -344,11 +344,15 @@ class JournalEndpoint extends Endpoint {
     );
 
     if (cached.isNotEmpty) {
-      session.log('Returning ${cached.length} cached journal insights for user $userId');
+      session.log(
+        'Returning ${cached.length} cached journal insights for user $userId',
+      );
       return cached;
     }
 
-    session.log('No cached journal insights for user $userId, generating new ones...');
+    session.log(
+      'No cached journal insights for user $userId, generating new ones...',
+    );
 
     // 2. If no cache, trigger generation now
     await InsightService.generateJournalInsights(session, userId);
