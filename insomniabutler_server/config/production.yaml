@@ -1,28 +1,16 @@
-# Production configuration
+# Production configuration for Serverpod Cloud
+# Most settings are automatically managed.
+
 apiServer:
   port: 8080
-  publicHost: insomniabutler-alb-475922987.us-east-1.elb.amazonaws.com
-  publicPort: 80
-  publicScheme: http
 
 insightsServer:
   port: 8081
-  publicHost: insomniabutler-alb-475922987.us-east-1.elb.amazonaws.com
-  publicPort: 8081
-  publicScheme: http
 
 webServer:
   port: 8082
-  publicHost: insomniabutler-alb-475922987.us-east-1.elb.amazonaws.com
-  publicPort: 8082
-  publicScheme: http
 
 database:
-  host: insomniabutler-db.ccbsiy2ao0py.us-east-1.rds.amazonaws.com
-  port: 5432
-  name: insomniabutler
-  user: postgres
-  password: InsomniaButler2026!
   requireSsl: true
 
 redis:

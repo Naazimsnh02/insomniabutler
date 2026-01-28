@@ -6,9 +6,9 @@ Future<String> getServerUrl() async {
   try {
     final configString = await rootBundle.loadString('assets/config.json');
     final config = jsonDecode(configString);
-    return config['apiUrl'] as String? ?? 'http://localhost:8080/';
+    return config['apiUrl'] as String? ?? 'https://naazimsnh02.api.serverpod.space/';
   } catch (e) {
     // If config.json doesn't exist or can't be loaded, use localhost
-    return 'http://localhost:8080/';
+    return 'https://naazimsnh02.api.serverpod.space/';
   }
 }

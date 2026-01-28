@@ -27,4 +27,4 @@ serverpod:
     # Unfortunately, we can't use the `-o` flag directly because of an error
     # that happens on windows. Issue is tracked in the flutter
     # repository here: https://github.com/flutter/flutter/issues/157886
-    flutter_build: cd ../insomniabutler_flutter && flutter build web --base-href /app/ --wasm && rm -rf ../insomniabutler_server/web/app && mv build/web/ ../insomniabutler_server/web/app
+    flutter_build: powershell -ExecutionPolicy Bypass -File deploy_web.ps1

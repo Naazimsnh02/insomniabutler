@@ -29,6 +29,13 @@ config/firebase_service_account_key.json
 ecs-trust-policy.json
 aws-deployment-state.json
 task-def-final.json
+deploy-aws-full.ps1
+run-migrations.ps1
+cleanup-all.ps1
+deploy_web.ps1.bak
+Dockerfile.bak
+build_log.txt
+build_log_utf8.txt
 
 # Production configuration (contains sensitive data)
 insomniabutler_server/config/production.yaml

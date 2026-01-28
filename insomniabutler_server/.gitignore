@@ -7,9 +7,14 @@
 # Conventional directory for build outputs
 build/
 
-# Ignore the flutter web app directory
+# Ignore the flutter web app directory (commented out for Serverpod Cloud)
 web/app
 
+# Docker
+Dockerfile
+
+# Serverpod Cloud
+.scloud/
 
 # Directory created by dartdoc
 doc/api/

@@ -1,39 +1,30 @@
-# Build stage
-FROM dart:3.8.0 AS build
+# Use the official Dart image for the build stage.
+FROM dart:stable AS build
+
 WORKDIR /app
+
+# Copy the server coffee content into the container.
 COPY . .
 
-# Install dependencies and compile the server executable
+# Fetch dependencies.
 RUN dart pub get
-RUN dart compile exe bin/main.dart -o bin/server
 
-# Final stage
-FROM alpine:latest
+# Compile the server.
+RUN dart compile exe bin/main.dart -o bin/main
 
-# Environment variables
-ENV runmode=production
-ENV serverid=default
-ENV logging=normal
-ENV role=monolith
+# Use a slim Debian image for the runtime stage.
+FROM debian:slim
 
-# Copy runtime dependencies
-COPY --from=build /runtime/ /
+WORKDIR /app
 
-# Copy compiled server executable
-COPY --from=build /app/bin/server server
+# Copy the compiled binary from the build stage.
+COPY --from=build /app/bin/main /app/bin/main
+# Copy any required assets or configuration files.
+COPY --from=build /app/config /app/config
+COPY --from=build /app/web /app/web
 
-# Copy configuration files and resources
-COPY --from=build /app/config/ config/
-COPY --from=build /app/web/ web/
-COPY --from=build /app/migrations/ migrations/
-
-# This file is required to enable the endpoint log filter in Insights.
-COPY --from=build /app/lib/src/generated/protocol.yaml lib/src/generated/protocol.yaml
-
-# Expose ports
+# Expose the port your server listens on.
 EXPOSE 8080
-EXPOSE 8081
-EXPOSE 8082
 
-# Define the entrypoint command
-ENTRYPOINT ./server --mode=$runmode --server-id=$serverid --logging=$logging --role=$role
+# Run the server.
+CMD ["/app/bin/main"]

@@ -128,7 +128,7 @@ The application features a high-fidelity **Glassmorphic UI** designed for low-li
 | **AI Intelligence** | Google Gemini |
 | **Vector Search** | pgvector (PostgreSQL) for RAG |
 | **Database** | PostgreSQL 18.1 |
-| **Infrastructure** | AWS Fargate (ECS) + AWS RDS + ALB |
+| **Infrastructure** | Serverpod Cloud |
 
 ---
 
@@ -174,42 +174,46 @@ The application features a high-fidelity **Glassmorphic UI** designed for low-li
 
 ## 🚀 Deployment
 
-### AWS Production Deployment
+The project is deployed via **Serverpod Cloud**, which handles infrastructure orchestration, database management, and scaling.
 
-1. **Configure Production Server:**
+### Serverpod Cloud Deployment
+
+1. **Prerequisites:**
+   - Install the `scloud` CLI tool (bundled with Serverpod).
+   - Ensure you are logged in: `scloud login`.
+
+2. **Configure Secrets:**
+   Set your sensitive API keys (like Gemini) using the cloud secret manager:
    ```bash
-   cp insomniabutler_server/config/production.yaml.template insomniabutler_server/config/production.yaml
+   scloud secret set GEMINI_API_KEY YOUR_ACTUAL_KEY
    ```
-   Edit `production.yaml` with your actual values:
-   - Replace `your-domain.com` with your actual domain
-   - Update database host and credentials
-   - Set Redis configuration if needed
 
-2. **Infrastructure Provisioning:**
-    ```powershell
-    .\deploy-aws-full.ps1 -GeminiApiKey "YOUR_KEY"
-    ```
-    *Creates ALB, ECS Services, RDS Instance, and ECR Repositories.*
+3. **Deploy the Project:**
+   Run the deployment command from the root of the Git repository:
+   ```powershell
+   scloud deploy --project-dir ./insomniabutler_server
+   ```
+   *This will automatically:*
+   - Generate necessary Serverpod code.
+   - Build the Flutter web application.
+   - Package the server and upload it to Serverpod Cloud.
+   - Run database migrations if necessary.
 
-3. **Database Sync:**
-    ```powershell
-    .\run-migrations.ps1
-    ```
-    *Captures dynamic DNS and applies complex PostgreSQL migrations to RDS.*
+4. **Verify Deployment:**
+   Check the status of your live environment:
+   ```bash
+   scloud deployment show
+   ```
 
-4. **Update Client Connection:**
-    - The migration script automatically updates `insomniabutler_flutter/assets/config.json` with the new Load Balancer URL.
-    - **ACTION REQUIRED:** Open `insomniabutler_flutter/lib/main.dart` and update the `serverUrl` variable to match your new ALB DNS manually, as the auto-loader logic may not be awaited.
-    ```dart
-    // Select the URL from run-migrations.ps1 output or config.json
-    String serverUrl = 'https://your-domain.com/';
-    ```
+5. **Connect the Client:**
+   After a successful deployment, you will receive your project's unique URLs.
+   - **How to find your URLs**: Run `scloud project list` or check your project settings at [console.serverpod.cloud](https://console.serverpod.cloud).
+   - **Update configuration**:
+     1. Open `insomniabutler_flutter/assets/config.json` and update the `apiUrl` with your new Cloud API URL.
+     2. Open `insomniabutler_flutter/lib/main.dart` and update the `serverUrl` fallback variable (around line 58) to ensure the app connects to the correct endpoint.
 
-5. **Rebuild Application:**
-    - Rebuild your Flutter application to ensure it connects to the production server:
-    ```bash
-    flutter run
-    ```
+6. **Web Application Access**:
+   Your Flutter web app is automatically hosted and accessible via the provided web URL (e.g., `https://your-project-id.serverpod.space/`).
 
 ---
 

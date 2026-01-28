@@ -1,29 +1,16 @@
-# Production configuration template
-# Copy to production.yaml and update with your actual values
+# Production configuration for Serverpod Cloud
+# Most settings are automatically managed by the platform.
+
 apiServer:
   port: 8080
-  publicHost: your-domain.com
-  publicPort: 80
-  publicScheme: https
 
 insightsServer:
   port: 8081
-  publicHost: your-domain.com
-  publicPort: 8081
-  publicScheme: https
 
 webServer:
   port: 8082
-  publicHost: your-domain.com
-  publicPort: 8082
-  publicScheme: https
 
 database:
-  host: your-db-host.rds.amazonaws.com
-  port: 5432
-  name: insomniabutler
-  user: postgres
-  password: your-secure-password
   requireSsl: true
 
 redis:

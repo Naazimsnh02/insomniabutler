@@ -13,7 +13,6 @@ import 'screens/onboarding/onboarding_screen.dart';
 import 'core/theme.dart';
 import 'screens/chat/chat_history_screen.dart';
 import 'screens/insomnia_butler_screen.dart';
-import 'screens/insomnia_butler_screen.dart';
 import 'services/account_settings_service.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'services/notification_service.dart';
@@ -55,34 +54,24 @@ void main() async {
   );
 
   // Default server URL (fallback to local development)
-  String serverUrl = 'http://localhost:8080/';
+  String serverUrl = 'https://naazimsnh02.api.serverpod.space/';
+
+  // Load custom config if available
+  try {
+    final configString = await rootBundle.loadString('assets/config.json');
+    final config = json.decode(configString);
+    if (config['apiUrl'] != null) {
+      serverUrl = config['apiUrl'];
+      if (!serverUrl.endsWith('/')) serverUrl += '/';
+      debugPrint('Config loaded. API URL: $serverUrl');
+    }
+  } catch (e) {
+    debugPrint('Config not found or error loading: $e (using default: $serverUrl)');
+  }
 
   client = Client(serverUrl)
     ..connectivityMonitor = FlutterConnectivityMonitor()
     ..authSessionManager = FlutterAuthSessionManager();
-
-  // Try to load custom config asynchronously without blocking main flow
-  unawaited(
-    rootBundle
-        .loadString('assets/config.json')
-        .then((configString) {
-          try {
-            final config = json.decode(configString);
-            if (config['apiUrl'] != null) {
-              String newUrl = config['apiUrl'];
-              if (!newUrl.endsWith('/')) newUrl += '/';
-              // Note: client.host or similar might need updating if serverpod client supports it
-              // For now we just print it. Usually serverUrl is set at creation.
-              debugPrint('Config loaded. API URL: $newUrl');
-            }
-          } catch (e) {
-            debugPrint('Error parsing config: $e');
-          }
-        })
-        .catchError((e) {
-          debugPrint('Config not found or error loading: $e');
-        }),
-  );
 
   // Remove splash as soon as basic initialization is done
   FlutterNativeSplash.remove();
