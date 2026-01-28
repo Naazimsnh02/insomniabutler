@@ -11,20 +11,39 @@
 
 ---
 
+## 📱 Screenshots
+
+<div align="center">
+
+| ![Screenshot 1](insomniabutler_flutter/assets/screenshots/1.png) | ![Screenshot 2](insomniabutler_flutter/assets/screenshots/2.png) |
+|:---:|:---:|
+| *Screenshot 1* | *Screenshot 2* |
+
+| ![Screenshot 3](insomniabutler_flutter/assets/screenshots/3.png) | ![Screenshot 4](insomniabutler_flutter/assets/screenshots/4.png) |
+|:---:|:---:|
+| *Screenshot 3* | *Screenshot 4* |
+
+</div>
+
+---
+
+## 🎥 Demo
+
+<div align="center">
+
+[![Insomnia Butler Demo](https://img.youtube.com/vi/Nv9RRJnVVbQ/0.jpg)](https://youtu.be/Nv9RRJnVVbQ)
+
+*Click to watch the full demo on YouTube*
+
+</div>
+
+---
+
 ## 🌟 Executive Summary
 
 **Insomnia Butler** is a premium, AI-powered companion designed to resolve the root cause of late-night wakefulness: a racing mind. Unlike traditional sleep apps that only offer passive sounds, the Butler engages in a structured, therapeutic dialogue to **organize your thoughts, provide cognitive reframing, and guide you into a restful state.**
 
 By combining **Cognitive Behavioral Therapy (CBT-I) principles**, **Gemini Intelligence**, and **Long-term Vector Memory**, we create a personalized sanctuary that learns your patterns and helps you "park" your worries so you can finally rest.
-
----
-
-## 💎 The "Deep Night" Experience
-
-The application features a high-fidelity **Glassmorphic UI** designed for low-light environments.
-- **Subtle Glows & Gradients:** A curated palette of Deep Navy, Sky Blue, and Lavender.
-- **Micro-animations:** Smooth transitions and haptic feedback to reduce digital friction.
-- **Adaptive Dashboard:** A dynamic home screen that shifts based on the time of day and your sleep readiness.
 
 ---
 
@@ -91,6 +110,15 @@ The Butler doesn't just track data; it provides scheduled, proactive wisdom.
 
 ---
 
+## 💎 The "Deep Night" Experience
+
+The application features a high-fidelity **Glassmorphic UI** designed for low-light environments.
+- **Subtle Glows & Gradients:** A curated palette of Deep Navy, Sky Blue, and Lavender.
+- **Micro-animations:** Smooth transitions and haptic feedback to reduce digital friction.
+- **Time-Aware Interface:** Dynamic greetings and affirmations that change based on the time of day.
+
+---
+
 ## 💻 Tech Stack
 
 | Layer | Technology |
@@ -110,13 +138,13 @@ The Butler doesn't just track data; it provides scheduled, proactive wisdom.
 - [Flutter SDK](https://docs.flutter.dev/get-started/install)
 - [Serverpod CLI](https://docs.serverpod.dev/getting-started/installing-serverpod)
 - [Docker & Docker Compose](https://www.docker.com/get-started)
-- Gemini API Key
+- [Gemini API Key](https://aistudio.google.com/app/api-keys)
 
 ### Setup
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-repo/insomniabutler.git
+    git clone https://github.com/Naazimsnh02/insomniabutler.git
     cd insomniabutler
     ```
 
