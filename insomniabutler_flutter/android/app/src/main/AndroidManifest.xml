@@ -60,7 +60,7 @@
 
         <!-- Health Connect View Permission Usage (Android 14 and above) -->
         <activity-alias
-            android:name="com.example.insomniabutler_flutter.ViewPermissionUsageActivity"
+            android:name="com.insomniabutler.app.ViewPermissionUsageActivity"
             android:exported="true"
             android:targetActivity=".MainActivity"
             android:permission="android.permission.START_VIEW_PERMISSION_USAGE">

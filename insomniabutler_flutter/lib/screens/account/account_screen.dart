@@ -2102,7 +2102,7 @@ class AccountScreenState extends State<AccountScreen> {
   Future<void> _openExactAlarmSettings() async {
     try {
       // Use Android intent to open exact alarm settings page
-      const platform = MethodChannel('com.example.insomniabutler_flutter/settings');
+      const platform = MethodChannel('com.insomniabutler.app/settings');
       await platform.invokeMethod('openExactAlarmSettings');
     } catch (e) {
       debugPrint('Error opening exact alarm settings: $e');

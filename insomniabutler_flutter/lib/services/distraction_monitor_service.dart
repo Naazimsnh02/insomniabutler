@@ -78,8 +78,7 @@ class DistractionMonitorService {
       
       // Ignore valid contexts (Launcher, self, System UI)
       if (foregroundPackage == null || 
-          foregroundPackage == 'com.example.insomniabutler_flutter' || 
-          foregroundPackage == 'com.example.insomniabutler' ||
+          foregroundPackage == 'com.insomniabutler.app' || 
           foregroundPackage.contains('launcher') || // Generic launcher catch
           foregroundPackage.contains('systemui')) {
             // User is "safe" or navigating.
