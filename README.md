@@ -8,6 +8,9 @@
 [![Serverpod](https://img.shields.io/badge/Serverpod-3.0-blueviolet?style=for-the-badge)](https://serverpod.dev)
 [![Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google-gemini&logoColor=white)](https://deepmind.google/technologies/gemini/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Devpost](https://img.shields.io/badge/Devpost-Hackathon_Submission-003E54?style=for-the-badge&logo=devpost&logoColor=white)](https://devpost.com/software/insomnia-butler)
+
+> **🏆 Submitted to the [Build your Flutter Butler with Serverpod](https://serverpod.devpost.com/) Hackathon**
 
 ---
 
