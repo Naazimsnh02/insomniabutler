@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'account_settings_service.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
@@ -301,19 +302,65 @@ class NotificationService {
     );
   }
 
-  /// Test method to verify notifications are working
-  /// Sends an immediate test notification
-  static Future<void> sendTestNotification() async {
-    debugPrint('🧪 Sending test notification...');
-    try {
-      await showNotification(
-        id: 9999,
-        title: 'Test Notification ✅',
-        body: 'If you see this, notifications are working correctly!',
+  // --- Sync Logic from AccountSettings ---
+
+  static Future<void> syncAllNotifications() async {
+    await syncBedtimeNotification();
+    await syncInsightsNotification();
+    await syncJournalNotification();
+  }
+
+  static Future<void> syncBedtimeNotification() async {
+    const id = 100;
+    final enabled = await AccountSettingsService.getBedtimeNotifications();
+    if (enabled) {
+      final timeStr = await AccountSettingsService.getBedtimeTime();
+      final parts = timeStr.split(':');
+      final time = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+      await scheduleDailyNotification(
+        id: id,
+        title: 'Time for Bed 🌙',
+        body: 'Your Butler is ready to help you wind down for a great night\'s sleep.',
+        time: time,
       );
-      debugPrint('✅ Test notification sent successfully');
-    } catch (e) {
-      debugPrint('❌ Error sending test notification: $e');
+    } else {
+      await cancelNotification(id);
+    }
+  }
+
+  static Future<void> syncInsightsNotification() async {
+    const id = 101;
+    final enabled = await AccountSettingsService.getInsightsNotifications();
+    if (enabled) {
+      final timeStr = await AccountSettingsService.getInsightsTime();
+      final parts = timeStr.split(':');
+      final time = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+      await scheduleDailyNotification(
+        id: id,
+        title: 'Sleep Insights Ready 📊',
+        body: 'Your personalized sleep analysis for last night is ready for review.',
+        time: time,
+      );
+    } else {
+      await cancelNotification(id);
+    }
+  }
+
+  static Future<void> syncJournalNotification() async {
+    const id = 102;
+    final enabled = await AccountSettingsService.getJournalNotifications();
+    if (enabled) {
+      final timeStr = await AccountSettingsService.getJournalTime();
+      final parts = timeStr.split(':');
+      final time = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+      await scheduleDailyNotification(
+        id: id,
+        title: 'Evening Journaling 📔',
+        body: 'Take a moment to clear your mind before bed with a quick journal entry.',
+        time: time,
+      );
+    } else {
+      await cancelNotification(id);
     }
   }
 }

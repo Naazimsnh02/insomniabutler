@@ -19,6 +19,7 @@ import 'services/notification_service.dart';
 import 'services/distraction_monitor_service.dart';
 import 'services/health_data_service.dart';
 import 'services/sleep_sync_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'dart:convert'; // Added for json.decode
 import 'dart:async'; // Added for unawaited
@@ -54,20 +55,8 @@ void main() async {
   );
 
   // Default server URL (fallback to local development)
-  String serverUrl = 'https://naazimsnh02.api.serverpod.space/';
-
-  // Load custom config if available
-  try {
-    final configString = await rootBundle.loadString('assets/config.json');
-    final config = json.decode(configString);
-    if (config['apiUrl'] != null) {
-      serverUrl = config['apiUrl'];
-      if (!serverUrl.endsWith('/')) serverUrl += '/';
-      debugPrint('Config loaded. API URL: $serverUrl');
-    }
-  } catch (e) {
-    debugPrint('Config not found or error loading: $e (using default: $serverUrl)');
-  }
+  String serverUrl = await getServerUrl();
+  debugPrint('Server URL: $serverUrl');
 
   client = Client(serverUrl)
     ..connectivityMonitor = FlutterConnectivityMonitor()
@@ -150,6 +139,11 @@ class _AppInitializerState extends State<AppInitializer> {
   Future<void> _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_completed', true);
+
+    // Schedule notifications if permission is granted
+    if (await Permission.notification.isGranted) {
+      await NotificationService.syncAllNotifications();
+    }
 
     setState(() {
       _showOnboarding = false;

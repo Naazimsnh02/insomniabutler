@@ -766,7 +766,7 @@ class AccountScreenState extends State<AccountScreen> {
                   await AccountSettingsService.setBedtimeTime(val);
                   _bedtimeTime = val;
                 },
-                onSync: _syncBedtimeNotification,
+                onSync: NotificationService.syncBedtimeNotification,
               ),
               color: const Color(0xFF64B5F6),
             ) : null,
@@ -774,7 +774,7 @@ class AccountScreenState extends State<AccountScreen> {
               await HapticHelper.lightImpact();
               await AccountSettingsService.setBedtimeNotifications(value);
               setState(() => _bedtimeNotifications = value);
-              await _syncBedtimeNotification();
+              await NotificationService.syncBedtimeNotification();
             },
           ),
           _buildDivider(),
@@ -794,7 +794,7 @@ class AccountScreenState extends State<AccountScreen> {
                   await UserService.updateSleepPreferences(
                       sleepInsightsTime: val);
                 },
-                onSync: _syncInsightsNotification,
+                onSync: NotificationService.syncInsightsNotification,
               ),
               color: const Color(0xFF81C784),
             ) : null,
@@ -802,7 +802,7 @@ class AccountScreenState extends State<AccountScreen> {
               await HapticHelper.lightImpact();
               await AccountSettingsService.setInsightsNotifications(value);
               setState(() => _insightsNotifications = value);
-              await _syncInsightsNotification();
+              await NotificationService.syncInsightsNotification();
               await UserService.updateSleepPreferences(
                   sleepInsightsEnabled: value);
             },
@@ -824,7 +824,7 @@ class AccountScreenState extends State<AccountScreen> {
                   await UserService.updateSleepPreferences(
                       journalInsightsTime: val);
                 },
-                onSync: _syncJournalNotification,
+                onSync: NotificationService.syncJournalNotification,
               ),
               color: const Color(0xFFFFD54F),
             ) : null,
@@ -832,7 +832,7 @@ class AccountScreenState extends State<AccountScreen> {
               await HapticHelper.lightImpact();
               await AccountSettingsService.setJournalNotifications(value);
               setState(() => _journalNotifications = value);
-              await _syncJournalNotification();
+              await NotificationService.syncJournalNotification();
               await UserService.updateSleepPreferences(
                   journalInsightsEnabled: value);
             },
@@ -1427,59 +1427,9 @@ class AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _syncNotifications() async {
-    await _syncBedtimeNotification();
-    await _syncInsightsNotification();
-    await _syncJournalNotification();
+    await NotificationService.syncAllNotifications();
     // Debug: Print all pending notifications
     await NotificationService.debugPrintPendingNotifications();
-  }
-
-  Future<void> _syncBedtimeNotification() async {
-    const id = 100;
-    if (_bedtimeNotifications) {
-      final parts = _bedtimeTime.split(':');
-      final time = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
-      await NotificationService.scheduleDailyNotification(
-        id: id,
-        title: 'Time for Bed 🌙',
-        body: 'Your Butler is ready to help you wind down for a great night\'s sleep.',
-        time: time,
-      );
-    } else {
-      await NotificationService.cancelNotification(id);
-    }
-  }
-
-  Future<void> _syncInsightsNotification() async {
-    const id = 101;
-    if (_insightsNotifications) {
-      final parts = _insightsTime.split(':');
-      final time = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
-      await NotificationService.scheduleDailyNotification(
-        id: id,
-        title: 'Sleep Insights Ready 📊',
-        body: 'Your personalized sleep analysis for last night is ready for review.',
-        time: time,
-      );
-    } else {
-      await NotificationService.cancelNotification(id);
-    }
-  }
-
-  Future<void> _syncJournalNotification() async {
-    const id = 102;
-    if (_journalNotifications) {
-      final parts = _journalTime.split(':');
-      final time = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
-      await NotificationService.scheduleDailyNotification(
-        id: id,
-        title: 'Evening Journaling 📔',
-        body: 'Take a moment to clear your mind before bed with a quick journal entry.',
-        time: time,
-      );
-    } else {
-      await NotificationService.cancelNotification(id);
-    }
   }
 
   Future<void> _pickNotificationTime({
@@ -1560,7 +1510,7 @@ class AccountScreenState extends State<AccountScreen> {
       setState(() => _bedtimeTime = formatted);
       
       if (_bedtimeNotifications) {
-        await _syncBedtimeNotification();
+        await NotificationService.syncBedtimeNotification();
       }
 
       if (mounted) {

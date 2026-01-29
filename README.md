@@ -165,10 +165,12 @@ The application features a high-fidelity **Glassmorphic UI** designed for low-li
     ```
 
 5.  **Run Flutter App:**
-    ```bash
-    cd insomniabutler_flutter
-    flutter run
-    ```
+    -   Copy `insomniabutler_flutter/assets/config.template.json` to `insomniabutler_flutter/assets/config.json`.
+    -   Run the app:
+        ```bash
+        cd insomniabutler_flutter
+        flutter run
+        ```
 
 ---
 
@@ -210,7 +212,7 @@ The project is deployed via **Serverpod Cloud**, which handles infrastructure or
    - **How to find your URLs**: Run `scloud project list` or check your project settings at [console.serverpod.cloud](https://console.serverpod.cloud).
    - **Update configuration**:
      1. Open `insomniabutler_flutter/assets/config.json` and update the `apiUrl` with your new Cloud API URL.
-     2. Open `insomniabutler_flutter/lib/main.dart` and update the `serverUrl` fallback variable (around line 58) to ensure the app connects to the correct endpoint.
+     2. (Optional) Open `insomniabutler_flutter/lib/utils/server_url.dart` if you wish to update the hardcoded fallback URL, though this is not required if `config.json` is present.
 
 6. **Web Application Access**:
    Your Flutter web app is automatically hosted and accessible via the provided web URL (e.g., `https://your-project-id.serverpod.space/`).

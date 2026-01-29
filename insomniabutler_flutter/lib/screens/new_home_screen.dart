@@ -535,7 +535,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                 shape: BoxShape.circle,
                 color: AppColors.accentPrimary.withOpacity(0.05),
               ),
-            ).animate().fadeIn(duration: 1200.ms),
+            ),
           ),
           Positioned(
             top: 200,
@@ -547,7 +547,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                 shape: BoxShape.circle,
                 color: AppColors.accentLavender.withOpacity(0.03),
               ),
-            ).animate().fadeIn(delay: 400.ms, duration: 1200.ms),
+            ),
           ),
 
           // Main Content
@@ -610,25 +610,23 @@ class _NewHomeScreenState extends State<NewHomeScreen>
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               const SizedBox(height: AppSpacing.lg),
-              _buildLastNightSummary().animate().fadeIn(delay: 300.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
-              const SizedBox(height: AppSpacing.xl),
-              _buildAdvancedMetrics().animate().fadeIn(delay: 350.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
-              const SizedBox(height: AppSpacing.xl),
-              _buildDailyAffirmation().animate().fadeIn(delay: 400.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
-              const SizedBox(height: AppSpacing.xl),
-              _buildSleepGauge().animate().fadeIn(delay: 450.ms, duration: 400.ms).scale(begin: const Offset(0.98, 0.98)),
-              const SizedBox(height: AppSpacing.xl),
-              if (_isTodaySelected) ...[
-                _timerService.isRunning 
-                  ? _buildActiveTimerCard().animate().fadeIn(delay: 500.ms, duration: 400.ms).slideY(begin: 0.05, end: 0)
-                  : _buildStartTrackingButton().animate().fadeIn(delay: 500.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
-                const SizedBox(height: AppSpacing.xl),
-              ],
-              _buildControlPanel().animate().fadeIn(delay: 550.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
-              const SizedBox(height: AppSpacing.xl),
-              _buildMoodTracker().animate().fadeIn(delay: 600.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
-              const SizedBox(height: AppSpacing.xl),
-              _buildTrendInsights().animate().fadeIn(delay: 650.ms, duration: 400.ms).slideY(begin: 0.05, end: 0),
+              _buildLastNightSummary(),
+            const SizedBox(height: AppSpacing.xl),
+            _buildAdvancedMetrics(),
+            const SizedBox(height: AppSpacing.xl),
+            _buildDailyAffirmation(),
+            const SizedBox(height: AppSpacing.xl),
+            _buildSleepGauge(),
+            const SizedBox(height: AppSpacing.xl),
+            _timerService.isRunning 
+              ? _buildActiveTimerCard()
+              : _buildStartTrackingButton(),
+            const SizedBox(height: AppSpacing.xl),
+            _buildControlPanel(),
+            const SizedBox(height: AppSpacing.xl),
+            _buildMoodTracker(),
+            const SizedBox(height: AppSpacing.xl),
+            _buildTrendInsights(),
               const SizedBox(height: 140), // Space for fab & nav
             ]),
           ),
@@ -661,7 +659,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                   ),
                 ),
               ],
-            ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.05, end: 0),
+            ),
             Row(
               children: [
                 _buildIconButton(
@@ -678,7 +676,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                       _refreshAllData();
                     }
                   },
-                ).animate().fadeIn(delay: 100.ms).scale(duration: 300.ms),
+                ),
                 const SizedBox(width: 12),
                 _buildIconButton(
                   icon: _showFullCalendar
@@ -690,7 +688,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                       _showFullCalendar = !_showFullCalendar;
                     });
                   },
-                ).animate().fadeIn(delay: 150.ms).scale(duration: 300.ms),
+                ),
               ],
             ),
           ],
@@ -771,7 +769,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                 markersMaxCount: 1,
               ),
             ),
-          ).animate().fadeIn().slideY(begin: -0.1, end: 0),
+          ),
         ),
       );
     }
@@ -861,7 +859,7 @@ class _NewHomeScreenState extends State<NewHomeScreen>
                   ],
                 ),
               ),
-            ).animate().fadeIn(delay: (200 + (index * 20)).ms).slideX(begin: 0.1, end: 0, duration: 300.ms);
+            );
           },
         ),
       ),
