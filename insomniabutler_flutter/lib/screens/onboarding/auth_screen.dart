@@ -41,7 +41,11 @@ class _AuthScreenState extends State<AuthScreen> {
           await UserService.setCurrentUser(user);
           widget.onComplete();
         } else {
-          _showError('Email already exists or registration failed.');
+          _showError('Account already exists. Switching to login...');
+          setState(() => _isRegistering = false);
+          // Optional: Attempt login automatically or let user click login
+          // await Future.delayed(const Duration(seconds: 1));
+          // _handleAuth(); // Recursive call? Better to let user confirm.
         }
       } else {
         final user = await client.auth.login(_emailController.text.trim());
@@ -50,11 +54,13 @@ class _AuthScreenState extends State<AuthScreen> {
           await UserService.setCurrentUser(user);
           widget.onComplete();
         } else {
-          _showError('Invalid email or user not found.');
+          _showError('Account not found. Please register.');
+          setState(() => _isRegistering = true);
         }
       }
     } catch (e) {
-      _showError('Connection error. Please try again.');
+      debugPrint('Auth error: $e');
+      _showError('Connection error. Check your internet.');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

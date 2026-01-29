@@ -142,7 +142,12 @@ class _AppInitializerState extends State<AppInitializer> {
 
     // Schedule notifications if permission is granted
     if (await Permission.notification.isGranted) {
-      await NotificationService.syncAllNotifications();
+      try {
+        await NotificationService.syncAllNotifications();
+      } catch (e) {
+        debugPrint('Error syncing notifications during onboarding: $e');
+        // Continue anyway - don't block onboarding completion
+      }
     }
 
     setState(() {
